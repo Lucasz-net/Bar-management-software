@@ -1,12 +1,60 @@
 ﻿<UserControl x:Class="SistemaGestionBar.Views.LoginView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:SistemaGestionBar.Views"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="450"
+             d:DesignWidth="800">
+
+    <Grid Background="#F2F2F2">
+
+        <Border Width="350"
+                Padding="30"
+                Background="White"
+                CornerRadius="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
+            <StackPanel>
+
+                <TextBlock Text="Iniciar sesión"
+                           FontSize="28"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,25"/>
+
+                <TextBlock Text="Usuario"
+                           FontWeight="SemiBold"/>
+
+                <TextBox x:Name="txtUsuario"
+                         Height="35"
+                         Margin="0,5,0,15" TextAlignment="Center"/>
+
+                <TextBlock Text="Contraseña"
+                           FontWeight="SemiBold"/>
+
+                <PasswordBox x:Name="txtPassword"
+                             Height="35"
+                             Margin="0,5,0,20"/>
+
+                <Button x:Name="btnIngresar"
+                        Content="INGRESAR"
+                        Height="40"
+                        Background="#2D89EF"
+                        Foreground="White"
+                        FontWeight="Bold"
+                        Click="btnIngresar_Click"/>
+
+                <TextBlock x:Name="txtMensaje"
+                           Text=""
+                           Foreground="Red"
+                           TextAlignment="Center"
+                           Margin="0,15,0,0"/>
+
+            </StackPanel>
+
+        </Border>
+
     </Grid>
 </UserControl>

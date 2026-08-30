@@ -1,17 +1,13 @@
-﻿<Window x:Class="SistemaGestionBar.MainWindow"
+﻿ <Window x:Class="SistemaGestionBar.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SistemaGestionBar"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        mc:Ignorable="d"
-        Title="Punto de Venta - Bar" Height="600" Width="1000"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-        Background="{DynamicResource MaterialDesignPaper}"
-        FontFamily="{materialDesign:MaterialDesignFont}">
+        xmlns:views="clr-namespace:SistemaGestionBar.Views"
+        Title="Sistema Gestión Bar"
+        Height="500"
+        Width="800">
 
     <Grid>
-
+        <views:LoginView/>
     </Grid>
+
 </Window>
