@@ -1,56 +1,97 @@
-﻿<UserControl x:Class="SistemaGestionBar.Views.LoginView"
+<UserControl x:Class="SistemaGestionBar.Views.LoginView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
-             d:DesignHeight="450"
-             d:DesignWidth="800">
+             d:DesignHeight="800"
+             d:DesignWidth="1280">
 
-    <Grid Background="#F2F2F2">
+    <Grid Background="#EAF2FB">
 
-        <Border Width="350"
-                Padding="30"
+        <Border Width="400"
+                Padding="40,44"
                 Background="White"
-                CornerRadius="10"
+                CornerRadius="18"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
 
+            <Border.Effect>
+                <DropShadowEffect Color="#2D89EF"
+                                   Opacity="0.18"
+                                   BlurRadius="35"
+                                   ShadowDepth="8"
+                                   Direction="270"/>
+            </Border.Effect>
+
             <StackPanel>
 
-                <TextBlock Text="Iniciar sesión"
-                           FontSize="28"
-                           FontWeight="Bold"
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Margin="0,0,0,8">
+
+                    <materialDesign:PackIcon Kind="GlassCocktail"
+                                              Width="34"
+                                              Height="34"
+                                              Foreground="#2D89EF"
+                                              VerticalAlignment="Center"/>
+
+                    <TextBlock Text="Nombre del Bar"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="#222222"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"/>
+
+                </StackPanel>
+
+                <TextBlock Text="Iniciá sesión para continuar"
+                           FontSize="14"
+                           Foreground="#888888"
                            HorizontalAlignment="Center"
-                           Margin="0,0,0,25"/>
+                           Margin="0,0,0,30"/>
 
-                <TextBlock Text="Usuario"
-                           FontWeight="SemiBold"/>
-
+                <!-- IMPORTANTE: no fijar Height en estos campos Material Design.
+                     El estilo Outlined necesita medir su propio alto para ubicar
+                     el hint flotante; forzar un Height chico recorta el texto. -->
                 <TextBox x:Name="txtUsuario"
-                         Height="35"
-                         Margin="0,5,0,15" TextAlignment="Center"/>
-
-                <TextBlock Text="Contraseña"
-                           FontWeight="SemiBold"/>
+                         Style="{DynamicResource MaterialDesignOutlinedTextBox}"
+                         materialDesign:HintAssist.Hint="Correo electrónico"
+                         FontSize="14"
+                         Padding="14,12"
+                         Margin="0,0,0,18"
+                         Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}"/>
 
                 <PasswordBox x:Name="txtPassword"
-                             Height="35"
-                             Margin="0,5,0,20"/>
+                             Style="{DynamicResource MaterialDesignOutlinedPasswordBox}"
+                             materialDesign:HintAssist.Hint="Contraseña"
+                             FontSize="14"
+                             Padding="14,12"
+                             Margin="0,0,0,28"
+                             PasswordChanged="txtPassword_PasswordChanged"/>
 
                 <Button x:Name="btnIngresar"
                         Content="INGRESAR"
-                        Height="40"
-                        Background="#2D89EF"
-                        Foreground="White"
+                        Style="{DynamicResource MaterialDesignRaisedButton}"
+                        materialDesign:ButtonAssist.CornerRadius="16"
+                        Height="46"
+                        FontSize="14"
                         FontWeight="Bold"
-                        Click="btnIngresar_Click"/>
+                        Background="#2D89EF"
+                        BorderBrush="#2D89EF"
+                        Foreground="White"
+                        Cursor="Hand"
+                        Command="{Binding LoginCommand}"/>
 
                 <TextBlock x:Name="txtMensaje"
-                           Text=""
-                           Foreground="Red"
+                           Text="{Binding Mensaje}"
+                           Foreground="{Binding MensajeColor}"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           TextWrapping="Wrap"
                            TextAlignment="Center"
-                           Margin="0,15,0,0"/>
+                           Margin="0,20,0,0"/>
 
             </StackPanel>
 
