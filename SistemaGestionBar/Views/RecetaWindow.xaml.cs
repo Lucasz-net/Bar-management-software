@@ -1,21 +1,16 @@
-using System.Collections.Generic;
 using System.Windows;
 
 namespace SistemaGestionBar.Views
 {
+    /// <summary>
+    /// Modal de receta (RF-04). Lo abre ServicioDialogo con un RecetaViewModel
+    /// como DataContext; el boton cierra por IsCancel, sin code-behind.
+    /// </summary>
     public partial class RecetaWindow : Window
     {
-        public RecetaWindow(string nombreCoctel, List<string> ingredientes, string preparacion)
+        public RecetaWindow()
         {
             InitializeComponent();
-            txtNombreCoctel.Text = nombreCoctel;
-            lstIngredientes.ItemsSource = ingredientes;
-            txtPreparacion.Text = preparacion;
-        }
-
-        private void BtnCerrar_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
         }
     }
 }

@@ -4,13 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels"
              mc:Ignorable="d"
-             d:DesignHeight="800"
-             d:DesignWidth="1280">
+             d:DataContext="{d:DesignInstance Type=vm:LoginViewModel}"
+             d:DesignHeight="820"
+             d:DesignWidth="1360">
 
     <Grid Background="#EAF2FB">
 
-        <Border Width="400"
+        <Border Width="420"
                 Padding="40,44"
                 Background="White"
                 CornerRadius="18"
@@ -19,10 +22,10 @@
 
             <Border.Effect>
                 <DropShadowEffect Color="#2D89EF"
-                                   Opacity="0.18"
-                                   BlurRadius="35"
-                                   ShadowDepth="8"
-                                   Direction="270"/>
+                                  Opacity="0.18"
+                                  BlurRadius="35"
+                                  ShadowDepth="8"
+                                  Direction="270" />
             </Border.Effect>
 
             <StackPanel>
@@ -32,47 +35,47 @@
                             Margin="0,0,0,8">
 
                     <materialDesign:PackIcon Kind="GlassCocktail"
-                                              Width="34"
-                                              Height="34"
-                                              Foreground="#2D89EF"
-                                              VerticalAlignment="Center"/>
+                                             Width="34"
+                                             Height="34"
+                                             Foreground="#2D89EF"
+                                             VerticalAlignment="Center" />
 
-                    <TextBlock Text="Nombre del Bar"
-                               FontSize="22"
+                    <TextBlock Text="Sistema de Gestión de Bar"
+                               FontSize="20"
                                FontWeight="Bold"
                                Foreground="#222222"
                                VerticalAlignment="Center"
-                               Margin="10,0,0,0"/>
-
+                               Margin="10,0,0,0" />
                 </StackPanel>
 
                 <TextBlock Text="Iniciá sesión para continuar"
                            FontSize="14"
                            Foreground="#888888"
                            HorizontalAlignment="Center"
-                           Margin="0,0,0,30"/>
+                           Margin="0,0,0,30" />
 
                 <!-- IMPORTANTE: no fijar Height en estos campos Material Design.
                      El estilo Outlined necesita medir su propio alto para ubicar
                      el hint flotante; forzar un Height chico recorta el texto. -->
-                <TextBox x:Name="txtUsuario"
-                         Style="{DynamicResource MaterialDesignOutlinedTextBox}"
+                <TextBox Style="{DynamicResource MaterialDesignOutlinedTextBox}"
                          materialDesign:HintAssist.Hint="Correo electrónico"
                          FontSize="14"
                          Padding="14,12"
                          Margin="0,0,0,18"
-                         Text="{Binding Usuario, UpdateSourceTrigger=PropertyChanged}"/>
+                         Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
 
-                <PasswordBox x:Name="txtPassword"
-                             Style="{DynamicResource MaterialDesignOutlinedPasswordBox}"
+                <!-- PasswordBox.Password no es bindeable de fabrica: el enlace lo
+                     resuelve la propiedad adjunta PasswordBoxAssist, asi la vista
+                     no necesita code-behind. -->
+                <PasswordBox Style="{DynamicResource MaterialDesignOutlinedPasswordBox}"
                              materialDesign:HintAssist.Hint="Contraseña"
                              FontSize="14"
                              Padding="14,12"
                              Margin="0,0,0,28"
-                             PasswordChanged="txtPassword_PasswordChanged"/>
+                             b:PasswordBoxAssist.Enlazar="True"
+                             b:PasswordBoxAssist.Password="{Binding Clave, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                <Button x:Name="btnIngresar"
-                        Content="INGRESAR"
+                <Button Content="INGRESAR"
                         Style="{DynamicResource MaterialDesignRaisedButton}"
                         materialDesign:ButtonAssist.CornerRadius="16"
                         Height="46"
@@ -82,20 +85,53 @@
                         BorderBrush="#2D89EF"
                         Foreground="White"
                         Cursor="Hand"
-                        Command="{Binding LoginCommand}"/>
+                        IsDefault="True"
+                        Command="{Binding IngresarCommand}" />
 
-                <TextBlock x:Name="txtMensaje"
-                           Text="{Binding Mensaje}"
-                           Foreground="{Binding MensajeColor}"
+                <TextBlock Text="{Binding Mensaje}"
                            FontSize="13"
                            FontWeight="SemiBold"
                            TextWrapping="Wrap"
                            TextAlignment="Center"
-                           Margin="0,20,0,0"/>
+                           Margin="0,20,0,0">
+                    <TextBlock.Style>
+                        <!-- El color y la visibilidad los decide la vista:
+                             el ViewModel solo expone "hay mensaje" y "es error". -->
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Foreground" Value="#2E7D32" />
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HayMensaje}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
+                                    <Setter Property="Foreground" Value="#C62828" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <Border Background="#F4F7FB"
+                        CornerRadius="10"
+                        Padding="14,10"
+                        Margin="0,24,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Usuarios de prueba"
+                                   FontSize="11"
+                                   FontWeight="Bold"
+                                   Foreground="#7A8699"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Text="admin@bar.com  ·  vendedor@bar.com  ·  mesero@bar.com"
+                                   FontSize="11"
+                                   Foreground="#7A8699" />
+                        <TextBlock Text="Contraseña: 12345678"
+                                   FontSize="11"
+                                   Foreground="#7A8699" />
+                    </StackPanel>
+                </Border>
 
             </StackPanel>
-
         </Border>
-
     </Grid>
 </UserControl>

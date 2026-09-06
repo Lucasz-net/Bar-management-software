@@ -1,78 +1,84 @@
 using System;
-using System.Linq;
 using System.Windows.Input;
-using System.Windows.Media;
 using SistemaGestionBar.Models;
+using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels
 {
+    /// <summary>
+    /// RF-09. Valida email (de Persona) + clave hasheada (de Usuario) contra el repositorio.
+    /// El ViewModel no sabe cómo se hashea ni de dónde salen los usuarios.
+    /// </summary>
     public class LoginViewModel : ViewModelBase
     {
-        private string _usuario = string.Empty;
-        public string Usuario
+        private readonly IRepositorioBar _repositorio;
+
+        public LoginViewModel(IRepositorioBar repositorio)
         {
-            get => _usuario;
-            set => SetProperty(ref _usuario, value);
+            _repositorio = repositorio;
+            IngresarCommand = new RelayCommand(Ingresar, PuedeIngresar);
         }
 
-        private string _password = string.Empty;
-        public string Password
+        private string _email = string.Empty;
+        public string Email
         {
-            get => _password;
-            set => SetProperty(ref _password, value);
+            get => _email;
+            set => SetProperty(ref _email, value);
+        }
+
+        private string _clave = string.Empty;
+        public string Clave
+        {
+            get => _clave;
+            set => SetProperty(ref _clave, value);
         }
 
         private string _mensaje = string.Empty;
         public string Mensaje
         {
             get => _mensaje;
-            set => SetProperty(ref _mensaje, value);
+            private set
+            {
+                if (SetProperty(ref _mensaje, value))
+                    OnPropertyChanged(nameof(HayMensaje));
+            }
         }
 
-        private Brush _mensajeColor = Brushes.Red;
-        public Brush MensajeColor
+        private bool _mensajeEsError = true;
+        /// <summary>
+        /// El color lo decide la View con un DataTrigger. Un ViewModel que expusiera
+        /// un Brush estaría mezclando presentación con lógica.
+        /// </summary>
+        public bool MensajeEsError
         {
-            get => _mensajeColor;
-            set => SetProperty(ref _mensajeColor, value);
+            get => _mensajeEsError;
+            private set => SetProperty(ref _mensajeEsError, value);
         }
 
-        public Usuario? UsuarioAutenticado { get; private set; }
+        public bool HayMensaje => !string.IsNullOrWhiteSpace(Mensaje);
 
-        public event EventHandler? LoginExitoso;
+        public ICommand IngresarCommand { get; }
 
-        public ICommand LoginCommand { get; }
+        public event EventHandler<Usuario>? LoginExitoso;
 
-        public LoginViewModel()
-        {
-            LoginCommand = new RelayCommand(_ => Ingresar());
-        }
+        private bool PuedeIngresar() =>
+            !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Clave);
 
         private void Ingresar()
         {
-            if (string.IsNullOrWhiteSpace(Usuario) || string.IsNullOrWhiteSpace(Password))
+            var usuario = _repositorio.Autenticar(Email.Trim(), Clave);
+
+            if (usuario is null)
             {
-                MensajeColor = Brushes.Red;
-                Mensaje = "Complete todos los campos.";
+                MensajeEsError = true;
+                Mensaje = "Usuario o contraseña incorrectos.";
+                Clave = string.Empty;
                 return;
             }
 
-            var usuario = DatosPruebaUsuarios.ObtenerUsuariosMock()
-                .FirstOrDefault(u =>
-                    string.Equals(u.Correo, Usuario, StringComparison.OrdinalIgnoreCase) &&
-                    u.Clave == Password);
-
-            if (usuario != null)
-            {
-                UsuarioAutenticado = usuario;
-                MensajeColor = Brushes.Green;
-                Mensaje = "¡Inicio de sesión correcto!";
-                LoginExitoso?.Invoke(this, EventArgs.Empty);
-            }
-            else
-            {
-                MensajeColor = Brushes.Red;
-                Mensaje = "Usuario o contraseña incorrectos.";
-            }
+            MensajeEsError = false;
+            Mensaje = $"Bienvenido, {usuario.NombreCompleto}.";
+            LoginExitoso?.Invoke(this, usuario);
         }
     }
 }

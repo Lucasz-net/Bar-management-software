@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,15 +6,20 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <RootNamespace>SistemaGestionBar</RootNamespace>
   </PropertyGroup>
 
+  <!-- Las fotos de producto se compilan dentro del ensamblado (Build Action = Resource),
+       por eso Producto.RutaImagen puede ser una ruta relativa tipo /Assets/Productos/x.png -->
   <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="ViewModels\" />
+    <Resource Include="Assets\**\*.png" />
+    <Resource Include="Assets\**\*.jpg" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />
+    <PackageReference Include="MaterialDesignColors" Version="5.3.2" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
   </ItemGroup>
 
 </Project>
