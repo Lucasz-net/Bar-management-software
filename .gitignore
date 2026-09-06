@@ -362,7 +362,14 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Claude Code
+# ---------------------------------------------------------------
+# Claude Code / asistentes de IA (no versionar)
+# ---------------------------------------------------------------
 .claude/
+.claude-*/
 CLAUDE.md
+CLAUDE.local.md
 .mcp.json
+.aider*
+.cursor/
+.windsurf/
