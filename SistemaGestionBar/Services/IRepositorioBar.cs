@@ -45,6 +45,49 @@ namespace SistemaGestionBar.Services
 
         /// <summary>Ventas registradas, de la más vieja a la más nueva.</summary>
         IReadOnlyList<Venta> ObtenerVentas();
+
+        // ---------------------------------------------------------------
+        // Consultas del módulo de administración
+        // ---------------------------------------------------------------
+        IReadOnlyList<Ingrediente> ObtenerIngredientes();
+        IReadOnlyList<Usuario> ObtenerUsuarios();
+        IReadOnlyList<Rol> ObtenerRoles();
+        IReadOnlyList<Reporte> ObtenerReportes();
+
+        /// <summary>Todas las ubicaciones, incluidas las reservadas (el POS filtra, el ABM no).</summary>
+        IReadOnlyList<Ubicacion> ObtenerTodasLasUbicaciones();
+
+        // ---------------------------------------------------------------
+        // ABM (RF-12). Cada método valida antes de tocar los datos (RF-13)
+        // y estampa los campos de auditoría (RF-11).
+        // ---------------------------------------------------------------
+        ResultadoOperacion GuardarProducto(Producto producto);
+        ResultadoOperacion EliminarProducto(int idProducto);
+
+        /// <summary>
+        /// Guarda la receta completa: el procedimiento (tabla Receta) y la composición
+        /// (Producto_Ingrediente). Una lista vacía deja al producto sin receta.
+        /// </summary>
+        ResultadoOperacion GuardarReceta(int idProducto, string? instrucciones, IEnumerable<ProductoIngrediente> composicion);
+
+        ResultadoOperacion GuardarIngrediente(Ingrediente ingrediente);
+        ResultadoOperacion EliminarIngrediente(int idIngrediente);
+
+        /// <summary>Alta o edición de un empleado: escribe Persona y Usuario juntos (RF-10).</summary>
+        ResultadoOperacion GuardarUsuario(Usuario usuario, string? claveNueva);
+        ResultadoOperacion EliminarUsuario(int idUsuario);
+
+        ResultadoOperacion GuardarCategoria(Categoria categoria);
+        ResultadoOperacion EliminarCategoria(int idCategoria);
+
+        ResultadoOperacion GuardarMetodoPago(MetodoPago metodoPago);
+        ResultadoOperacion EliminarMetodoPago(int idMetodoPago);
+
+        ResultadoOperacion GuardarUbicacion(Ubicacion ubicacion);
+        ResultadoOperacion EliminarUbicacion(int idUbicacion);
+
+        /// <summary>RF-14: deja constancia del informe generado.</summary>
+        ResultadoOperacion RegistrarReporte(Reporte reporte);
     }
 
     /// <summary>Resultado de una operación de negocio: éxito o mensaje de error para la UI.</summary>

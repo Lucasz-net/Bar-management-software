@@ -11,19 +11,25 @@ namespace SistemaGestionBar.Data
     /// Contiene la lógica de negocio real (validaciones y descuento de stock) para que,
     /// al migrar a EF Core, solo cambie el origen de los datos y no las reglas.
     /// </summary>
-    public class RepositorioMemoria : IRepositorioBar
+    public partial class RepositorioMemoria : IRepositorioBar
     {
         private readonly DatosPrueba _datos;
+        private readonly SesionActual _sesion;
         private int _proximoIdVenta = 1;
         private int _proximoIdDetalle = 1;
 
-        public RepositorioMemoria() : this(DatosPrueba.Crear())
+        public RepositorioMemoria() : this(DatosPrueba.Crear(), new SesionActual())
         {
         }
 
-        public RepositorioMemoria(DatosPrueba datos)
+        public RepositorioMemoria(SesionActual sesion) : this(DatosPrueba.Crear(), sesion)
+        {
+        }
+
+        public RepositorioMemoria(DatosPrueba datos, SesionActual sesion)
         {
             _datos = datos;
+            _sesion = sesion;
         }
 
         // ---------------------------------------------------------------

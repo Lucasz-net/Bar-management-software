@@ -4,6 +4,8 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels"
              xmlns:views="clr-namespace:SistemaGestionBar.Views"
+             xmlns:vmAdmin="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             xmlns:viewsAdmin="clr-namespace:SistemaGestionBar.Views.Admin"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -18,6 +20,10 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ComboBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PasswordBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.RadioButton.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DataGrid.xaml" />
+
+                <!-- Estilos compartidos por las pantallas del tablero de administracion -->
+                <ResourceDictionary Source="Views/Admin/EstilosAdmin.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- ============================================================
@@ -33,6 +39,33 @@
 
             <DataTemplate DataType="{x:Type vm:PuntoDeVentaViewModel}">
                 <views:PuntoDeVentaView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vmAdmin:AdminViewModel}">
+                <viewsAdmin:AdminView />
+            </DataTemplate>
+
+            <!-- Rutas hijas del tablero de administracion -->
+            <DataTemplate DataType="{x:Type vmAdmin:AdminResumenViewModel}">
+                <viewsAdmin:AdminResumenView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminProductosViewModel}">
+                <viewsAdmin:AdminProductosView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminInventarioViewModel}">
+                <viewsAdmin:AdminInventarioView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminUsuariosViewModel}">
+                <viewsAdmin:AdminUsuariosView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminVentasViewModel}">
+                <viewsAdmin:AdminVentasView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminParametrosViewModel}">
+                <viewsAdmin:AdminParametrosView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminReportesViewModel}">
+                <viewsAdmin:AdminReportesView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

@@ -1,0 +1,177 @@
+<UserControl x:Class="SistemaGestionBar.Views.Admin.AdminView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:AdminViewModel}"
+             d:DesignHeight="820"
+             d:DesignWidth="1360"
+             Background="#F4F6FA">
+
+    <UserControl.Resources>
+        <!-- Item del menu lateral -->
+        <Style x:Key="ItemMenu" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="14,11" />
+            <Setter Property="Margin" Value="10,2" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
+                    <Setter Property="Background" Value="#1E4C86" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TextoMenu" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="12,0,0,0" />
+            <Setter Property="Foreground" Value="#A8C3E8" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
+                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="IconoMenu" TargetType="materialDesign:PackIcon">
+            <Setter Property="Width" Value="19" />
+            <Setter Property="Height" Value="19" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="#A8C3E8" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="248" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============================================================
+             MENU LATERAL
+             ============================================================ -->
+        <Border Grid.Column="0" Background="#12305C">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Marca -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="22,26,22,22">
+                    <Border Background="#1E4C86" CornerRadius="11" Width="40" Height="40">
+                        <materialDesign:PackIcon Kind="GlassCocktail" Width="22" Height="22"
+                                                 Foreground="White"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
+                        <TextBlock Text="{Binding TituloTablero}" FontSize="13" FontWeight="Bold" Foreground="White" />
+                        <TextBlock Text="Sistema de Gestión de Bar" FontSize="10.5" Foreground="#7FA6DA" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Secciones -->
+                <ItemsControl Grid.Row="1" ItemsSource="{Binding Secciones}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{DynamicResource ItemMenu}">
+                                <i:Interaction.Triggers>
+                                    <i:EventTrigger EventName="MouseLeftButtonUp">
+                                        <i:InvokeCommandAction
+                                            Command="{Binding DataContext.SeleccionarSeccionCommand,
+                                                              RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                            CommandParameter="{Binding}" />
+                                    </i:EventTrigger>
+                                </i:Interaction.Triggers>
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Style="{DynamicResource IconoMenu}" Kind="{Binding Icono}" />
+                                    <TextBlock Style="{DynamicResource TextoMenu}" Text="{Binding Titulo}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- Pie: usuario y salidas -->
+                <StackPanel Grid.Row="2" Margin="18,0,18,20">
+                    <Border Background="#1A3F72" CornerRadius="10" Padding="12,10" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#2D89EF" CornerRadius="16" Width="32" Height="32">
+                                <TextBlock Text="{Binding InicialesUsuario}" Foreground="White"
+                                           FontWeight="Bold" FontSize="12"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
+                                <TextBlock Text="{Binding NombreUsuario}" FontSize="12.5" FontWeight="SemiBold" Foreground="White" />
+                                <TextBlock Text="{Binding RolUsuario}" FontSize="10.5" Foreground="#7FA6DA" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Style="{DynamicResource MaterialDesignOutlinedButton}"
+                            materialDesign:ButtonAssist.CornerRadius="16"
+                            Height="36" FontSize="12"
+                            Foreground="#A8C3E8" BorderBrush="#2A5490"
+                            Cursor="Hand"
+                            Margin="0,0,0,8"
+                            Command="{Binding IrAlPuntoDeVentaCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CashRegister" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock Text="Punto de venta" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{DynamicResource MaterialDesignOutlinedButton}"
+                            materialDesign:ButtonAssist.CornerRadius="16"
+                            Height="36" FontSize="12"
+                            Foreground="#F0A6A0" BorderBrush="#5C3540"
+                            Cursor="Hand"
+                            Command="{Binding CerrarSesionCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="LogoutVariant" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock Text="Cerrar sesión" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ============================================================
+             CONTENIDO DE LA SECCION
+             ============================================================ -->
+        <Grid Grid.Column="1" Margin="26,24,26,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="{Binding SeccionActual.Titulo}"
+                               FontSize="24" FontWeight="Bold" Foreground="#2B3445" />
+                    <TextBlock Text="{Binding SeccionActual.Subtitulo}"
+                               FontSize="13" Foreground="#8A93A5" Margin="0,3,0,0" />
+                </StackPanel>
+                <TextBlock Text="{Binding FechaActual}"
+                           FontSize="12.5" Foreground="#9AA3B2"
+                           HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,0,0" />
+            </Grid>
+
+            <!-- Router anidado: el DataTemplate de App.xaml resuelve cada seccion -->
+            <ContentControl Grid.Row="1" Content="{Binding SeccionActual}" />
+        </Grid>
+    </Grid>
+</UserControl>

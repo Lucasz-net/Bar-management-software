@@ -21,5 +21,12 @@ namespace SistemaGestionBar.Models
         public string NombreCompleto => Persona?.Nombre ?? string.Empty;
         public string NombreRol => Rol?.NombreRol ?? string.Empty;
         public bool EsAdministrador => NombreRol == RolesSistema.Administrador;
+        public bool EsGerente => NombreRol == RolesSistema.Gerente;
+
+        /// <summary>
+        /// Quiénes entran al tablero en lugar del punto de venta (RF-09).
+        /// El administrador ve todo; el gerente, solo lo que hace a la gestión del negocio.
+        /// </summary>
+        public bool AccedeAlTablero => EsAdministrador || EsGerente;
     }
 }

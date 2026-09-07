@@ -47,7 +47,6 @@
             <Setter Property="BorderThickness" Value="1.5" />
             <Setter Property="Padding" Value="18,14" />
             <Setter Property="Margin" Value="0,0,10,0" />
-            <Setter Property="MinWidth" Value="150" />
             <Setter Property="Cursor" Value="Hand" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
@@ -61,6 +60,8 @@
             <Setter Property="FontSize" Value="17" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#2B3445" />
+            <!-- Al repartirse el ancho, un nombre largo tiene que envolver y no recortarse -->
+            <Setter Property="TextWrapping" Value="Wrap" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
                     <Setter Property="Foreground" Value="White" />
@@ -222,6 +223,33 @@
                             <TextBlock Text="{Binding NombreUsuario}" FontSize="13" FontWeight="SemiBold" Foreground="#2B3445" />
                             <TextBlock Text="{Binding RolUsuario}" FontSize="11" Foreground="#8A93A5" />
                         </StackPanel>
+                        <!-- Volver al tablero: solo para el administrador (RF-09) -->
+                        <Button materialDesign:ButtonAssist.CornerRadius="16"
+                                Command="{Binding VolverAlTableroCommand}"
+                                ToolTip="Volver al tablero de administración"
+                                Height="34"
+                                Padding="14,0"
+                                FontSize="12"
+                                Foreground="#1565C0"
+                                BorderBrush="#BBD5F2"
+                                Cursor="Hand"
+                                Margin="0,0,10,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding PuedeVolverAlTablero}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ArrowLeft" Width="16" Height="16" VerticalAlignment="Center" />
+                                <TextBlock Text="Tablero" Margin="6,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
                         <Button Style="{DynamicResource MaterialDesignIconButton}"
                                 Command="{Binding CerrarSesionCommand}"
                                 ToolTip="Cerrar sesión"
@@ -262,10 +290,13 @@
             </Border>
 
             <!-- ==== CATEGORIAS ==== -->
-            <ItemsControl Grid.Row="2" ItemsSource="{Binding Categorias}" Margin="0,16,0,0">
+            <!-- UniformGrid en vez de WrapPanel: reparte el ancho en partes iguales y las
+                 tarjetas ocupan toda la fila. El margen negativo de la derecha absorbe
+                 la separación que deja la última tarjeta. -->
+            <ItemsControl Grid.Row="2" ItemsSource="{Binding Categorias}" Margin="0,16,-10,0">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel />
+                        <UniformGrid Rows="1" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>

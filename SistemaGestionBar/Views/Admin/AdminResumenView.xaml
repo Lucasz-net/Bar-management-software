@@ -1,0 +1,115 @@
+<UserControl x:Class="SistemaGestionBar.Views.Admin.AdminResumenView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:AdminResumenViewModel}"
+             d:DesignHeight="600" d:DesignWidth="1000">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Indicadores del día -->
+        <UniformGrid Grid.Row="0" Rows="1" Columns="5" Margin="0,0,0,20">
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding VentasDelDia}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ventas hoy" />
+                </StackPanel>
+            </Border>
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}"
+                               Foreground="#2E7D32"
+                               Text="{Binding FacturadoHoy, StringFormat={}{0:C0}}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Facturado hoy" />
+                </StackPanel>
+            </Border>
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadProductos}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Productos en catálogo" />
+                </StackPanel>
+            </Border>
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadInsumos}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Insumos en inventario" />
+                </StackPanel>
+            </Border>
+            <Border Style="{DynamicResource TarjetaIndicador}">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadUsuarios}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Usuarios del sistema" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="320" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Alertas de inventario (RF-08) -->
+            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                        <materialDesign:PackIcon Kind="AlertOutline" Width="19" Height="19"
+                                                 Foreground="#E65100" VerticalAlignment="Center" />
+                        <TextBlock Text="Alertas de inventario" Style="{DynamicResource TituloPanel}"
+                                   Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="1" Text="{Binding TextoAlertas}"
+                               FontSize="12.5" Foreground="#8A93A5" Margin="0,0,0,14" />
+
+                    <DataGrid Grid.Row="2"
+                              Style="{DynamicResource GrillaAdmin}"
+                              ItemsSource="{Binding Alertas}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Ítem" Binding="{Binding Nombre}" Width="*" />
+                            <DataGridTextColumn Header="Stock actual" Binding="{Binding Stock, StringFormat={}{0:0.##}}" Width="120" />
+                            <DataGridTextColumn Header="Mínimo" Binding="{Binding StockMinimo, StringFormat={}{0:0.##}}" Width="100" />
+                            <DataGridTextColumn Header="Unidad" Binding="{Binding UnidadMedida}" Width="90" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- Composición del catálogo -->
+            <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" VerticalAlignment="Top">
+                <StackPanel>
+                    <TextBlock Text="Catálogo" Style="{DynamicResource TituloPanel}" />
+
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Se preparan con receta" Margin="0" />
+                    <TextBlock Style="{DynamicResource ValorIndicador}" FontSize="22"
+                               Text="{Binding ProductosConReceta}" />
+                    <TextBlock Style="{DynamicResource TextoAyuda}"
+                               Text="Descuentan insumos del inventario al venderse." />
+
+                    <Border Height="1" Background="#EDF1F6" Margin="0,16" />
+
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Total de productos" Margin="0" />
+                    <TextBlock Style="{DynamicResource ValorIndicador}" FontSize="22"
+                               Foreground="#5A6577"
+                               Text="{Binding CantidadProductos}" />
+                    <TextBlock Style="{DynamicResource TextoAyuda}"
+                               Text="El resto son de venta directa y descuentan su propio stock." />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

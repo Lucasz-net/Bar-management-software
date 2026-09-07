@@ -66,17 +66,19 @@ namespace SistemaGestionBar.Data
             {
                 new Rol { IdRol = 1, NombreRol = RolesSistema.Administrador },
                 new Rol { IdRol = 2, NombreRol = RolesSistema.Vendedor },
-                new Rol { IdRol = 3, NombreRol = RolesSistema.Mesero }
+                new Rol { IdRol = 3, NombreRol = RolesSistema.Mesero },
+                new Rol { IdRol = 4, NombreRol = RolesSistema.Gerente }
             });
 
             Personas.AddRange(new[]
             {
-                new Persona { IdPersona = 1, Nombre = "Lucas Escobar",  DniCuit = "40.123.456", Telefono = "351-5550101", Email = "admin@bar.com" },
+                new Persona { IdPersona = 1, Nombre = "Nazareno Villalba",  DniCuit = "40.123.456", Telefono = "351-5550101", Email = "admin@bar.com" },
                 new Persona { IdPersona = 2, Nombre = "Martina Gómez",  DniCuit = "38.987.654", Telefono = "351-5550102", Email = "vendedor@bar.com" },
-                new Persona { IdPersona = 3, Nombre = "Nicolás Kern",   DniCuit = "41.222.333", Telefono = "351-5550103", Email = "mesero@bar.com" },
+                new Persona { IdPersona = 3, Nombre = "Jose Hernandez",   DniCuit = "41.222.333", Telefono = "351-5550103", Email = "mesero@bar.com" },
                 new Persona { IdPersona = 4, Nombre = "Consumidor Final" },
                 new Persona { IdPersona = 5, Nombre = "Sofía Ramírez",  DniCuit = "37.444.555", Telefono = "351-5550104", Email = "sofia@mail.com" },
-                new Persona { IdPersona = 6, Nombre = "Bar El Ancla SRL", DniCuit = "30-71234567-9", Telefono = "351-5550105", Email = "compras@elancla.com" }
+                new Persona { IdPersona = 6, Nombre = "Bar El Ancla SRL", DniCuit = "30-71234567-9", Telefono = "351-5550105", Email = "compras@elancla.com" },
+                new Persona { IdPersona = 7, Nombre = "Diego Ferrari", DniCuit = "35.666.777", Telefono = "351-5550106", Email = "gerente@bar.com" }
             });
 
             // Las claves se hashean igual que lo hará el alta real de usuarios (RF-09).
@@ -84,7 +86,8 @@ namespace SistemaGestionBar.Data
             {
                 new Usuario { IdUsuario = 1, IdPersona = 1, IdRol = 1, Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
                 new Usuario { IdUsuario = 2, IdPersona = 2, IdRol = 2, Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
-                new Usuario { IdUsuario = 3, IdPersona = 3, IdRol = 3, Clave = SeguridadHelper.GenerarHash(ClaveDemo) }
+                new Usuario { IdUsuario = 3, IdPersona = 3, IdRol = 3, Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
+                new Usuario { IdUsuario = 4, IdPersona = 7, IdRol = 4, Clave = SeguridadHelper.GenerarHash(ClaveDemo) }
             });
 
             Clientes.AddRange(new[]

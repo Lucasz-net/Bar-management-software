@@ -59,12 +59,20 @@ namespace SistemaGestionBar.ViewModels
             ConfirmarVentaCommand = new RelayCommand(ConfirmarVenta, () => Ticket.Count > 0);
             CancelarTicketCommand = new RelayCommand(CancelarTicket, () => Ticket.Count > 0);
             CerrarSesionCommand = new RelayCommand(() => CierreSesionSolicitado?.Invoke(this, EventArgs.Empty));
+            VolverAlTableroCommand = new RelayCommand(() => TableroSolicitado?.Invoke(this, EventArgs.Empty));
 
             RefrescarIndicadores();
         }
 
         /// <summary>Lo escucha MainViewModel para volver al login (RF-09).</summary>
         public event EventHandler? CierreSesionSolicitado;
+
+        /// <summary>
+        /// Vuelta al tablero de administración. Es una acción distinta de cerrar sesión:
+        /// antes el mismo botón hacía las dos cosas según el rol, y desde el punto de venta
+        /// no había forma de saber que uno volvía al tablero en lugar de salir del sistema.
+        /// </summary>
+        public event EventHandler? TableroSolicitado;
 
         // ---------------------------------------------------------------
         // Encabezado
@@ -352,7 +360,13 @@ namespace SistemaGestionBar.ViewModels
         public ObservableCollection<AlertaStock> AlertasStock { get; }
 
         /// <summary>RF-08: el panel de alertas es exclusivo del administrador.</summary>
-        public bool PuedeVerAlertas => UsuarioActual.EsAdministrador;
+        public bool PuedeVerAlertas => UsuarioActual.AccedeAlTablero;
+
+        /// <summary>
+        /// Solo el administrador tiene tablero al que volver: para el resto
+        /// el punto de venta es la única pantalla del sistema.
+        /// </summary>
+        public bool PuedeVolverAlTablero => UsuarioActual.AccedeAlTablero;
 
         public bool HayAlertasStock => PuedeVerAlertas && AlertasStock.Count > 0;
 
@@ -402,6 +416,7 @@ namespace SistemaGestionBar.ViewModels
         public ICommand ConfirmarVentaCommand { get; }
         public ICommand CancelarTicketCommand { get; }
         public ICommand CerrarSesionCommand { get; }
+        public ICommand VolverAlTableroCommand { get; }
 
         private void VerReceta(ProductoCatalogoViewModel producto)
         {

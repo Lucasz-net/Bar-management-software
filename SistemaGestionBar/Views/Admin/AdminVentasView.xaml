@@ -1,0 +1,132 @@
+<UserControl x:Class="SistemaGestionBar.Views.Admin.AdminVentasView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:AdminVentasViewModel}"
+             d:DesignHeight="620" d:DesignWidth="1050">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <UniformGrid Grid.Row="0" Rows="1" Columns="3" Margin="0,0,0,18">
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadVentas}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ventas registradas" />
+                </StackPanel>
+            </Border>
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}" Foreground="#2E7D32"
+                               Text="{Binding TotalFacturado, StringFormat={}{0:C0}}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Total facturado" />
+                </StackPanel>
+            </Border>
+            <Border Style="{DynamicResource TarjetaIndicador}">
+                <StackPanel>
+                    <TextBlock Style="{DynamicResource ValorIndicador}" Foreground="#5A6577"
+                               Text="{Binding TicketPromedio, StringFormat={}{0:C0}}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ticket promedio" />
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="368" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="Historial de ventas" Style="{DynamicResource TituloPanel}" />
+
+                    <DataGrid Grid.Row="1" Style="{DynamicResource GrillaAdmin}"
+                              ItemsSource="{Binding Ventas}"
+                              SelectedItem="{Binding Seleccionada}">
+                        <DataGrid.Columns>
+                            <!-- El método de pago va en el panel de detalle: con 8 columnas
+                                 los nombres de cajero y mesero quedaban recortados a una letra. -->
+                            <DataGridTextColumn Header="#" Binding="{Binding IdVenta}" Width="42" />
+                            <DataGridTextColumn Header="Fecha" Binding="{Binding FechaHora, StringFormat={}{0:dd/MM/yy HH:mm}}" Width="108" />
+                            <DataGridTextColumn Header="Modalidad" Binding="{Binding ModalidadConsumo}" Width="92" />
+                            <DataGridTextColumn Header="Ubicación" Binding="{Binding Ubicacion.NombreUbicacion}" Width="*" MinWidth="82" />
+                            <DataGridTextColumn Header="Cajero" Binding="{Binding Cajero.NombreCompleto}" Width="*" MinWidth="110" />
+                            <DataGridTextColumn Header="Mesero" Binding="{Binding Mesero.NombreCompleto}" Width="*" MinWidth="110" />
+                            <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat={}{0:C0}}" Width="92" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="{Binding TituloDetalle}" Style="{DynamicResource TituloPanel}" />
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HaySeleccion}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="0">
+                            <Run Text="Cliente:" />
+                            <Run Text="{Binding Seleccionada.Cliente.NombreMostrado, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+                        <TextBlock Style="{DynamicResource RotuloIndicador}">
+                            <Run Text="Método de pago:" />
+                            <Run Text="{Binding Seleccionada.MetodoPago.NombreMetodo, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+                        <TextBlock Style="{DynamicResource RotuloIndicador}">
+                            <Run Text="Estado:" />
+                            <Run Text="{Binding Seleccionada.EstadoVenta, Mode=OneWay}" FontWeight="SemiBold" />
+                        </TextBlock>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="2" Style="{DynamicResource GrillaAdmin}"
+                              ItemsSource="{Binding Detalle}" RowHeight="34">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Producto" Binding="{Binding Producto.Nombre}" Width="*" />
+                            <DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}" Width="55" />
+                            <DataGridTextColumn Header="P. unit." Binding="{Binding PrecioUnitario, StringFormat={}{0:C0}}" Width="85" />
+                            <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat={}{0:C0}}" Width="90" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Border Grid.Row="3" Background="#F7F9FC" CornerRadius="10" Padding="14,10" Margin="0,12,0,0">
+                        <Grid>
+                            <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="13" Foreground="#2B3445" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Seleccionada.Total, StringFormat={}{0:C0}}"
+                                       FontWeight="Bold" FontSize="18" Foreground="#1565C0"
+                                       HorizontalAlignment="Right" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

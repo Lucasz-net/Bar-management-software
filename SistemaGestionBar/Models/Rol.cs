@@ -15,6 +15,7 @@ namespace SistemaGestionBar.Models
     public static class RolesSistema
     {
         public const string Administrador = "Administrador";
+        public const string Gerente = "Gerente";
         public const string Vendedor = "Vendedor";
         public const string Mesero = "Mesero";
     }

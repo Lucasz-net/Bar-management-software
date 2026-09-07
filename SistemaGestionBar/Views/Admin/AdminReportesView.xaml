@@ -1,0 +1,108 @@
+<UserControl x:Class="SistemaGestionBar.Views.Admin.AdminReportesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:AdminReportesViewModel}"
+             d:DesignHeight="620" d:DesignWidth="1050">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="360" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============ GENERADOR ============ -->
+        <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0" VerticalAlignment="Top">
+            <StackPanel>
+                <TextBlock Text="Generar informe" Style="{DynamicResource TituloPanel}" />
+
+                <Border Style="{DynamicResource BarraMensaje}">
+                    <TextBlock Style="{DynamicResource TextoMensaje}" Text="{Binding Mensaje}" />
+                </Border>
+
+                <TextBlock Text="TIPO DE INFORME" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,4" />
+                <ComboBox Style="{DynamicResource ComboAdmin}"
+                          ItemsSource="{Binding Tipos}"
+                          SelectedItem="{Binding TipoSeleccionado}" />
+
+                <Border Background="#F7F9FC" CornerRadius="10" Padding="14,12" Margin="0,14,0,0">
+                    <TextBlock Text="{Binding DescripcionTipo}" FontSize="12.5"
+                               Foreground="#5A6577" TextWrapping="Wrap" />
+                </Border>
+
+                <Button Style="{DynamicResource BotonPrimario}" Height="42" Margin="0,18,0,0"
+                        Command="{Binding GenerarCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="FileDocumentOutline" Width="17" Height="17" VerticalAlignment="Center" />
+                        <TextBlock Text="GENERAR CSV" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <TextBlock Text="CARPETA DE DESTINO" Style="{DynamicResource EtiquetaAdmin}" />
+                <TextBlock Text="{Binding CarpetaDestino}" FontSize="11" Foreground="#8A93A5"
+                           TextWrapping="Wrap" />
+
+                <Button Style="{DynamicResource BotonSecundario}" Content="Abrir carpeta" Margin="0,10,0,0"
+                        Command="{Binding AbrirCarpetaCommand}" />
+
+                <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,12,0,0"
+                           Text="Cada informe generado queda registrado en la tabla Reporte con su tipo, el usuario que lo pidió y la ruta del archivo." />
+            </StackPanel>
+        </Border>
+
+        <!-- ============ BITACORA ============ -->
+        <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Informes generados" Style="{DynamicResource TituloPanel}" />
+
+                <Grid Grid.Row="1">
+                    <TextBlock Text="Todavía no se generó ningún informe."
+                               FontSize="13" Foreground="#9AA3B2"
+                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HayHistorial}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <DataGrid Style="{DynamicResource GrillaAdmin}" ItemsSource="{Binding Historial}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="#" Binding="{Binding IdReporte}" Width="50" />
+                            <DataGridTextColumn Header="Tipo" Binding="{Binding TipoReporte}" Width="170" />
+                            <DataGridTextColumn Header="Generado" Binding="{Binding FechaGeneracion, StringFormat={}{0:dd/MM/yy HH:mm}}" Width="130" />
+                            <DataGridTextColumn Header="Usuario" Binding="{Binding UsuarioGenerador.NombreCompleto}" Width="160" />
+                            <DataGridTextColumn Header="Archivo" Binding="{Binding RutaArchivo}" Width="*" />
+                            <DataGridTemplateColumn Width="50">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Style="{DynamicResource BotonIconoFila}" Foreground="#1565C0" ToolTip="Abrir archivo"
+                                                Command="{Binding DataContext.AbrirArchivoCommand,
+                                                                  RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                CommandParameter="{Binding}">
+                                            <materialDesign:PackIcon Kind="OpenInNew" Width="15" Height="15" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
