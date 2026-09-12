@@ -44,17 +44,23 @@
                     <TextBlock Style="{DynamicResource TextoMensaje}" Text="{Binding Mensaje}" />
                 </Border>
 
-                <DataGrid Grid.Row="2" Style="{DynamicResource GrillaAdmin}"
-                          ItemsSource="{Binding Usuarios}"
-                          SelectedItem="{Binding Seleccionado}">
-                    <DataGrid.Columns>
+                <StackPanel Grid.Row="2">
+                    <TextBox Width="260" HorizontalAlignment="Left" Margin="0,0,0,8"
+                             Text="{Binding Filtro, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="Buscar por nombre, email, DNI o rol..." />
+
+                    <DataGrid Style="{DynamicResource GrillaAdmin}"
+                              ItemsSource="{Binding UsuariosView}"
+                              SelectedItem="{Binding Seleccionado}">
+                        <DataGrid.Columns>
                         <DataGridTextColumn Header="Nombre" Binding="{Binding Persona.Nombre}" Width="*" />
                         <DataGridTextColumn Header="Correo (acceso)" Binding="{Binding Persona.Email}" Width="200" />
                         <DataGridTextColumn Header="DNI / CUIT" Binding="{Binding Persona.DniCuit}" Width="120" />
                         <DataGridTextColumn Header="Teléfono" Binding="{Binding Persona.Telefono}" Width="120" />
                         <DataGridTextColumn Header="Rol" Binding="{Binding Rol.NombreRol}" Width="130" />
                     </DataGrid.Columns>
-                </DataGrid>
+                    </DataGrid>
+                </StackPanel>
             </Grid>
         </Border>
 

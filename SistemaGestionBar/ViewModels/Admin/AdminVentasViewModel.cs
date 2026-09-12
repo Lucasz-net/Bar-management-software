@@ -2,6 +2,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using SistemaGestionBar.Models;
 using SistemaGestionBar.Services;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
@@ -23,6 +25,21 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public ObservableCollection<Venta> Ventas { get; }
         public ObservableCollection<VentaDetalle> Detalle { get; }
+        private ICollectionView? _ventasView;
+        public ICollectionView? VentasView => _ventasView;
+
+        private string _filtro = string.Empty;
+        public string Filtro
+        {
+            get => _filtro;
+            set
+            {
+                if (SetProperty(ref _filtro, value))
+                {
+                    _ventasView?.Refresh();
+                }
+            }
+        }
 
         private Venta? _seleccionada;
         public Venta? Seleccionada
@@ -80,11 +97,49 @@ namespace SistemaGestionBar.ViewModels.Admin
             foreach (var v in Repositorio.ObtenerVentas().OrderByDescending(v => v.IdVenta))
                 Ventas.Add(v);
 
+            // Inicializar / refrescar la vista filtrada
+            if (_ventasView is null)
+            {
+                _ventasView = CollectionViewSource.GetDefaultView(Ventas);
+                _ventasView.Filter = o => FiltrarVenta(o as Venta);
+            }
+            else
+            {
+                _ventasView.Refresh();
+            }
+
             CantidadVentas = Ventas.Count;
             TotalFacturado = Ventas.Sum(v => v.Total);
             TicketPromedio = CantidadVentas == 0 ? 0 : TotalFacturado / CantidadVentas;
 
             Seleccionada = Ventas.FirstOrDefault(v => v.IdVenta == idPrevio) ?? Ventas.FirstOrDefault();
+        }
+
+        private bool FiltrarVenta(Venta? v)
+        {
+            if (v is null)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(Filtro))
+                return true;
+
+            var q = Filtro.Trim();
+            if (v.IdVenta.ToString().Contains(q))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(v.Cliente?.NombreMostrado) && v.Cliente.NombreMostrado.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(v.Cajero?.NombreCompleto) && v.Cajero.NombreCompleto.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(v.Mesero?.NombreCompleto) && v.Mesero.NombreCompleto.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(v.Ubicacion?.NombreUbicacion) && v.Ubicacion.NombreUbicacion.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
         }
     }
 }

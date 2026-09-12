@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminVentasViewModel}"
              d:DesignHeight="620" d:DesignWidth="1050">
@@ -52,9 +53,13 @@
 
                     <TextBlock Grid.Row="0" Text="Historial de ventas" Style="{DynamicResource TituloPanel}" />
 
-                    <DataGrid Grid.Row="1" Style="{DynamicResource GrillaAdmin}"
-                              ItemsSource="{Binding Ventas}"
-                              SelectedItem="{Binding Seleccionada}">
+                    <StackPanel Grid.Row="1" Margin="0,0,0,8">
+                        <TextBox Width="280" HorizontalAlignment="Left" Margin="0,0,0,8"
+                                 Text="{Binding Filtro, UpdateSourceTrigger=PropertyChanged}"
+                                 materialDesign:HintAssist.Hint="Buscar por id, cliente, cajero, mesero, ubicación..." />
+                        <DataGrid Style="{DynamicResource GrillaAdmin}" 
+                                  ItemsSource="{Binding VentasView}"
+                                  SelectedItem="{Binding Seleccionada}">
                         <DataGrid.Columns>
                             <!-- El método de pago va en el panel de detalle: con 8 columnas
                                  los nombres de cajero y mesero quedaban recortados a una letra. -->
@@ -66,7 +71,8 @@
                             <DataGridTextColumn Header="Mesero" Binding="{Binding Mesero.NombreCompleto}" Width="*" MinWidth="110" />
                             <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat={}{0:C0}}" Width="92" />
                         </DataGrid.Columns>
-                    </DataGrid>
+                        </DataGrid>
+                    </StackPanel>
                 </Grid>
             </Border>
 

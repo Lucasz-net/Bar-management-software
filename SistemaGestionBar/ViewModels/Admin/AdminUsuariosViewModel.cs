@@ -3,6 +3,8 @@ using System.Linq;
 using System.Windows.Input;
 using SistemaGestionBar.Models;
 using SistemaGestionBar.Services;
+using System.ComponentModel;
+using System.Windows.Data;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
@@ -31,6 +33,21 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public ObservableCollection<Usuario> Usuarios { get; }
         public ObservableCollection<Rol> Roles { get; }
+        private ICollectionView? _usuariosView;
+        public ICollectionView? UsuariosView => _usuariosView;
+
+        private string _filtro = string.Empty;
+        public string Filtro
+        {
+            get => _filtro;
+            set
+            {
+                if (SetProperty(ref _filtro, value))
+                {
+                    _usuariosView?.Refresh();
+                }
+            }
+        }
 
         private Usuario? _seleccionado;
         public Usuario? Seleccionado
@@ -98,11 +115,46 @@ namespace SistemaGestionBar.ViewModels.Admin
             foreach (var u in Repositorio.ObtenerUsuarios())
                 Usuarios.Add(u);
 
+            if (_usuariosView is null)
+            {
+                _usuariosView = CollectionViewSource.GetDefaultView(Usuarios);
+                _usuariosView.Filter = o => FiltrarUsuario(o as Usuario);
+            }
+            else
+            {
+                _usuariosView.Refresh();
+            }
+
             Roles.Clear();
             foreach (var r in Repositorio.ObtenerRoles())
                 Roles.Add(r);
 
             Seleccionado = Usuarios.FirstOrDefault(u => u.IdUsuario == idPrevio) ?? Usuarios.FirstOrDefault();
+        }
+
+        private bool FiltrarUsuario(Usuario? u)
+        {
+            if (u is null)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(Filtro))
+                return true;
+
+            var q = Filtro.Trim();
+
+            if (!string.IsNullOrWhiteSpace(u.Persona?.Nombre) && u.Persona.Nombre.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(u.Persona?.Email) && u.Persona.Email.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(u.Persona?.DniCuit) && u.Persona.DniCuit.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (!string.IsNullOrWhiteSpace(u.Rol?.NombreRol) && u.Rol.NombreRol.Contains(q, System.StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            return false;
         }
 
         private void CargarEnEditor(Usuario? usuario)
