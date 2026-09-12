@@ -29,6 +29,7 @@ namespace SistemaGestionBar.Data
         public List<Ubicacion> Ubicaciones { get; } = new();
         public List<Venta> Ventas { get; } = new();
         public List<Reporte> Reportes { get; } = new();
+        public List<Factura> Facturas { get; } = new();
 
         /// <summary>Clave en texto plano de los tres usuarios de prueba.</summary>
         public const string ClaveDemo = "12345678";

@@ -17,6 +17,7 @@ namespace SistemaGestionBar.Data
         private readonly SesionActual _sesion;
         private int _proximoIdVenta = 1;
         private int _proximoIdDetalle = 1;
+        private int _proximoIdFactura = 1;
 
         public RepositorioMemoria() : this(DatosPrueba.Crear(), new SesionActual())
         {
@@ -141,7 +142,55 @@ namespace SistemaGestionBar.Data
             }
 
             _datos.Ventas.Add(venta);
+            // Generar factura automáticamente al confirmar la venta
+            try
+            {
+                var factura = new Factura
+                {
+                    IdVenta = venta.IdVenta,
+                    FechaEmision = DateTime.Now,
+                    ClienteNombre = venta.Cliente?.NombreMostrado,
+                    Importe = venta.Total,
+                    Numero = $"F-{_proximoIdFactura:0000}"
+                };
+
+                int lineaId = 1;
+                foreach (var d in venta.Detalles)
+                {
+                    factura.Lineas.Add(new FacturaLinea
+                    {
+                        IdFacturaLinea = lineaId++,
+                        NombreProducto = d.Producto?.Nombre ?? string.Empty,
+                        Cantidad = d.Cantidad,
+                        PrecioUnitario = d.PrecioUnitario
+                    });
+                }
+
+                RegistrarFactura(factura);
+            }
+            catch
+            {
+                // Si algo falla en la creación de la factura no abortamos la venta ya guardada.
+            }
             return ResultadoOperacion.Ok($"Venta #{venta.IdVenta} confirmada por {venta.Total:C0}.");
+        }
+
+        public IReadOnlyList<Factura> ObtenerFacturas() => _datos.Facturas.ToList();
+
+        public IReadOnlyList<Factura> ObtenerFacturasPorVenta(int idVenta) =>
+            _datos.Facturas.Where(f => f.IdVenta == idVenta).ToList();
+
+        public ResultadoOperacion RegistrarFactura(Factura factura)
+        {
+            factura.IdFactura = _proximoIdFactura++;
+            // Asegurar fecha y número si no vienen
+            if (factura.FechaEmision == default)
+                factura.FechaEmision = DateTime.Now;
+            if (string.IsNullOrWhiteSpace(factura.Numero))
+                factura.Numero = $"F-{factura.IdFactura:0000}";
+
+            _datos.Facturas.Add(factura);
+            return ResultadoOperacion.Ok($"Factura {factura.Numero} registrada.");
         }
 
         private ResultadoOperacion Validar(Venta venta)

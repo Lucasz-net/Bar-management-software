@@ -20,6 +20,7 @@ namespace SistemaGestionBar.ViewModels.Admin
         {
             Ventas = new ObservableCollection<Venta>();
             Detalle = new ObservableCollection<VentaDetalle>();
+            VerFacturaCommand = new RelayCommand(VerFactura, () => Seleccionada is not null);
             Recargar();
         }
 
@@ -59,6 +60,8 @@ namespace SistemaGestionBar.ViewModels.Admin
 
                 OnPropertyChanged(nameof(HaySeleccion));
                 OnPropertyChanged(nameof(TituloDetalle));
+                // Forzar reevaluación de CanExecute en los comandos (actualiza botones/menús)
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
             }
         }
 
@@ -88,6 +91,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             get => _ticketPromedio;
             private set => SetProperty(ref _ticketPromedio, value);
         }
+
+        public System.Windows.Input.ICommand? VerFacturaCommand { get; }
 
         public sealed override void Recargar()
         {
@@ -140,6 +145,27 @@ namespace SistemaGestionBar.ViewModels.Admin
                 return true;
 
             return false;
+        }
+
+        private void VerFactura()
+        {
+            if (Seleccionada is null)
+            {
+                Dialogo.Informar("Factura", "No hay una venta seleccionada.");
+                return;
+            }
+
+            var facturas = Repositorio.ObtenerFacturasPorVenta(Seleccionada.IdVenta);
+            if (facturas is null || facturas.Count == 0)
+            {
+                Dialogo.Informar("Factura", "No hay factura para esta venta.");
+                return;
+            }
+
+            // Mostrar la primera factura encontrada (en este sistema cada venta genera 1 factura)
+            var f = facturas[0];
+            var vm = new ViewModels.FacturaViewModel(f);
+            Dialogo.MostrarFactura(vm);
         }
     }
 }

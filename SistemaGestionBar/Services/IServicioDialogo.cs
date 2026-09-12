@@ -13,6 +13,8 @@ namespace SistemaGestionBar.Services
         /// <summary>RF-04: abre el modal de receta.</summary>
         void MostrarReceta(RecetaViewModel receta);
 
+        void MostrarFactura(ViewModels.FacturaViewModel factura);
+
         void Informar(string titulo, string mensaje);
 
         bool Confirmar(string titulo, string mensaje);

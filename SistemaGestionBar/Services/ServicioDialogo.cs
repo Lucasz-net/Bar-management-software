@@ -18,6 +18,16 @@ namespace SistemaGestionBar.Services
             ventana.ShowDialog();
         }
 
+        public void MostrarFactura(ViewModels.FacturaViewModel factura)
+        {
+            var ventana = new Views.FacturaWindow
+            {
+                DataContext = factura,
+                Owner = VentanaActiva()
+            };
+            ventana.ShowDialog();
+        }
+
         public void Informar(string titulo, string mensaje) =>
             MessageBox.Show(VentanaActiva(), mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
 

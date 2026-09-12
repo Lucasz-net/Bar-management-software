@@ -40,6 +40,13 @@ namespace SistemaGestionBar.Services
         /// </summary>
         ResultadoOperacion RegistrarVenta(Venta venta);
 
+        // ---------------------------------------------------------------
+        // Facturación
+        // ---------------------------------------------------------------
+        IReadOnlyList<Factura> ObtenerFacturas();
+        IReadOnlyList<Factura> ObtenerFacturasPorVenta(int idVenta);
+        ResultadoOperacion RegistrarFactura(Factura factura);
+
         /// <summary>Cantidad de ventas confirmadas del día, para el indicador del encabezado.</summary>
         int ContarVentasDelDia();
 

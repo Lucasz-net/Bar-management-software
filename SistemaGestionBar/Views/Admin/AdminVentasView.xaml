@@ -111,6 +111,7 @@
                             <Run Text="Estado:" />
                             <Run Text="{Binding Seleccionada.EstadoVenta, Mode=OneWay}" FontWeight="SemiBold" />
                         </TextBlock>
+                        <Button Style="{DynamicResource BotonSecundario}" Content="Ver factura" Command="{Binding VerFacturaCommand}" Margin="0,8,0,0" />
                     </StackPanel>
 
                     <DataGrid Grid.Row="2" Style="{DynamicResource GrillaAdmin}"
