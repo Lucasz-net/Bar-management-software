@@ -11,126 +11,117 @@
              d:DesignHeight="820"
              d:DesignWidth="1360">
 
-    <Grid Background="#EAF2FB">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Enter" Command="{Binding IngresarCommand}" />
+    </UserControl.InputBindings>
 
-        <Border Width="420"
-                Padding="40,44"
-                Background="White"
-                CornerRadius="18"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center">
+    <UserControl.Resources>
+        <!-- Paleta y estilos sencillos para un login moderno, limpio y minimalista -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#111827" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#2D89EF" />
+        <SolidColorBrush x:Key="SubtleBrush" Color="#6B7280" />
 
+        <Style x:Key="InputBase" TargetType="Control">
+            <Setter Property="Height" Value="44" />
+            <Setter Property="Margin" Value="0,6,0,6" />
+            <Setter Property="Padding" Value="12,8" />
+        </Style>
+
+        <Style x:Key="SimpleTextBox" TargetType="TextBox" BasedOn="{StaticResource InputBase}">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#E5E7EB" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+
+        <Style x:Key="SimplePasswordBox" TargetType="PasswordBox" BasedOn="{StaticResource InputBase}">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="BorderBrush" Value="#E5E7EB" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Height" Value="46" />
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="14,6" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#F3F4F6">
+        <Border Width="440" Padding="28" Background="White" CornerRadius="12" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Border.Effect>
-                <DropShadowEffect Color="#2D89EF"
-                                  Opacity="0.18"
-                                  BlurRadius="35"
-                                  ShadowDepth="8"
-                                  Direction="270" />
+                <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="4" Opacity="0.12" />
             </Border.Effect>
 
             <StackPanel>
-
-                <StackPanel Orientation="Horizontal"
-                            HorizontalAlignment="Center"
-                            Margin="0,0,0,8">
-
-                    <materialDesign:PackIcon Kind="GlassCocktail"
-                                             Width="34"
-                                             Height="34"
-                                             Foreground="#2D89EF"
-                                             VerticalAlignment="Center" />
-
-                    <TextBlock Text="Sistema de Gestión de Bar"
-                               FontSize="20"
-                               FontWeight="Bold"
-                               Foreground="#222222"
-                               VerticalAlignment="Center"
-                               Margin="10,0,0,0" />
+                <!-- Header -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
+                    <Border Width="48" Height="48" Background="{StaticResource AccentBrush}" CornerRadius="10">
+                        <TextBlock Text="B" Foreground="White" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+                    <StackPanel Margin="12,0,0,0">
+                        <TextBlock Text="Sistema Gestión Bar" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" />
+                        <TextBlock Text="Accede a tu cuenta" FontSize="12" Foreground="{StaticResource SubtleBrush}" />
+                    </StackPanel>
                 </StackPanel>
 
-                <TextBlock Text="Iniciá sesión para continuar"
-                           FontSize="14"
-                           Foreground="#888888"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,30" />
+                <TextBlock Text="Iniciar sesión" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" Margin="0,6,0,8" />
+                <TextBlock Text="Introduce tus credenciales para continuar" FontSize="12" Foreground="{StaticResource SubtleBrush}" Margin="0,0,0,12" />
 
-                <!-- IMPORTANTE: no fijar Height en estos campos Material Design.
-                     El estilo Outlined necesita medir su propio alto para ubicar
-                     el hint flotante; forzar un Height chico recorta el texto. -->
-                <TextBox Style="{DynamicResource MaterialDesignOutlinedTextBox}"
-                         materialDesign:HintAssist.Hint="Correo electrónico"
-                         FontSize="14"
-                         Padding="14,12"
-                         Margin="0,0,0,18"
-                         Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
-
-                <!-- PasswordBox.Password no es bindeable de fabrica: el enlace lo
-                     resuelve la propiedad adjunta PasswordBoxAssist, asi la vista
-                     no necesita code-behind. -->
-                <PasswordBox Style="{DynamicResource MaterialDesignOutlinedPasswordBox}"
-                             materialDesign:HintAssist.Hint="Contraseña"
-                             FontSize="14"
-                             Padding="14,12"
-                             Margin="0,0,0,28"
-                             b:PasswordBoxAssist.Enlazar="True"
-                             b:PasswordBoxAssist.Password="{Binding Clave, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                <Button Content="INGRESAR"
-                        Style="{DynamicResource MaterialDesignRaisedButton}"
-                        materialDesign:ButtonAssist.CornerRadius="16"
-                        Height="46"
-                        FontSize="14"
-                        FontWeight="Bold"
-                        Background="#2D89EF"
-                        BorderBrush="#2D89EF"
-                        Foreground="White"
-                        Cursor="Hand"
-                        IsDefault="True"
-                        Command="{Binding IngresarCommand}" />
-
-                <TextBlock Text="{Binding Mensaje}"
-                           FontSize="13"
-                           FontWeight="SemiBold"
-                           TextWrapping="Wrap"
-                           TextAlignment="Center"
-                           Margin="0,20,0,0">
+                <!-- Mensaje de estado (ViewModel) -->
+                <TextBlock Text="{Binding Mensaje}" TextWrapping="Wrap" Margin="0,0,0,8" FontSize="12">
                     <TextBlock.Style>
-                        <!-- El color y la visibilidad los decide la vista:
-                             el ViewModel solo expone "hay mensaje" y "es error". -->
                         <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="#2E7D32" />
                             <Setter Property="Visibility" Value="Collapsed" />
+                            <Setter Property="Foreground" Value="#10B981" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding HayMensaje}" Value="True">
                                     <Setter Property="Visibility" Value="Visible" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
-                                    <Setter Property="Foreground" Value="#C62828" />
+                                    <Setter Property="Foreground" Value="#EF4444" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
                 </TextBlock>
 
-                <Border Background="#F4F7FB"
-                        CornerRadius="10"
-                        Padding="14,10"
-                        Margin="0,24,0,0">
+                <!-- Inputs enlazados al LoginViewModel -->
+                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SimpleTextBox}" ToolTip="Usuario o correo electrónico" />
+                <PasswordBox Style="{StaticResource SimplePasswordBox}" PasswordChar="●" b:PasswordBoxAssist.Enlazar="True" b:PasswordBoxAssist.Password="{Binding Clave, Mode=TwoWay}" />
+
+                <Button Style="{StaticResource PrimaryButton}" Content="Entrar" Command="{Binding IngresarCommand}" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
+                    <TextBlock Text="¿No tienes una cuenta?" Foreground="{StaticResource SubtleBrush}" FontSize="12" />
+                    <TextBlock Text=" Registrarse" Foreground="{StaticResource AccentBrush}" FontSize="12" FontWeight="SemiBold" Cursor="Hand" />
+                </StackPanel>
+
+                <!-- Informational box (kept for usability during design) -->
+                <Border Background="#F4F7FB" CornerRadius="10" Padding="12" Margin="0,18,0,0">
                     <StackPanel>
-                        <TextBlock Text="Usuarios de prueba"
-                                   FontSize="11"
-                                   FontWeight="Bold"
-                                   Foreground="#7A8699"
-                                   Margin="0,0,0,4" />
-                        <TextBlock Text="admin@bar.com  ·  vendedor@bar.com  ·  mesero@bar.com"
-                                   FontSize="11"
-                                   Foreground="#7A8699" />
-                        <TextBlock Text="Contraseña: 12345678"
-                                   FontSize="11"
-                                   Foreground="#7A8699" />
+                        <TextBlock Text="Usuarios de prueba" FontSize="11" FontWeight="Bold" Foreground="#7A8699" Margin="0,0,0,4"/>
+                        <TextBlock Text="admin@bar.com · vendedor@bar.com · mesero@bar.com" FontSize="11" Foreground="#7A8699"/>
+                        <TextBlock Text="Contraseña: 12345678" FontSize="11" Foreground="#7A8699"/>
                     </StackPanel>
                 </Border>
-
             </StackPanel>
         </Border>
     </Grid>
