@@ -15,9 +15,9 @@ namespace SistemaGestionBar.Data
     {
         private readonly DatosPrueba _datos;
         private readonly SesionActual _sesion;
-        private int _proximoIdVenta = 1;
-        private int _proximoIdDetalle = 1;
-        private int _proximoIdFactura = 1;
+        private int _proximoIdVenta;
+        private int _proximoIdDetalle;
+        private int _proximoIdFactura;
 
         public RepositorioMemoria() : this(DatosPrueba.Crear(), new SesionActual())
         {
@@ -31,15 +31,31 @@ namespace SistemaGestionBar.Data
         {
             _datos = datos;
             _sesion = sesion;
+
+            // Los contadores arrancan después del último id sembrado. Si arrancaran en 1,
+            // la primera venta real pisaría el id de una venta de prueba.
+            _proximoIdVenta = SiguienteId(_datos.Ventas.Select(v => v.IdVenta));
+            _proximoIdDetalle = SiguienteId(_datos.Ventas.SelectMany(v => v.Detalles).Select(d => d.IdVentaDetalle));
+            _proximoIdFactura = SiguienteId(_datos.Facturas.Select(f => f.IdFactura));
+        }
+
+        private static int SiguienteId(IEnumerable<int> ids)
+        {
+            var lista = ids.ToList();
+            return lista.Count == 0 ? 1 : lista.Max() + 1;
         }
 
         // ---------------------------------------------------------------
         // Consultas
         // ---------------------------------------------------------------
+        /// <summary>
+        /// RF-09. Entra por el correo de TRABAJO. El correo personal de Persona no abre
+        /// sesión: un cliente registrado en el padrón no es un usuario del sistema.
+        /// </summary>
         public Usuario? Autenticar(string email, string clave)
         {
             var usuario = _datos.Usuarios.FirstOrDefault(u =>
-                string.Equals(u.Persona.Email, email, StringComparison.OrdinalIgnoreCase));
+                string.Equals(u.Email, email?.Trim(), StringComparison.OrdinalIgnoreCase));
 
             if (usuario is null)
                 return null;
@@ -57,13 +73,21 @@ namespace SistemaGestionBar.Data
             _datos.MetodosPago.ToList();
 
         public IReadOnlyList<Ubicacion> ObtenerUbicaciones() =>
-            _datos.Ubicaciones.Where(u => u.Estado != EstadoUbicacion.Reservada).ToList();
+            _datos.Ubicaciones.OrderBy(u => u.Tipo).ThenBy(u => u.NombreUbicacion).ToList();
 
         public IReadOnlyList<Cliente> ObtenerClientes() =>
             _datos.Clientes.OrderBy(c => c.IdCliente).ToList();
 
-        public IReadOnlyList<Usuario> ObtenerMeseros() =>
-            _datos.Usuarios.Where(u => u.NombreRol == RolesSistema.Mesero).ToList();
+        /// <summary>
+        /// RF-02. Vendedores y meseros juntos: las dos cuentas hacen el mismo trabajo,
+        /// así que cualquiera de las dos puede figurar como quien atendió la mesa.
+        /// </summary>
+        public IReadOnlyList<Usuario> ObtenerPersonalDeAtencion() =>
+            _datos.Usuarios
+                .Where(u => u.EsPersonalDeAtencion)
+                .OrderBy(u => u.Persona.Apellido)
+                .ThenBy(u => u.Persona.Nombre)
+                .ToList();
 
         public IReadOnlyList<Venta> ObtenerVentas() =>
             _datos.Ventas.OrderBy(v => v.IdVenta).ToList();
@@ -142,56 +166,62 @@ namespace SistemaGestionBar.Data
             }
 
             _datos.Ventas.Add(venta);
-            // Generar factura automáticamente al confirmar la venta
-            try
-            {
-                var factura = new Factura
-                {
-                    IdVenta = venta.IdVenta,
-                    FechaEmision = DateTime.Now,
-                    ClienteNombre = venta.Cliente?.NombreMostrado,
-                    Importe = venta.Total,
-                    Numero = $"F-{_proximoIdFactura:0000}"
-                };
 
-                int lineaId = 1;
-                foreach (var d in venta.Detalles)
-                {
-                    factura.Lineas.Add(new FacturaLinea
-                    {
-                        IdFacturaLinea = lineaId++,
-                        NombreProducto = d.Producto?.Nombre ?? string.Empty,
-                        Cantidad = d.Cantidad,
-                        PrecioUnitario = d.PrecioUnitario
-                    });
-                }
+            var factura = EmitirFactura(venta);
 
-                RegistrarFactura(factura);
-            }
-            catch
-            {
-                // Si algo falla en la creación de la factura no abortamos la venta ya guardada.
-            }
-            return ResultadoOperacion.Ok($"Venta #{venta.IdVenta} confirmada por {venta.Total:C0}.");
+            return ResultadoOperacion.Ok(
+                $"Venta #{venta.IdVenta} confirmada por {venta.Total:C0}. Factura {factura.Numero}.");
         }
 
-        public IReadOnlyList<Factura> ObtenerFacturas() => _datos.Facturas.ToList();
+        public IReadOnlyList<Factura> ObtenerFacturas() =>
+            _datos.Facturas.OrderByDescending(f => f.IdFactura).ToList();
 
-        public IReadOnlyList<Factura> ObtenerFacturasPorVenta(int idVenta) =>
-            _datos.Facturas.Where(f => f.IdVenta == idVenta).ToList();
+        public Factura? ObtenerFacturaDeVenta(int idVenta) =>
+            _datos.Facturas.FirstOrDefault(f => f.IdVenta == idVenta);
 
-        public ResultadoOperacion RegistrarFactura(Factura factura)
+        /// <summary>
+        /// Emite el comprobante de una venta ya confirmada. Copia nombres e importes en
+        /// lugar de referenciarlos: la factura tiene que seguir diciendo lo mismo aunque
+        /// después cambie el precio del producto o el nombre del cliente.
+        ///
+        /// No lleva try/catch: si esto falla es un error de programación y tiene que verse,
+        /// no quedar en una venta cobrada sin comprobante y sin aviso.
+        /// </summary>
+        private Factura EmitirFactura(Venta venta)
         {
-            factura.IdFactura = _proximoIdFactura++;
-            // Asegurar fecha y número si no vienen
-            if (factura.FechaEmision == default)
-                factura.FechaEmision = DateTime.Now;
-            if (string.IsNullOrWhiteSpace(factura.Numero))
-                factura.Numero = $"F-{factura.IdFactura:0000}";
+            var factura = new Factura
+            {
+                IdFactura = _proximoIdFactura++,
+                IdVenta = venta.IdVenta,
+                FechaEmision = venta.FechaHora,
+                ClienteNombre = venta.Cliente?.NombreMostrado,
+                CajeroNombre = venta.Cajero?.NombreCompleto,
+                Importe = venta.Total,
+                Venta = venta
+            };
 
+            factura.Numero = NumeroDeFactura(factura.IdFactura);
+
+            int idLinea = 1;
+            foreach (var detalle in venta.Detalles)
+            {
+                factura.Lineas.Add(new FacturaLinea
+                {
+                    IdFacturaLinea = idLinea++,
+                    IdFactura = factura.IdFactura,
+                    NombreProducto = detalle.Producto?.Nombre ?? string.Empty,
+                    Cantidad = detalle.Cantidad,
+                    PrecioUnitario = detalle.PrecioUnitario
+                });
+            }
+
+            Auditar(factura, esAlta: true);
             _datos.Facturas.Add(factura);
-            return ResultadoOperacion.Ok($"Factura {factura.Numero} registrada.");
+            return factura;
         }
+
+        /// <summary>Formato del número de comprobante, en un solo lugar.</summary>
+        internal static string NumeroDeFactura(int idFactura) => $"F-{idFactura:0000}";
 
         private ResultadoOperacion Validar(Venta venta)
         {

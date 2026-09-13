@@ -6,8 +6,6 @@ namespace SistemaGestionBar.Models
         public int IdUbicacion { get; set; }
         public string NombreUbicacion { get; set; } = string.Empty;
         public int Capacidad { get; set; }
-        public EstadoUbicacion Estado { get; set; } = EstadoUbicacion.Libre;
-
         /// <summary>EXTENSIÓN AL DER: ver comentario en <see cref="TipoUbicacion"/>.</summary>
         public TipoUbicacion Tipo { get; set; } = TipoUbicacion.Mesa;
 

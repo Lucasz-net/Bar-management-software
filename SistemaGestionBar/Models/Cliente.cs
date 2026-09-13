@@ -12,6 +12,6 @@ namespace SistemaGestionBar.Models
         public Persona Persona { get; set; } = null!;
 
         /// <summary>Texto que muestra el combo de clientes del punto de venta.</summary>
-        public string NombreMostrado => Persona?.Nombre ?? $"Cliente #{IdCliente}";
+        public string NombreMostrado => Persona?.NombreCompleto ?? $"Cliente #{IdCliente}";
     }
 }

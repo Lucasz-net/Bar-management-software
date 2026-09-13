@@ -22,14 +22,31 @@ namespace SistemaGestionBar.Data
         public IReadOnlyList<Ingrediente> ObtenerIngredientes() =>
             _datos.Ingredientes.OrderBy(i => i.Nombre).ToList();
 
+        public IReadOnlyList<Persona> ObtenerPersonas() =>
+            _datos.Personas.OrderBy(p => p.Apellido).ThenBy(p => p.Nombre).ToList();
+
+        /// <summary>
+        /// El DNI/CUIT es el dato identificatorio de la persona: dos filas con el mismo
+        /// documento son la misma persona. Por eso la búsqueda ignora puntos y guiones,
+        /// que son formato y no dato: "40.123.456" y "40123456" son el mismo documento.
+        /// </summary>
+        public Persona? BuscarPersonaPorDocumento(string? dniCuit)
+        {
+            string clave = NormalizarDocumento(dniCuit);
+            if (clave.Length == 0)
+                return null;
+
+            return _datos.Personas.FirstOrDefault(p => NormalizarDocumento(p.DniCuit) == clave);
+        }
+
+        private static string NormalizarDocumento(string? documento) =>
+            new string((documento ?? string.Empty).Where(char.IsDigit).ToArray());
+
         public IReadOnlyList<Usuario> ObtenerUsuarios() =>
-            _datos.Usuarios.OrderBy(u => u.NombreCompleto).ToList();
+            _datos.Usuarios.OrderBy(u => u.Persona.Apellido).ThenBy(u => u.Persona.Nombre).ToList();
 
         public IReadOnlyList<Rol> ObtenerRoles() =>
             _datos.Roles.OrderBy(r => r.IdRol).ToList();
-
-        public IReadOnlyList<Reporte> ObtenerReportes() =>
-            _datos.Reportes.OrderByDescending(r => r.FechaGeneracion).ToList();
 
         public IReadOnlyList<Ubicacion> ObtenerTodasLasUbicaciones() =>
             _datos.Ubicaciones.OrderBy(u => u.Tipo).ThenBy(u => u.NombreUbicacion).ToList();
@@ -235,86 +252,205 @@ namespace SistemaGestionBar.Data
         }
 
         // ---------------------------------------------------------------
-        // Usuario + Persona (RF-10: los datos personales van a Persona)
+        // Persona: el padrón (RF-10). Una persona puede no ser nada todavía,
+        // ser cliente del bar, ser empleada, o las dos cosas a la vez.
+        // ---------------------------------------------------------------
+        public ResultadoOperacion GuardarPersona(Persona persona, bool esCliente)
+        {
+            if (string.IsNullOrWhiteSpace(persona.Nombre))
+                return ResultadoOperacion.Error("El nombre es obligatorio.");
+
+            if (string.IsNullOrWhiteSpace(persona.Apellido))
+                return ResultadoOperacion.Error("El apellido es obligatorio.");
+
+            // El DNI/CUIT es el dato identificatorio: sin él no se puede saber si una
+            // persona que vuelve es la misma que ya está cargada.
+            if (string.IsNullOrWhiteSpace(persona.DniCuit))
+                return ResultadoOperacion.Error("El DNI/CUIT es obligatorio: identifica a la persona.");
+
+            // RF-13: comparando sin puntos ni guiones, que son formato y no dato.
+            var conMismoDocumento = BuscarPersonaPorDocumento(persona.DniCuit);
+            if (conMismoDocumento is not null && conMismoDocumento.IdPersona != persona.IdPersona)
+                return ResultadoOperacion.Error(
+                    $"El DNI/CUIT {persona.DniCuit.Trim()} ya es de {conMismoDocumento.NombreCompleto}.");
+
+            // El correo personal es opcional, pero si está tampoco se repite: sirve
+            // para encontrar a la persona y repetido vuelve ambigua la búsqueda.
+            if (!string.IsNullOrWhiteSpace(persona.Email))
+            {
+                bool correoDuplicado = _datos.Personas.Any(p =>
+                    p.IdPersona != persona.IdPersona &&
+                    string.Equals(p.Email?.Trim(), persona.Email.Trim(), StringComparison.OrdinalIgnoreCase));
+                if (correoDuplicado)
+                    return ResultadoOperacion.Error($"Ya hay una persona con el correo {persona.Email.Trim()}.");
+            }
+
+            persona.Nombre = persona.Nombre.Trim();
+            persona.Apellido = persona.Apellido.Trim();
+            persona.DniCuit = persona.DniCuit.Trim();
+            persona.Telefono = string.IsNullOrWhiteSpace(persona.Telefono) ? null : persona.Telefono.Trim();
+            persona.Email = string.IsNullOrWhiteSpace(persona.Email) ? null : persona.Email.Trim();
+
+            bool esAlta = persona.IdPersona == 0;
+            if (esAlta)
+            {
+                persona.IdPersona = ProximoId(_datos.Personas, p => p.IdPersona);
+                Auditar(persona, esAlta: true);
+                _datos.Personas.Add(persona);
+            }
+            else
+            {
+                Auditar(persona, esAlta: false);
+            }
+
+            var resultadoCliente = SincronizarCliente(persona, esCliente);
+            if (!resultadoCliente.Exito)
+                return resultadoCliente;
+
+            return ResultadoOperacion.Ok(
+                esAlta ? $"Persona \"{persona.NombreCompleto}\" creada."
+                       : $"Persona \"{persona.NombreCompleto}\" actualizada.");
+        }
+
+        /// <summary>
+        /// Crea o quita la fila de Cliente según el tilde del formulario. Dar de baja al
+        /// cliente no borra a la persona: el padrón es uno solo y la persona sigue existiendo.
+        /// </summary>
+        private ResultadoOperacion SincronizarCliente(Persona persona, bool esCliente)
+        {
+            var cliente = _datos.Clientes.FirstOrDefault(c => c.IdPersona == persona.IdPersona);
+
+            if (esCliente && cliente is null)
+            {
+                cliente = new Cliente
+                {
+                    IdCliente = ProximoId(_datos.Clientes, c => c.IdCliente),
+                    IdPersona = persona.IdPersona,
+                    FechaRegistro = DateTime.Now,
+                    Persona = persona
+                };
+                Auditar(cliente, esAlta: true);
+                _datos.Clientes.Add(cliente);
+                persona.Cliente = cliente;
+            }
+            else if (!esCliente && cliente is not null)
+            {
+                // RF-13: un cliente con ventas no se borra, o el histórico queda colgado.
+                int ventas = _datos.Ventas.Count(v => v.IdCliente == cliente.IdCliente);
+                if (ventas > 0)
+                    return ResultadoOperacion.Error(
+                        $"No se puede quitar el cliente: {persona.NombreCompleto} figura en {ventas} venta(s).");
+
+                _datos.Clientes.Remove(cliente);
+                persona.Cliente = null;
+            }
+
+            return ResultadoOperacion.Ok();
+        }
+
+        public ResultadoOperacion EliminarPersona(int idPersona)
+        {
+            var persona = _datos.Personas.FirstOrDefault(p => p.IdPersona == idPersona);
+            if (persona is null)
+                return ResultadoOperacion.Error("La persona no existe.");
+
+            // RF-13: primero hay que dar de baja lo que cuelga de ella.
+            if (_datos.Usuarios.Any(u => u.IdPersona == idPersona))
+                return ResultadoOperacion.Error(
+                    $"No se puede eliminar: {persona.NombreCompleto} tiene una cuenta de usuario. Elimínela primero en Usuarios.");
+
+            var cliente = _datos.Clientes.FirstOrDefault(c => c.IdPersona == idPersona);
+            if (cliente is not null)
+            {
+                int ventas = _datos.Ventas.Count(v => v.IdCliente == cliente.IdCliente);
+                if (ventas > 0)
+                    return ResultadoOperacion.Error(
+                        $"No se puede eliminar: {persona.NombreCompleto} figura como cliente en {ventas} venta(s).");
+
+                _datos.Clientes.Remove(cliente);
+            }
+
+            _datos.Personas.Remove(persona);
+            return ResultadoOperacion.Ok($"Persona \"{persona.NombreCompleto}\" eliminada.");
+        }
+
+        // ---------------------------------------------------------------
+        // Usuario: la CUENTA de acceso de una persona que ya está en el padrón.
+        // Este método no escribe datos personales: eso es responsabilidad de Persona.
         // ---------------------------------------------------------------
         public ResultadoOperacion GuardarUsuario(Usuario usuario, string? claveNueva)
         {
-            var persona = usuario.Persona;
-            if (persona is null || string.IsNullOrWhiteSpace(persona.Nombre))
-                return ResultadoOperacion.Error("El nombre de la persona es obligatorio.");
-
-            if (string.IsNullOrWhiteSpace(persona.Email))
-                return ResultadoOperacion.Error("El correo es obligatorio: es la credencial de acceso.");
+            var persona = _datos.Personas.FirstOrDefault(p => p.IdPersona == usuario.IdPersona);
+            if (persona is null)
+                return ResultadoOperacion.Error("Seleccione la persona a la que pertenece la cuenta.");
 
             var rol = _datos.Roles.FirstOrDefault(r => r.IdRol == usuario.IdRol);
             if (rol is null)
                 return ResultadoOperacion.Error("Seleccione un rol válido.");
 
-            // RF-13: el correo es la credencial de login, no puede repetirse.
-            bool correoDuplicado = _datos.Personas.Any(p =>
-                p.IdPersona != persona.IdPersona &&
-                string.Equals(p.Email, persona.Email.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (correoDuplicado)
-                return ResultadoOperacion.Error($"Ya hay una persona registrada con el correo {persona.Email.Trim()}.");
+            if (string.IsNullOrWhiteSpace(usuario.Email))
+                return ResultadoOperacion.Error("El correo de trabajo es obligatorio: es la credencial de acceso.");
 
-            // RF-13: el DNI/CUIT tampoco.
-            if (!string.IsNullOrWhiteSpace(persona.DniCuit))
-            {
-                bool dniDuplicado = _datos.Personas.Any(p =>
-                    p.IdPersona != persona.IdPersona &&
-                    string.Equals(p.DniCuit, persona.DniCuit.Trim(), StringComparison.OrdinalIgnoreCase));
-                if (dniDuplicado)
-                    return ResultadoOperacion.Error($"Ya hay una persona con el DNI/CUIT {persona.DniCuit.Trim()}.");
-            }
+            // RF-13: el correo de trabajo es el nombre de usuario, no puede repetirse.
+            bool correoDuplicado = _datos.Usuarios.Any(u =>
+                u.IdUsuario != usuario.IdUsuario &&
+                string.Equals(u.Email.Trim(), usuario.Email.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (correoDuplicado)
+                return ResultadoOperacion.Error($"Ya hay una cuenta con el correo {usuario.Email.Trim()}.");
+
+            // Una persona tiene una sola cuenta: dos cuentas para la misma persona
+            // harían ambiguo quién cobró una venta.
+            bool personaYaTieneCuenta = _datos.Usuarios.Any(u =>
+                u.IdUsuario != usuario.IdUsuario && u.IdPersona == usuario.IdPersona);
+            if (personaYaTieneCuenta)
+                return ResultadoOperacion.Error($"{persona.NombreCompleto} ya tiene una cuenta de usuario.");
 
             bool esAlta = usuario.IdUsuario == 0;
 
             if (esAlta && string.IsNullOrWhiteSpace(claveNueva))
-                return ResultadoOperacion.Error("Defina una contraseña para el usuario nuevo.");
+                return ResultadoOperacion.Error("Defina una contraseña para la cuenta nueva.");
 
             if (!string.IsNullOrWhiteSpace(claveNueva) && claveNueva.Trim().Length < 8)
                 return ResultadoOperacion.Error("La contraseña debe tener al menos 8 caracteres.");
 
-            persona.Nombre = persona.Nombre.Trim();
-            persona.Email = persona.Email.Trim();
-            persona.DniCuit = persona.DniCuit?.Trim();
-            persona.Telefono = persona.Telefono?.Trim();
+            // Bajar de rol al último administrador dejaría el sistema sin quien administre.
+            if (!esAlta && EsElUltimoAdministrador(usuario) && rol.NombreRol != RolesSistema.Administrador)
+                return ResultadoOperacion.Error("Debe quedar al menos un administrador en el sistema.");
 
+            usuario.Email = usuario.Email.Trim();
+            usuario.Persona = persona;
             usuario.Rol = rol;
-            usuario.IdPersona = persona.IdPersona;
 
             if (!string.IsNullOrWhiteSpace(claveNueva))
                 usuario.Clave = SeguridadHelper.GenerarHash(claveNueva.Trim());
 
             if (esAlta)
             {
-                persona.IdPersona = ProximoId(_datos.Personas, p => p.IdPersona);
-                Auditar(persona, esAlta: true);
-                _datos.Personas.Add(persona);
-
-                usuario.IdPersona = persona.IdPersona;
                 usuario.IdUsuario = ProximoId(_datos.Usuarios, u => u.IdUsuario);
                 Auditar(usuario, esAlta: true);
                 _datos.Usuarios.Add(usuario);
 
                 persona.Usuario = usuario;
                 rol.Usuarios.Add(usuario);
-                return ResultadoOperacion.Ok($"Usuario \"{persona.Nombre}\" creado.");
+                return ResultadoOperacion.Ok($"Cuenta de \"{persona.NombreCompleto}\" creada.");
             }
 
-            Auditar(persona, esAlta: false);
             Auditar(usuario, esAlta: false);
-            return ResultadoOperacion.Ok($"Usuario \"{persona.Nombre}\" actualizado.");
+            return ResultadoOperacion.Ok($"Cuenta de \"{persona.NombreCompleto}\" actualizada.");
         }
+
+        private bool EsElUltimoAdministrador(Usuario usuario) =>
+            usuario.NombreRol == RolesSistema.Administrador &&
+            _datos.Usuarios.Count(u => u.NombreRol == RolesSistema.Administrador) == 1;
 
         public ResultadoOperacion EliminarUsuario(int idUsuario)
         {
             var usuario = _datos.Usuarios.FirstOrDefault(u => u.IdUsuario == idUsuario);
             if (usuario is null)
-                return ResultadoOperacion.Error("El usuario no existe.");
+                return ResultadoOperacion.Error("La cuenta no existe.");
 
             if (usuario.IdUsuario == _sesion.IdUsuario)
-                return ResultadoOperacion.Error("No puede eliminar el usuario con el que está trabajando.");
+                return ResultadoOperacion.Error("No puede eliminar la cuenta con la que está trabajando.");
 
             // RF-13: las ventas guardan quién cobró y quién tomó el pedido.
             int ventas = _datos.Ventas.Count(v => v.IdCajero == idUsuario || v.IdMesero == idUsuario);
@@ -322,24 +458,19 @@ namespace SistemaGestionBar.Data
                 return ResultadoOperacion.Error(
                     $"No se puede eliminar: {usuario.NombreCompleto} figura en {ventas} venta(s).");
 
-            if (_datos.Reportes.Any(r => r.IdUsuarioGenerador == idUsuario))
-                return ResultadoOperacion.Error(
-                    $"No se puede eliminar: {usuario.NombreCompleto} generó reportes registrados.");
-
-            if (usuario.NombreRol == RolesSistema.Administrador &&
-                _datos.Usuarios.Count(u => u.NombreRol == RolesSistema.Administrador) == 1)
+            if (EsElUltimoAdministrador(usuario))
                 return ResultadoOperacion.Error("Debe quedar al menos un administrador en el sistema.");
 
             string nombre = usuario.NombreCompleto;
             usuario.Rol?.Usuarios.Remove(usuario);
             _datos.Usuarios.Remove(usuario);
 
-            // La Persona queda: puede ser también cliente, y RF-10 la centraliza.
+            // La Persona queda en el padrón: puede ser también cliente, y RF-10 la centraliza.
             var persona = _datos.Personas.FirstOrDefault(p => p.IdPersona == usuario.IdPersona);
             if (persona is not null)
                 persona.Usuario = null;
 
-            return ResultadoOperacion.Ok($"Usuario \"{nombre}\" eliminado.");
+            return ResultadoOperacion.Ok($"Cuenta de \"{nombre}\" eliminada.");
         }
 
         // ---------------------------------------------------------------
@@ -469,23 +600,6 @@ namespace SistemaGestionBar.Data
 
             _datos.Ubicaciones.Remove(ubicacion);
             return ResultadoOperacion.Ok($"Ubicación \"{ubicacion.NombreUbicacion}\" eliminada.");
-        }
-
-        // ---------------------------------------------------------------
-        // Reporte (RF-14)
-        // ---------------------------------------------------------------
-        public ResultadoOperacion RegistrarReporte(Reporte reporte)
-        {
-            if (reporte.IdUsuarioGenerador <= 0)
-                return ResultadoOperacion.Error("No se identificó al usuario que generó el reporte.");
-
-            reporte.IdReporte = ProximoId(_datos.Reportes, r => r.IdReporte);
-            reporte.FechaGeneracion = DateTime.Now;
-            reporte.UsuarioGenerador = _datos.Usuarios.First(u => u.IdUsuario == reporte.IdUsuarioGenerador);
-            Auditar(reporte, esAlta: true);
-
-            _datos.Reportes.Add(reporte);
-            return ResultadoOperacion.Ok($"Reporte #{reporte.IdReporte} registrado.");
         }
     }
 }

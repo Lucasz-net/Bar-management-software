@@ -7,7 +7,16 @@
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminResumenViewModel}"
-             d:DesignHeight="600" d:DesignWidth="1000">
+             d:DesignHeight="700" d:DesignWidth="1180">
+
+    <UserControl.Resources>
+        <!-- Indicador: chip de icono arriba, numero grande, rotulo abajo. Los cinco son
+             iguales salvo el color y el texto, asi que la estructura va una sola vez. -->
+        <Style x:Key="NumeroGrande" TargetType="TextBlock" BasedOn="{StaticResource ValorIndicador}">
+            <Setter Property="FontSize" Value="27" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+        </Style>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -15,99 +24,210 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Indicadores del día -->
-        <UniformGrid Grid.Row="0" Rows="1" Columns="5" Margin="0,0,0,20">
-            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+        <!-- ==== INDICADORES DEL DÍA ==== -->
+        <UniformGrid Grid.Row="0" Rows="1" Columns="5">
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0">
                 <StackPanel>
-                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding VentasDelDia}" />
+                    <Border Style="{DynamicResource ChipIcono}" HorizontalAlignment="Left">
+                        <materialDesign:PackIcon Kind="CashRegister" Width="20" Height="20"
+                                                 Foreground="{DynamicResource Acento}"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Style="{DynamicResource NumeroGrande}" Text="{Binding VentasDelDia}" />
                     <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ventas hoy" />
                 </StackPanel>
             </Border>
-            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0">
                 <StackPanel>
-                    <TextBlock Style="{DynamicResource ValorIndicador}"
-                               Foreground="#2E7D32"
+                    <Border Style="{DynamicResource ChipIcono}" Background="{DynamicResource ExitoSuave}" HorizontalAlignment="Left">
+                        <materialDesign:PackIcon Kind="CashMultiple" Width="20" Height="20" Foreground="#17703F"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="{DynamicResource Exito}"
                                Text="{Binding FacturadoHoy, StringFormat={}{0:C0}}" />
                     <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Facturado hoy" />
                 </StackPanel>
             </Border>
-            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0">
                 <StackPanel>
-                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadProductos}" />
+                    <Border Style="{DynamicResource ChipIcono}" Background="#EDE7FA" HorizontalAlignment="Left">
+                        <materialDesign:PackIcon Kind="GlassCocktail" Width="20" Height="20" Foreground="#5B3A9E"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="#5B3A9E"
+                               Text="{Binding CantidadProductos}" />
                     <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Productos en catálogo" />
                 </StackPanel>
             </Border>
-            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,12,0">
+
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0">
                 <StackPanel>
-                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadInsumos}" />
+                    <Border Style="{DynamicResource ChipIcono}" Background="{DynamicResource AvisoSuave}" HorizontalAlignment="Left">
+                        <materialDesign:PackIcon Kind="PackageVariantClosed" Width="20" Height="20"
+                                                 Foreground="{DynamicResource Aviso}"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="{DynamicResource Aviso}"
+                               Text="{Binding CantidadInsumos}" />
                     <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Insumos en inventario" />
                 </StackPanel>
             </Border>
+
             <Border Style="{DynamicResource TarjetaIndicador}">
                 <StackPanel>
-                    <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadUsuarios}" />
-                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Usuarios del sistema" />
+                    <Border Style="{DynamicResource ChipIcono}" Background="#F1F4F9" HorizontalAlignment="Left">
+                        <materialDesign:PackIcon Kind="AccountGroupOutline" Width="20" Height="20"
+                                                 Foreground="#5A6577"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="#5A6577"
+                               Text="{Binding CantidadUsuarios}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Cuentas de acceso" />
                 </StackPanel>
             </Border>
         </UniformGrid>
 
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="320" />
+                <ColumnDefinition Width="330" />
             </Grid.ColumnDefinitions>
 
-            <!-- Alertas de inventario (RF-08) -->
-            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0">
+            <!-- ==== ALERTAS DE INVENTARIO (RF-08) ==== -->
+            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,18,0">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
-                        <materialDesign:PackIcon Kind="AlertOutline" Width="19" Height="19"
-                                                 Foreground="#E65100" VerticalAlignment="Center" />
-                        <TextBlock Text="Alertas de inventario" Style="{DynamicResource TituloPanel}"
-                                   Margin="8,0,0,0" VerticalAlignment="Center" />
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="{DynamicResource AvisoSuave}">
+                            <materialDesign:PackIcon Kind="AlertOutline" Width="18" Height="18"
+                                                     Foreground="{DynamicResource Aviso}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Alertas de inventario" Style="{DynamicResource TituloEnLinea}" />
+                            <TextBlock Text="{Binding TextoAlertas}" Style="{DynamicResource RotuloIndicador}" Margin="0" />
+                        </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Grid.Row="1" Text="{Binding TextoAlertas}"
-                               FontSize="12.5" Foreground="#8A93A5" Margin="0,0,0,14" />
+                    <Grid Grid.Row="1">
+                        <!-- Cada alerta como una fila con barra: el numero solo no dice
+                             cuanto falta para quedarse sin insumo. -->
+                        <ItemsControl ItemsSource="{Binding Alertas}">
+                            <ItemsControl.Template>
+                                <ControlTemplate TargetType="ItemsControl">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,6,0">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </ControlTemplate>
+                            </ItemsControl.Template>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{DynamicResource SubPanel}" Margin="0,0,0,8"
+                                            Background="{DynamicResource AvisoSuave}" BorderBrush="#F3DFC0">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
 
-                    <DataGrid Grid.Row="2"
-                              Style="{DynamicResource GrillaAdmin}"
-                              ItemsSource="{Binding Alertas}">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Ítem" Binding="{Binding Nombre}" Width="*" />
-                            <DataGridTextColumn Header="Stock actual" Binding="{Binding Stock, StringFormat={}{0:0.##}}" Width="120" />
-                            <DataGridTextColumn Header="Mínimo" Binding="{Binding StockMinimo, StringFormat={}{0:0.##}}" Width="100" />
-                            <DataGridTextColumn Header="Unidad" Binding="{Binding UnidadMedida}" Width="90" />
-                        </DataGrid.Columns>
-                    </DataGrid>
+                                            <materialDesign:PackIcon Grid.Column="0" Kind="AlertCircleOutline"
+                                                                     Width="18" Height="18"
+                                                                     Foreground="{DynamicResource Aviso}"
+                                                                     VerticalAlignment="Center" />
+
+                                            <StackPanel Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Nombre}" FontSize="13" FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TintaFuerte}" />
+                                                <TextBlock FontSize="11" Foreground="#96560A" Margin="0,2,0,0">
+                                                    <Run Text="quedan" />
+                                                    <Run Text="{Binding Stock, StringFormat={}{0:0.##}, Mode=OneWay}" FontWeight="SemiBold" />
+                                                    <Run Text="{Binding UnidadMedida, Mode=OneWay}" />
+                                                    <Run Text="· mínimo" />
+                                                    <Run Text="{Binding StockMinimo, StringFormat={}{0:0.##}, Mode=OneWay}" />
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <Border Grid.Column="2" Style="{DynamicResource ChipGrilla}" Margin="0"
+                                                    Background="White">
+                                                <TextBlock Style="{DynamicResource TextoChip}"
+                                                           Foreground="{DynamicResource Aviso}" Text="REPONER" />
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Sin alertas es una buena noticia: se dice así, no con una tabla vacía. -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HayAlertas}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource ExitoSuave}"
+                                    HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="CheckCircleOutline" Width="28" Height="28"
+                                                         Foreground="#17703F"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="Todo el inventario está en nivel" Margin="0,14,0,0"
+                                       FontSize="13.5" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TintaFuerte}" HorizontalAlignment="Center" />
+                            <TextBlock Style="{DynamicResource TextoVacio}" Margin="0,4,0,0"
+                                       Text="Ningún insumo llegó a su punto de reposición." />
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
 
-            <!-- Composición del catálogo -->
+            <!-- ==== COMPOSICIÓN DEL CATÁLOGO ==== -->
             <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" VerticalAlignment="Top">
                 <StackPanel>
-                    <TextBlock Text="Catálogo" Style="{DynamicResource TituloPanel}" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="#EDE7FA">
+                            <materialDesign:PackIcon Kind="BookOpenVariant" Width="18" Height="18" Foreground="#5B3A9E"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Text="Composición del catálogo" Style="{DynamicResource TituloEnLinea}"
+                                   Margin="11,0,0,0" TextWrapping="Wrap" />
+                    </StackPanel>
 
-                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Se preparan con receta" Margin="0" />
-                    <TextBlock Style="{DynamicResource ValorIndicador}" FontSize="22"
-                               Text="{Binding ProductosConReceta}" />
-                    <TextBlock Style="{DynamicResource TextoAyuda}"
-                               Text="Descuentan insumos del inventario al venderse." />
+                    <Border Style="{DynamicResource SubPanel}" Margin="0,0,0,10">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Text="Se preparan con receta" Style="{DynamicResource RotuloIndicador}" Margin="0" />
+                                <TextBlock Text="{Binding ProductosConReceta}" FontSize="20" FontWeight="Bold"
+                                           Foreground="#5B3A9E" HorizontalAlignment="Right" />
+                            </Grid>
+                            <TextBlock Style="{DynamicResource TextoAyuda}"
+                                       Text="Descuentan insumos del inventario al venderse (RF-07)." />
+                        </StackPanel>
+                    </Border>
 
-                    <Border Height="1" Background="#EDF1F6" Margin="0,16" />
-
-                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Total de productos" Margin="0" />
-                    <TextBlock Style="{DynamicResource ValorIndicador}" FontSize="22"
-                               Foreground="#5A6577"
-                               Text="{Binding CantidadProductos}" />
-                    <TextBlock Style="{DynamicResource TextoAyuda}"
-                               Text="El resto son de venta directa y descuentan su propio stock." />
+                    <Border Style="{DynamicResource SubPanel}">
+                        <StackPanel>
+                            <Grid>
+                                <TextBlock Text="Total de productos" Style="{DynamicResource RotuloIndicador}" Margin="0" />
+                                <TextBlock Text="{Binding CantidadProductos}" FontSize="20" FontWeight="Bold"
+                                           Foreground="#5A6577" HorizontalAlignment="Right" />
+                            </Grid>
+                            <TextBlock Style="{DynamicResource TextoAyuda}"
+                                       Text="El resto son de venta directa y descuentan su propio stock." />
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
         </Grid>

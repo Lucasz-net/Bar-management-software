@@ -1,0 +1,357 @@
+<UserControl x:Class="SistemaGestionBar.Views.Admin.AdminPersonalView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:AdminPersonalViewModel}"
+             d:DesignHeight="700" d:DesignWidth="1180">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="368" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============================================================
+             LISTA
+             ============================================================ -->
+        <Grid Grid.Column="0" Margin="0,0,18,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- ==== BARRA DE ACCIONES Y BÚSQUEDA ==== -->
+            <Border Grid.Row="0" Style="{DynamicResource PanelAdmin}" Padding="14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Buscador sin marco adentro de la tarjeta, como en el punto de venta -->
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <materialDesign:PackIcon Grid.Column="0" Kind="Magnify" Width="20" Height="20"
+                                                 Foreground="{DynamicResource TintaTenue}"
+                                                 VerticalAlignment="Center" Margin="6,0,0,0" />
+                        <TextBox Grid.Column="1" Style="{DynamicResource BuscadorPlano}"
+                                 materialDesign:HintAssist.Hint="Buscar por nombre, apellido, DNI o correo"
+                                 Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Style="{DynamicResource BotonPrimario}" Command="{Binding NuevoCommand}" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="AccountPlusOutline" Width="16" Height="16" VerticalAlignment="Center" />
+                                <TextBlock Text="Nueva persona" Margin="7,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{DynamicResource BotonSecundario}" Command="{Binding EditarCommand}"
+                                Margin="0,0,8,0" ToolTip="Editar la persona seleccionada" Padding="12,0">
+                            <materialDesign:PackIcon Kind="PencilOutline" Width="16" Height="16" />
+                        </Button>
+                        <Button Style="{DynamicResource BotonPeligro}" Command="{Binding EliminarCommand}"
+                                ToolTip="Eliminar del padrón" Padding="12,0">
+                            <materialDesign:PackIcon Kind="TrashCanOutline" Width="16" Height="16" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ==== FILTROS ==== -->
+            <Grid Grid.Row="1" Margin="0,14,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <ListBox Style="{DynamicResource GrupoChips}"
+                             DisplayMemberPath="Texto"
+                             ItemsSource="{Binding OpcionesVinculo}"
+                             SelectedItem="{Binding Vinculo}" />
+
+                    <ComboBox Style="{DynamicResource FiltroCombo}" Margin="6,0,0,0" MinWidth="150"
+                              DisplayMemberPath="Texto"
+                              ItemsSource="{Binding OpcionesRol}"
+                              SelectedItem="{Binding RolFiltro}" />
+
+                    <Button Style="{DynamicResource BotonSecundario}" Margin="8,0,0,0" Padding="11,0"
+                            Command="{Binding LimpiarFiltrosCommand}" ToolTip="Quitar todos los filtros">
+                        <materialDesign:PackIcon Kind="FilterRemoveOutline" Width="16" Height="16" />
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Style="{DynamicResource ContadorFiltro}">
+                        <Run Text="{Binding CantidadVisible, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="de" />
+                        <Run Text="{Binding CantidadTotal, Mode=OneWay}" />
+                        <Run Text="·" />
+                        <Run Text="{Binding CantidadClientes, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="clientes" />
+                        <Run Text="·" />
+                        <Run Text="{Binding CantidadEmpleados, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="empleados" />
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="2" Style="{DynamicResource BarraMensaje}" Margin="0,14,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Style="{DynamicResource IconoMensaje}" />
+                    <TextBlock Style="{DynamicResource TextoMensaje}" Text="{Binding Mensaje}" />
+                </StackPanel>
+            </Border>
+
+            <!-- ==== GRILLA ==== -->
+            <!-- Va en la fila estrella para que arme su propio scroll. -->
+            <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="10,6,10,10" Margin="0,14,0,0">
+                <Grid>
+                    <DataGrid Style="{DynamicResource GrillaAdmin}"
+                              ItemsSource="{Binding Vista}"
+                              SelectedItem="{Binding Seleccionada}">
+                        <DataGrid.Columns>
+                            <!-- Identidad: avatar con iniciales + nombre y documento juntos.
+                                 Dos datos que siempre se leen de a pares, en una sola celda. -->
+                            <DataGridTemplateColumn Header="PERSONA" Width="*" MinWidth="230" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                                            <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource AcentoSuave}">
+                                                <materialDesign:PackIcon Kind="AccountOutline" Width="18" Height="18"
+                                                                         Foreground="{DynamicResource Acento}"
+                                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center" Margin="11,0,0,0">
+                                                <TextBlock Text="{Binding NombreParaListado}" FontSize="13.5"
+                                                           FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}" />
+                                                <TextBlock Text="{Binding DniCuit}" FontSize="11"
+                                                           Foreground="{DynamicResource TintaSuave}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="CONTACTO" Width="*" MinWidth="180" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Email, TargetNullValue='—'}" FontSize="12.5"
+                                                       Foreground="{DynamicResource TintaFuerte}" />
+                                            <TextBlock Text="{Binding Telefono, TargetNullValue='sin teléfono'}" FontSize="11"
+                                                       Foreground="{DynamicResource TintaSuave}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="ACCESO AL SISTEMA" Width="*" MinWidth="185" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Usuario.Email}" FontSize="12.5"
+                                                       Foreground="{DynamicResource TintaFuerte}" />
+                                            <TextBlock Text="{Binding Usuario.NombreRol}" FontSize="11"
+                                                       Foreground="{DynamicResource TintaSuave}" />
+                                            <TextBlock Text="sin cuenta" FontSize="12" FontStyle="Italic"
+                                                       Foreground="{DynamicResource TintaTenue}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding EsEmpleado}" Value="False">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="VÍNCULO" Width="175" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource AcentoSuave}"
+                                                    Visibility="{Binding EsCliente, Converter={StaticResource BoolAVisibilidad}}">
+                                                <TextBlock Style="{DynamicResource TextoChip}" Foreground="{DynamicResource Acento}" Text="CLIENTE" />
+                                            </Border>
+                                            <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource ExitoSuave}"
+                                                    Visibility="{Binding EsEmpleado, Converter={StaticResource BoolAVisibilidad}}">
+                                                <TextBlock Style="{DynamicResource TextoChip}" Foreground="#17703F" Text="EMPLEADO" />
+                                            </Border>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <!-- Estado vacío: qué se ve cuando el filtro no deja nada -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CantidadVisible}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <materialDesign:PackIcon Kind="AccountSearchOutline" Width="40" Height="40"
+                                                 Foreground="{DynamicResource Linea}" HorizontalAlignment="Center" />
+                        <TextBlock Style="{DynamicResource TextoVacio}" Margin="0,10,0,0"
+                                   Text="Ninguna persona coincide con el filtro." />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ============================================================
+             FICHA
+             ============================================================ -->
+        <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                    <Border Style="{DynamicResource ChipIconoChico}">
+                        <materialDesign:PackIcon Kind="CardAccountDetailsOutline" Width="18" Height="18"
+                                                 Foreground="{DynamicResource Acento}"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="{Binding TituloEditor}" Style="{DynamicResource TituloEnLinea}" Margin="11,0,0,0"
+                               TextWrapping="Wrap" />
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+                    <StackPanel IsEnabled="{Binding EnEdicion}">
+
+                        <!-- ==== DATOS PERSONALES ==== -->
+                        <TextBlock Text="DATOS PERSONALES" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,8"
+                                   Foreground="{DynamicResource Acento}" />
+
+                        <TextBlock Text="DNI / CUIT" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,5" />
+                        <TextBox Style="{DynamicResource CampoAdmin}"
+                                 materialDesign:HintAssist.Hint="Ej: 40.123.456"
+                                 Text="{Binding DniCuit, UpdateSourceTrigger=PropertyChanged, Delay=350}" />
+                        <TextBlock Style="{DynamicResource TextoAyuda}">
+                            <materialDesign:PackIcon Kind="MagnifyScan" Width="12" Height="12" VerticalAlignment="Center" />
+                            <Run Text="Identifica a la persona. Si ya está en el padrón, se cargan sus datos solos." />
+                        </TextBlock>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                <TextBlock Text="NOMBRE" Style="{DynamicResource EtiquetaAdmin}" />
+                                <TextBox Style="{DynamicResource CampoAdmin}"
+                                         Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                <TextBlock Text="APELLIDO" Style="{DynamicResource EtiquetaAdmin}" />
+                                <TextBox Style="{DynamicResource CampoAdmin}"
+                                         Text="{Binding Apellido, UpdateSourceTrigger=PropertyChanged}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="TELÉFONO" Style="{DynamicResource EtiquetaAdmin}" />
+                        <TextBox Style="{DynamicResource CampoAdmin}"
+                                 Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Text="CORREO PERSONAL" Style="{DynamicResource EtiquetaAdmin}" />
+                        <TextBox Style="{DynamicResource CampoAdmin}"
+                                 Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!-- ==== CLIENTE ==== -->
+                        <Border Style="{DynamicResource SubPanel}" Margin="0,18,0,0">
+                            <StackPanel>
+                                <CheckBox FontSize="13" FontWeight="SemiBold"
+                                          Foreground="{DynamicResource TintaFuerte}"
+                                          IsChecked="{Binding EsCliente}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="AccountHeartOutline" Width="16" Height="16"
+                                                                 Foreground="{DynamicResource Acento}" VerticalAlignment="Center" />
+                                        <TextBlock Text="Es cliente del bar" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </CheckBox>
+                                <TextBlock Style="{DynamicResource TextoAyuda}"
+                                           Text="Aparece en el combo de clientes del punto de venta (RF-05)." />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ==== ACCESO AL SISTEMA ==== -->
+                        <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0">
+                            <StackPanel>
+                                <CheckBox FontSize="13" FontWeight="SemiBold"
+                                          Foreground="{DynamicResource TintaFuerte}"
+                                          IsChecked="{Binding TieneCuenta}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="KeyOutline" Width="16" Height="16"
+                                                                 Foreground="{DynamicResource Acento}" VerticalAlignment="Center" />
+                                        <TextBlock Text="Trabaja en el bar y entra al sistema" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </CheckBox>
+
+                                <StackPanel IsEnabled="{Binding TieneCuenta}">
+                                    <TextBlock Text="CORREO DE TRABAJO" Style="{DynamicResource EtiquetaAdmin}" />
+                                    <TextBox Style="{DynamicResource CampoAdmin}"
+                                             materialDesign:HintAssist.Hint="nombre@bar.com"
+                                             Text="{Binding EmailTrabajo, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Style="{DynamicResource TextoAyuda}"
+                                               Text="Es la credencial de inicio de sesión, distinta del correo personal." />
+
+                                    <TextBlock Text="ROL" Style="{DynamicResource EtiquetaAdmin}" />
+                                    <ComboBox Style="{DynamicResource ComboAdmin}"
+                                              DisplayMemberPath="NombreRol"
+                                              ItemsSource="{Binding Roles}"
+                                              SelectedItem="{Binding RolSeleccionado}" />
+                                    <TextBlock Style="{DynamicResource TextoAyuda}"
+                                               Text="Vendedor y Mesero tienen las mismas atribuciones: el rol dice el puesto y es lo que se registra al vender en una mesa." />
+
+                                    <TextBlock Text="CONTRASEÑA" Style="{DynamicResource EtiquetaAdmin}" />
+                                    <PasswordBox Style="{DynamicResource ClaveAdmin}"
+                                                 b:PasswordBoxAssist.Enlazar="True"
+                                                 b:PasswordBoxAssist.Password="{Binding ClaveNueva, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Style="{DynamicResource TextoAyuda}" Text="{Binding AyudaCuenta}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="2">
+                    <TextBlock Style="{DynamicResource AvisoValidacion}" Text="{Binding ResumenDeErrores}" />
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                        <Button Style="{DynamicResource BotonSecundario}" Content="Cancelar"
+                                Margin="0,0,8,0" Command="{Binding CancelarCommand}" />
+                        <Button Style="{DynamicResource BotonExito}" Command="{Binding GuardarCommand}" Padding="20,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="ContentSaveOutline" Width="16" Height="16" VerticalAlignment="Center" />
+                                <TextBlock Text="Guardar" Margin="7,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

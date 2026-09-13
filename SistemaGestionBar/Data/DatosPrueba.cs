@@ -28,10 +28,9 @@ namespace SistemaGestionBar.Data
         public List<MetodoPago> MetodosPago { get; } = new();
         public List<Ubicacion> Ubicaciones { get; } = new();
         public List<Venta> Ventas { get; } = new();
-        public List<Reporte> Reportes { get; } = new();
         public List<Factura> Facturas { get; } = new();
 
-        /// <summary>Clave en texto plano de los tres usuarios de prueba.</summary>
+        /// <summary>Clave en texto plano de los cuatro usuarios de prueba.</summary>
         public const string ClaveDemo = "12345678";
 
         /// <summary>
@@ -55,6 +54,7 @@ namespace SistemaGestionBar.Data
             datos.CargarCatalogo();
             datos.CargarRecetas();
             datos.EnlazarNavegacion();
+            datos.CargarHistorialDeVentas();
             return datos;
         }
 
@@ -71,24 +71,29 @@ namespace SistemaGestionBar.Data
                 new Rol { IdRol = 4, NombreRol = RolesSistema.Gerente }
             });
 
+            // El Email de Persona es el CONTACTO PERSONAL. El correo con el que cada
+            // empleado inicia sesión va en Usuario, más abajo.
             Personas.AddRange(new[]
             {
-                new Persona { IdPersona = 1, Nombre = "Nazareno Villalba",  DniCuit = "40.123.456", Telefono = "351-5550101", Email = "admin@bar.com" },
-                new Persona { IdPersona = 2, Nombre = "Martina Gómez",  DniCuit = "38.987.654", Telefono = "351-5550102", Email = "vendedor@bar.com" },
-                new Persona { IdPersona = 3, Nombre = "Jose Hernandez",   DniCuit = "41.222.333", Telefono = "351-5550103", Email = "mesero@bar.com" },
-                new Persona { IdPersona = 4, Nombre = "Consumidor Final" },
-                new Persona { IdPersona = 5, Nombre = "Sofía Ramírez",  DniCuit = "37.444.555", Telefono = "351-5550104", Email = "sofia@mail.com" },
-                new Persona { IdPersona = 6, Nombre = "Bar El Ancla SRL", DniCuit = "30-71234567-9", Telefono = "351-5550105", Email = "compras@elancla.com" },
-                new Persona { IdPersona = 7, Nombre = "Diego Ferrari", DniCuit = "35.666.777", Telefono = "351-5550106", Email = "gerente@bar.com" }
+                new Persona { IdPersona = 1, Nombre = "Nazareno", Apellido = "Villalba",  DniCuit = "40.123.456",   Telefono = "351-5550101", Email = "nazareno.villalba@gmail.com" },
+                new Persona { IdPersona = 2, Nombre = "Martina",  Apellido = "Gómez",     DniCuit = "38.987.654",   Telefono = "351-5550102", Email = "martina.gomez@gmail.com" },
+                new Persona { IdPersona = 3, Nombre = "Jose",     Apellido = "Hernandez", DniCuit = "41.222.333",   Telefono = "351-5550103", Email = "jose.hernandez@gmail.com" },
+                new Persona { IdPersona = 4, Nombre = "Consumidor", Apellido = "Final",   DniCuit = "00.000.000" },
+                new Persona { IdPersona = 5, Nombre = "Sofía",    Apellido = "Ramírez",   DniCuit = "37.444.555",   Telefono = "351-5550104", Email = "sofia@mail.com" },
+                new Persona { IdPersona = 6, Nombre = "Bar El Ancla", Apellido = "S.R.L.", DniCuit = "30-71234567-9", Telefono = "351-5550105", Email = "compras@elancla.com" },
+                new Persona { IdPersona = 7, Nombre = "Diego",    Apellido = "Ferrari",   DniCuit = "35.666.777",   Telefono = "351-5550106", Email = "diego.ferrari@gmail.com" },
+                new Persona { IdPersona = 8, Nombre = "Valentina", Apellido = "Suárez",   DniCuit = "42.888.999",   Telefono = "351-5550107", Email = "valen.suarez@gmail.com" }
             });
 
             // Las claves se hashean igual que lo hará el alta real de usuarios (RF-09).
+            // El correo de trabajo es el nombre de usuario con el que se entra al sistema.
             Usuarios.AddRange(new[]
             {
-                new Usuario { IdUsuario = 1, IdPersona = 1, IdRol = 1, Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
-                new Usuario { IdUsuario = 2, IdPersona = 2, IdRol = 2, Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
-                new Usuario { IdUsuario = 3, IdPersona = 3, IdRol = 3, Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
-                new Usuario { IdUsuario = 4, IdPersona = 7, IdRol = 4, Clave = SeguridadHelper.GenerarHash(ClaveDemo) }
+                new Usuario { IdUsuario = 1, IdPersona = 1, IdRol = 1, Email = "admin@bar.com",    Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
+                new Usuario { IdUsuario = 2, IdPersona = 2, IdRol = 2, Email = "vendedor@bar.com", Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
+                new Usuario { IdUsuario = 3, IdPersona = 3, IdRol = 3, Email = "mesero@bar.com",   Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
+                new Usuario { IdUsuario = 4, IdPersona = 7, IdRol = 4, Email = "gerente@bar.com",  Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
+                new Usuario { IdUsuario = 5, IdPersona = 8, IdRol = 3, Email = "valentina@bar.com", Clave = SeguridadHelper.GenerarHash(ClaveDemo) }
             });
 
             Clientes.AddRange(new[]
@@ -124,12 +129,12 @@ namespace SistemaGestionBar.Data
             // Una sola barra: la atiende el barman, por eso no lleva mesero (RF-02).
             Ubicaciones.AddRange(new[]
             {
-                new Ubicacion { IdUbicacion = 1, NombreUbicacion = "Mesa 1", Capacidad = 4, Tipo = TipoUbicacion.Mesa,  Estado = EstadoUbicacion.Libre },
-                new Ubicacion { IdUbicacion = 2, NombreUbicacion = "Mesa 2", Capacidad = 4, Tipo = TipoUbicacion.Mesa,  Estado = EstadoUbicacion.Libre },
-                new Ubicacion { IdUbicacion = 3, NombreUbicacion = "Mesa 3", Capacidad = 6, Tipo = TipoUbicacion.Mesa,  Estado = EstadoUbicacion.Ocupada },
-                new Ubicacion { IdUbicacion = 4, NombreUbicacion = "Mesa 4", Capacidad = 2, Tipo = TipoUbicacion.Mesa,  Estado = EstadoUbicacion.Libre },
-                new Ubicacion { IdUbicacion = 5, NombreUbicacion = "Mesa 5", Capacidad = 6, Tipo = TipoUbicacion.Mesa,  Estado = EstadoUbicacion.Libre },
-                new Ubicacion { IdUbicacion = 6, NombreUbicacion = "Barra",  Capacidad = 8, Tipo = TipoUbicacion.Barra, Estado = EstadoUbicacion.Libre }
+                new Ubicacion { IdUbicacion = 1, NombreUbicacion = "Mesa 1", Capacidad = 4, Tipo = TipoUbicacion.Mesa },
+                new Ubicacion { IdUbicacion = 2, NombreUbicacion = "Mesa 2", Capacidad = 4, Tipo = TipoUbicacion.Mesa },
+                new Ubicacion { IdUbicacion = 3, NombreUbicacion = "Mesa 3", Capacidad = 6, Tipo = TipoUbicacion.Mesa },
+                new Ubicacion { IdUbicacion = 4, NombreUbicacion = "Mesa 4", Capacidad = 2, Tipo = TipoUbicacion.Mesa },
+                new Ubicacion { IdUbicacion = 5, NombreUbicacion = "Mesa 5", Capacidad = 6, Tipo = TipoUbicacion.Mesa },
+                new Ubicacion { IdUbicacion = 6, NombreUbicacion = "Barra",  Capacidad = 8, Tipo = TipoUbicacion.Barra }
             });
         }
 
@@ -268,6 +273,120 @@ namespace SistemaGestionBar.Data
                 receta.Ingrediente = Ingredientes.First(i => i.IdIngrediente == receta.IdIngrediente);
                 receta.Producto.Ingredientes.Add(receta);
             }
+        }
+
+        // ---------------------------------------------------------------
+        // Venta + Venta_Detalle + Factura: una semana de operación del bar.
+        //
+        // Sin esto, el historial de ventas y los indicadores del resumen arrancan
+        // vacíos y no hay forma de ver funcionar la sección Ventas ni las facturas.
+        //
+        // Dos decisiones deliberadas:
+        //  - Las ventas se siembran COMO DATOS, no llamando a RegistrarVenta: son ventas
+        //    que ya ocurrieron, así que no vuelven a descontar stock. El stock cargado
+        //    arriba ya es el que quedó después de estas ventas.
+        //  - El precio del renglón sale del catálogo actual. En producción sería el precio
+        //    del día de la venta; en una semilla, mantener dos precios sería ruido.
+        // ---------------------------------------------------------------
+        private void CargarHistorialDeVentas()
+        {
+            int idVenta = 1;
+            int idDetalle = 1;
+            int idFactura = 1;
+
+            void Registrar(
+                int diasAtras, int hora, int minuto,
+                int idCajero, int idCliente, int idMetodoPago,
+                ModalidadConsumo modalidad, int? idUbicacion, int? idMesero,
+                params (int IdProducto, int Cantidad)[] renglones)
+            {
+                var fecha = DateTime.Today.AddDays(-diasAtras).AddHours(hora).AddMinutes(minuto);
+
+                var venta = new Venta
+                {
+                    IdVenta = idVenta++,
+                    FechaHora = fecha,
+                    EstadoVenta = EstadoVenta.Confirmada,
+                    ModalidadConsumo = modalidad,
+                    IdCajero = idCajero,
+                    IdMesero = idMesero,
+                    IdUbicacion = idUbicacion,
+                    IdCliente = idCliente,
+                    IdMetodoPago = idMetodoPago,
+                    FechaCreacion = fecha,
+                    UsuarioModificacion = idCajero,
+                    Cajero = Usuarios.First(u => u.IdUsuario == idCajero),
+                    Mesero = idMesero is null ? null : Usuarios.First(u => u.IdUsuario == idMesero),
+                    Ubicacion = idUbicacion is null ? null : Ubicaciones.First(u => u.IdUbicacion == idUbicacion),
+                    Cliente = Clientes.First(c => c.IdCliente == idCliente),
+                    MetodoPago = MetodosPago.First(m => m.IdMetodoPago == idMetodoPago)
+                };
+
+                foreach (var (idProducto, cantidad) in renglones)
+                {
+                    var producto = Productos.First(p => p.IdProducto == idProducto);
+                    var detalle = new VentaDetalle
+                    {
+                        IdVentaDetalle = idDetalle++,
+                        IdVenta = venta.IdVenta,
+                        IdProducto = producto.IdProducto,
+                        Cantidad = cantidad,
+                        PrecioUnitario = producto.Precio,
+                        Venta = venta,
+                        Producto = producto
+                    };
+                    detalle.RecalcularSubtotal();
+                    venta.Detalles.Add(detalle);
+                }
+
+                Ventas.Add(venta);
+
+                // Cada venta confirmada tiene su comprobante, igual que las que se
+                // cobran desde el punto de venta.
+                var factura = new Factura
+                {
+                    IdFactura = idFactura,
+                    IdVenta = venta.IdVenta,
+                    Numero = $"F-{idFactura:0000}",
+                    FechaEmision = fecha,
+                    Importe = venta.Total,
+                    ClienteNombre = venta.Cliente.NombreMostrado,
+                    CajeroNombre = venta.Cajero.NombreCompleto,
+                    FechaCreacion = fecha,
+                    UsuarioModificacion = idCajero,
+                    Venta = venta
+                };
+
+                int idLinea = 1;
+                foreach (var detalle in venta.Detalles)
+                {
+                    factura.Lineas.Add(new FacturaLinea
+                    {
+                        IdFacturaLinea = idLinea++,
+                        IdFactura = factura.IdFactura,
+                        NombreProducto = detalle.Producto.Nombre,
+                        Cantidad = detalle.Cantidad,
+                        PrecioUnitario = detalle.PrecioUnitario
+                    });
+                }
+
+                Facturas.Add(factura);
+                idFactura++;
+            }
+
+            //        días  hh  mm  cajero cliente pago  modalidad                  ubic  mesero  renglones
+            Registrar(6, 21, 15, 2, 1, 1, ModalidadConsumo.Local, 1, 3, (4, 2), (1, 1));
+            Registrar(6, 22, 40, 3, 2, 2, ModalidadConsumo.Local, 3, 3, (7, 3), (8, 1));
+            Registrar(5, 20, 5, 2, 1, 4, ModalidadConsumo.ParaLlevar, null, null, (10, 2), (11, 1));
+            Registrar(4, 23, 10, 3, 3, 3, ModalidadConsumo.Local, 6, null, (6, 2), (13, 1));
+            Registrar(3, 19, 45, 2, 1, 1, ModalidadConsumo.Local, 2, 5, (9, 2), (5, 1));
+            Registrar(3, 22, 20, 5, 2, 2, ModalidadConsumo.Local, 5, 5, (4, 1), (2, 2));
+            Registrar(2, 21, 0, 2, 1, 1, ModalidadConsumo.Local, 6, null, (7, 2));
+            Registrar(2, 23, 30, 3, 1, 4, ModalidadConsumo.ParaLlevar, null, null, (1, 4));
+            Registrar(1, 20, 30, 2, 2, 3, ModalidadConsumo.Local, 4, 3, (8, 2), (6, 1));
+            Registrar(1, 22, 50, 5, 1, 1, ModalidadConsumo.Local, 1, 5, (5, 2), (10, 1));
+            Registrar(0, 20, 15, 2, 1, 2, ModalidadConsumo.Local, 2, 3, (4, 2), (9, 1));
+            Registrar(0, 21, 40, 3, 3, 4, ModalidadConsumo.Local, 6, null, (12, 1), (11, 2));
         }
     }
 }

@@ -7,7 +7,15 @@
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminParametrosViewModel}"
-             d:DesignHeight="620" d:DesignWidth="1050">
+             d:DesignHeight="700" d:DesignWidth="1180">
+
+    <UserControl.Resources>
+        <!-- Encabezado repetido de cada tarjeta paramétrica: chip de color con el icono,
+             título y bajada. Definido una vez porque las tres tarjetas son iguales. -->
+        <Style x:Key="TituloTarjeta" TargetType="TextBlock" BasedOn="{StaticResource TituloEnLinea}">
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -16,17 +24,21 @@
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Style="{DynamicResource BarraMensaje}">
-            <TextBlock Style="{DynamicResource TextoMensaje}" Text="{Binding Mensaje}" />
+            <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Style="{DynamicResource IconoMensaje}" />
+                <TextBlock Style="{DynamicResource TextoMensaje}" Text="{Binding Mensaje}" />
+            </StackPanel>
         </Border>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="1.4*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="1.35*" />
             </Grid.ColumnDefinitions>
 
             <!-- ============ CATEGORIAS ============ -->
-            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,14,0">
+            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -34,27 +46,37 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Categorías" Style="{DynamicResource TituloPanel}" />
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="#EDE7FA">
+                            <materialDesign:PackIcon Kind="ShapeOutline" Width="18" Height="18" Foreground="#5B3A9E"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Categorías" Style="{DynamicResource TituloTarjeta}" />
+                            <TextBlock Text="Agrupan el catálogo" Style="{DynamicResource RotuloIndicador}" Margin="0" />
+                        </StackPanel>
+                    </StackPanel>
 
                     <DataGrid Grid.Row="1" Style="{DynamicResource GrillaEditable}"
                               ItemsSource="{Binding Categorias}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Nombre" Binding="{Binding NombreCategoria, UpdateSourceTrigger=PropertyChanged}" Width="*" />
-                            <DataGridTemplateColumn Width="80" IsReadOnly="True">
+                            <DataGridTextColumn Header="NOMBRE" Width="*"
+                                                Binding="{Binding NombreCategoria, UpdateSourceTrigger=PropertyChanged}" />
+                            <DataGridTemplateColumn Width="78" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="#2E7D32" ToolTip="Guardar"
+                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="{DynamicResource Exito}" ToolTip="Guardar"
                                                     Command="{Binding DataContext.GuardarCategoriaCommand,
                                                                       RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                                     CommandParameter="{Binding}">
-                                                <materialDesign:PackIcon Kind="ContentSave" Width="15" Height="15" />
+                                                <materialDesign:PackIcon Kind="ContentSaveOutline" Width="15" Height="15" />
                                             </Button>
-                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="#C62828" ToolTip="Eliminar"
+                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="{DynamicResource Peligro}" ToolTip="Eliminar"
                                                     Command="{Binding DataContext.EliminarCategoriaCommand,
                                                                       RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                                     CommandParameter="{Binding}">
-                                                <materialDesign:PackIcon Kind="DeleteOutline" Width="15" Height="15" />
+                                                <materialDesign:PackIcon Kind="TrashCanOutline" Width="15" Height="15" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -63,13 +85,18 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <Button Grid.Row="2" Style="{DynamicResource BotonSecundario}" Content="Agregar categoría"
-                            Margin="0,12,0,0" Command="{Binding AgregarCategoriaCommand}" />
+                    <Button Grid.Row="2" Style="{DynamicResource BotonSecundario}" Margin="0,14,0,0"
+                            Command="{Binding AgregarCategoriaCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Width="15" Height="15" VerticalAlignment="Center" />
+                            <TextBlock Text="Agregar categoría" Margin="7,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
             <!-- ============ METODOS DE PAGO ============ -->
-            <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" Margin="0,0,14,0">
+            <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -77,27 +104,37 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Text="Métodos de pago" Style="{DynamicResource TituloPanel}" />
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="{DynamicResource ExitoSuave}">
+                            <materialDesign:PackIcon Kind="CreditCardOutline" Width="18" Height="18" Foreground="#17703F"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Métodos de pago" Style="{DynamicResource TituloTarjeta}" />
+                            <TextBlock Text="Formas de cobro del local" Style="{DynamicResource RotuloIndicador}" Margin="0" />
+                        </StackPanel>
+                    </StackPanel>
 
                     <DataGrid Grid.Row="1" Style="{DynamicResource GrillaEditable}"
                               ItemsSource="{Binding MetodosPago}">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Nombre" Binding="{Binding NombreMetodo, UpdateSourceTrigger=PropertyChanged}" Width="*" />
-                            <DataGridTemplateColumn Width="80" IsReadOnly="True">
+                            <DataGridTextColumn Header="NOMBRE" Width="*"
+                                                Binding="{Binding NombreMetodo, UpdateSourceTrigger=PropertyChanged}" />
+                            <DataGridTemplateColumn Width="78" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
-                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="#2E7D32" ToolTip="Guardar"
+                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="{DynamicResource Exito}" ToolTip="Guardar"
                                                     Command="{Binding DataContext.GuardarMetodoCommand,
                                                                       RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                                     CommandParameter="{Binding}">
-                                                <materialDesign:PackIcon Kind="ContentSave" Width="15" Height="15" />
+                                                <materialDesign:PackIcon Kind="ContentSaveOutline" Width="15" Height="15" />
                                             </Button>
-                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="#C62828" ToolTip="Eliminar"
+                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="{DynamicResource Peligro}" ToolTip="Eliminar"
                                                     Command="{Binding DataContext.EliminarMetodoCommand,
                                                                       RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
                                                     CommandParameter="{Binding}">
-                                                <materialDesign:PackIcon Kind="DeleteOutline" Width="15" Height="15" />
+                                                <materialDesign:PackIcon Kind="TrashCanOutline" Width="15" Height="15" />
                                             </Button>
                                         </StackPanel>
                                     </DataTemplate>
@@ -106,12 +143,80 @@
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <Button Grid.Row="2" Style="{DynamicResource BotonSecundario}" Content="Agregar método"
-                            Margin="0,12,0,0" Command="{Binding AgregarMetodoCommand}" />
+                    <Button Grid.Row="2" Style="{DynamicResource BotonSecundario}" Margin="0,14,0,0"
+                            Command="{Binding AgregarMetodoCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Width="15" Height="15" VerticalAlignment="Center" />
+                            <TextBlock Text="Agregar método" Margin="7,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
-            <!-- Ubicaciones eliminado: la gestión se mueve fuera de Parámetros -->
+            <!-- ============ UBICACIONES ============ -->
+            <Border Grid.Column="2" Style="{DynamicResource PanelAdmin}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="{DynamicResource AvisoSuave}">
+                            <materialDesign:PackIcon Kind="TableChair" Width="18" Height="18" Foreground="{DynamicResource Aviso}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Ubicaciones" Style="{DynamicResource TituloTarjeta}" />
+                            <TextBlock Text="En la barra la venta va sin mesero" Style="{DynamicResource RotuloIndicador}" Margin="0" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <DataGrid Grid.Row="1" Style="{DynamicResource GrillaEditable}"
+                              ItemsSource="{Binding Ubicaciones}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="NOMBRE" Width="*"
+                                                Binding="{Binding NombreUbicacion, UpdateSourceTrigger=PropertyChanged}" />
+                            <DataGridTextColumn Header="CAPACIDAD" Width="95"
+                                                Binding="{Binding Capacidad, UpdateSourceTrigger=PropertyChanged}" />
+                            <!-- Estatica a proposito: un DataGridComboBoxColumn no forma parte del
+                                 arbol visual, asi que no hereda el DataContext. -->
+                            <DataGridComboBoxColumn Header="TIPO" Width="100"
+                                                    SelectedItemBinding="{Binding Tipo, UpdateSourceTrigger=PropertyChanged}"
+                                                    ItemsSource="{Binding Source={x:Static vm:AdminParametrosViewModel.TodosLosTipos}}" />
+                            <DataGridTemplateColumn Width="78" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="{DynamicResource Exito}" ToolTip="Guardar"
+                                                    Command="{Binding DataContext.GuardarUbicacionCommand,
+                                                                      RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                    CommandParameter="{Binding}">
+                                                <materialDesign:PackIcon Kind="ContentSaveOutline" Width="15" Height="15" />
+                                            </Button>
+                                            <Button Style="{DynamicResource BotonIconoFila}" Foreground="{DynamicResource Peligro}" ToolTip="Eliminar"
+                                                    Command="{Binding DataContext.EliminarUbicacionCommand,
+                                                                      RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                    CommandParameter="{Binding}">
+                                                <materialDesign:PackIcon Kind="TrashCanOutline" Width="15" Height="15" />
+                                            </Button>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <Button Grid.Row="2" Style="{DynamicResource BotonSecundario}" Margin="0,14,0,0"
+                            Command="{Binding AgregarUbicacionCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Width="15" Height="15" VerticalAlignment="Center" />
+                            <TextBlock Text="Agregar ubicación" Margin="7,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

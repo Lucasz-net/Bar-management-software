@@ -33,15 +33,15 @@ namespace SistemaGestionBar.ViewModels.Admin
             Secciones.Add(new AdminProductosViewModel(repositorio, dialogo));
             Secciones.Add(new AdminInventarioViewModel(repositorio, dialogo));
 
+            // Personas y cuentas de acceso van juntas: son dos casilleros de la misma
+            // ficha, y separarlas obligaba a ir y volver entre pantallas.
             if (esAdministrador)
-                Secciones.Add(new AdminUsuariosViewModel(repositorio, dialogo));
+                Secciones.Add(new AdminPersonalViewModel(repositorio, dialogo));
 
             Secciones.Add(new AdminVentasViewModel(repositorio, dialogo));
 
             if (esAdministrador)
                 Secciones.Add(new AdminParametrosViewModel(repositorio, dialogo));
-
-            Secciones.Add(new AdminReportesViewModel(repositorio, dialogo, sesion));
 
             SeleccionarSeccionCommand = new RelayCommand<SeccionAdminViewModel>(SeleccionarSeccion);
             CerrarSesionCommand = new RelayCommand(() => CierreSesionSolicitado?.Invoke(this, EventArgs.Empty));

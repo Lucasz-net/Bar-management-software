@@ -55,17 +55,14 @@
             <DataTemplate DataType="{x:Type vmAdmin:AdminInventarioViewModel}">
                 <viewsAdmin:AdminInventarioView />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vmAdmin:AdminUsuariosViewModel}">
-                <viewsAdmin:AdminUsuariosView />
+            <DataTemplate DataType="{x:Type vmAdmin:AdminPersonalViewModel}">
+                <viewsAdmin:AdminPersonalView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vmAdmin:AdminVentasViewModel}">
                 <viewsAdmin:AdminVentasView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vmAdmin:AdminParametrosViewModel}">
                 <viewsAdmin:AdminParametrosView />
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type vmAdmin:AdminReportesViewModel}">
-                <viewsAdmin:AdminReportesView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>

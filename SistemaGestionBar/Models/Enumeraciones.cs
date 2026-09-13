@@ -14,13 +14,6 @@ namespace SistemaGestionBar.Models
         Anulada
     }
 
-    public enum EstadoUbicacion
-    {
-        Libre,
-        Ocupada,
-        Reservada
-    }
-
     /// <summary>
     /// EXTENSIÓN AL DER: distingue mesa de barra. Hace falta porque en la barra
     /// atiende el barman y la venta NO lleva mesero, mientras que en mesa sí.
@@ -31,13 +24,5 @@ namespace SistemaGestionBar.Models
     {
         Mesa,
         Barra
-    }
-
-    public enum TipoReporte
-    {
-        VentasPorPeriodo,
-        ProductosMasVendidos,
-        StockCritico,
-        CierreDeCaja
     }
 }

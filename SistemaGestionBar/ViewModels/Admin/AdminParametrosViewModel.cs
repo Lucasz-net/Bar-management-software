@@ -47,7 +47,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         /// de instancia. La fuente estática es la forma estándar de alimentarlo.
         /// </summary>
         public static IReadOnlyList<TipoUbicacion> TodosLosTipos { get; } = Enum.GetValues<TipoUbicacion>();
-        public static IReadOnlyList<EstadoUbicacion> TodosLosEstados { get; } = Enum.GetValues<EstadoUbicacion>();
 
         public ICommand AgregarCategoriaCommand { get; }
         public ICommand GuardarCategoriaCommand { get; }
@@ -97,8 +96,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             {
                 NombreUbicacion = $"Mesa {Ubicaciones.Count(u => u.Tipo == TipoUbicacion.Mesa) + 1}",
                 Capacidad = 4,
-                Tipo = TipoUbicacion.Mesa,
-                Estado = EstadoUbicacion.Libre
+                Tipo = TipoUbicacion.Mesa
             });
         }
 

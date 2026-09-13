@@ -13,7 +13,10 @@ namespace SistemaGestionBar.Services
     /// </summary>
     public interface IRepositorioBar
     {
-        /// <summary>RF-09. Devuelve null si el email no existe o la clave no coincide.</summary>
+        /// <summary>
+        /// RF-09. El usuario entra con su CORREO DE TRABAJO (Usuario.Email), no con el
+        /// correo personal de Persona. Devuelve null si no existe o la clave no coincide.
+        /// </summary>
         Usuario? Autenticar(string email, string clave);
 
         IReadOnlyList<Categoria> ObtenerCategorias();
@@ -22,8 +25,11 @@ namespace SistemaGestionBar.Services
         IReadOnlyList<Ubicacion> ObtenerUbicaciones();
         IReadOnlyList<Cliente> ObtenerClientes();
 
-        /// <summary>RF-02. Usuarios con rol Mesero, para asignar quién tomó el pedido.</summary>
-        IReadOnlyList<Usuario> ObtenerMeseros();
+        /// <summary>
+        /// RF-02. Personal de salón habilitado para figurar como mesero de una venta.
+        /// Incluye vendedores y meseros: las dos cuentas hacen el mismo trabajo.
+        /// </summary>
+        IReadOnlyList<Usuario> ObtenerPersonalDeAtencion();
 
         /// <summary>
         /// Cuántas unidades del producto se pueden vender ahora mismo.
@@ -35,8 +41,8 @@ namespace SistemaGestionBar.Services
         IReadOnlyList<AlertaStock> ObtenerAlertasStock();
 
         /// <summary>
-        /// RF-01 y RF-07. Confirma la venta, la numera, la persiste y descuenta el stock.
-        /// Devuelve el resultado con el detalle del error si la validación falla.
+        /// RF-01 y RF-07. Confirma la venta, la numera, la persiste, descuenta el stock
+        /// y emite su factura. Devuelve el detalle del error si la validación falla.
         /// </summary>
         ResultadoOperacion RegistrarVenta(Venta venta);
 
@@ -44,8 +50,9 @@ namespace SistemaGestionBar.Services
         // Facturación
         // ---------------------------------------------------------------
         IReadOnlyList<Factura> ObtenerFacturas();
-        IReadOnlyList<Factura> ObtenerFacturasPorVenta(int idVenta);
-        ResultadoOperacion RegistrarFactura(Factura factura);
+
+        /// <summary>Factura de una venta, o null si esa venta no llegó a emitir una.</summary>
+        Factura? ObtenerFacturaDeVenta(int idVenta);
 
         /// <summary>Cantidad de ventas confirmadas del día, para el indicador del encabezado.</summary>
         int ContarVentasDelDia();
@@ -57,9 +64,17 @@ namespace SistemaGestionBar.Services
         // Consultas del módulo de administración
         // ---------------------------------------------------------------
         IReadOnlyList<Ingrediente> ObtenerIngredientes();
+        IReadOnlyList<Persona> ObtenerPersonas();
+
+        /// <summary>
+        /// Busca una persona por su DNI/CUIT, que es su dato identificatorio: es lo que
+        /// permite dar de alta un empleado sin volver a cargar los datos de alguien que
+        /// ya está en el padrón. Devuelve null si no existe.
+        /// </summary>
+        Persona? BuscarPersonaPorDocumento(string? dniCuit);
+
         IReadOnlyList<Usuario> ObtenerUsuarios();
         IReadOnlyList<Rol> ObtenerRoles();
-        IReadOnlyList<Reporte> ObtenerReportes();
 
         /// <summary>Todas las ubicaciones, incluidas las reservadas (el POS filtra, el ABM no).</summary>
         IReadOnlyList<Ubicacion> ObtenerTodasLasUbicaciones();
@@ -80,7 +95,17 @@ namespace SistemaGestionBar.Services
         ResultadoOperacion GuardarIngrediente(Ingrediente ingrediente);
         ResultadoOperacion EliminarIngrediente(int idIngrediente);
 
-        /// <summary>Alta o edición de un empleado: escribe Persona y Usuario juntos (RF-10).</summary>
+        /// <summary>
+        /// Alta o edición del padrón de personas (RF-10). <paramref name="esCliente"/> crea
+        /// o quita la fila de Cliente: es lo que habilita a la persona en el punto de venta.
+        /// </summary>
+        ResultadoOperacion GuardarPersona(Persona persona, bool esCliente);
+        ResultadoOperacion EliminarPersona(int idPersona);
+
+        /// <summary>
+        /// Alta o edición de la CUENTA de un empleado sobre una persona que ya existe.
+        /// No escribe datos personales: esos se editan en el padrón de personas.
+        /// </summary>
         ResultadoOperacion GuardarUsuario(Usuario usuario, string? claveNueva);
         ResultadoOperacion EliminarUsuario(int idUsuario);
 
@@ -92,9 +117,6 @@ namespace SistemaGestionBar.Services
 
         ResultadoOperacion GuardarUbicacion(Ubicacion ubicacion);
         ResultadoOperacion EliminarUbicacion(int idUbicacion);
-
-        /// <summary>RF-14: deja constancia del informe generado.</summary>
-        ResultadoOperacion RegistrarReporte(Reporte reporte);
     }
 
     /// <summary>Resultado de una operación de negocio: éxito o mensaje de error para la UI.</summary>

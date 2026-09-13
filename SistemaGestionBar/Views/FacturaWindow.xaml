@@ -3,71 +3,123 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels"
         mc:Ignorable="d"
-        Title="Factura" Height="600" Width="800" WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
+        d:DataContext="{d:DesignInstance Type=vm:FacturaViewModel}"
+        Title="{Binding Titulo}" Height="620" Width="760"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
+        Background="#EEF2F7">
 
-    <Grid Background="#F7F9FB" Margin="12">
-        <Border Background="White" CornerRadius="8" Padding="18" BorderBrush="#E6E9EE" BorderThickness="1">
-            <DockPanel LastChildFill="True">
-                <StackPanel DockPanel.Dock="Top">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <StackPanel Orientation="Vertical">
-                            <TextBlock Text="Factura" FontSize="20" FontWeight="Bold" />
-                            <TextBlock Text="Sistema Gestión Bar" Foreground="#374151" />
-                        </StackPanel>
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Margin="0,0,0,0">
-                            <TextBlock Text="{Binding Factura.Numero}" FontWeight="Bold" HorizontalAlignment="Right" />
-                            <TextBlock Text="{Binding Factura.FechaEmision, StringFormat={}{0:dd/MM/yyyy HH:mm}}" HorizontalAlignment="Right" />
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- x:Name porque es justo lo que se manda a la impresora: el comprobante,
+             sin los botones de la ventana. -->
+        <Border x:Name="Comprobante" Grid.Row="0" Style="{DynamicResource PanelAdmin}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Encabezado -->
+                <Grid Grid.Row="0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="GlassCocktail" Width="26" Height="26"
+                                                 Foreground="#1565C0" VerticalAlignment="Center" />
+                        <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Sistema de Gestión de Bar" FontSize="15" FontWeight="Bold" Foreground="#2B3445" />
+                            <TextBlock Text="Comprobante de venta" Style="{DynamicResource RotuloIndicador}" Margin="0" />
                         </StackPanel>
                     </StackPanel>
 
-                    <Separator Margin="0,10" />
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Factura.Numero}" FontSize="20" FontWeight="Bold"
+                                   Foreground="#1565C0" HorizontalAlignment="Right" />
+                        <TextBlock Style="{DynamicResource RotuloIndicador}" HorizontalAlignment="Right"
+                                   Text="{Binding Factura.FechaEmision, StringFormat={}{0:dd/MM/yyyy HH:mm}}" />
+                    </StackPanel>
+                </Grid>
 
-                    <Grid Margin="0,6">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="200" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <TextBlock Text="Cliente:" FontWeight="SemiBold" />
-                            <TextBlock Text="{Binding Factura.ClienteNombre}" />
+                <Border Grid.Row="1" Height="1" Background="#E4E8F0" Margin="0,16" />
+
+                <!-- Datos de la operación -->
+                <Grid Grid.Row="2" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="CLIENTE" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding Factura.ClienteNombre, TargetNullValue='Consumidor Final'}"
+                                   FontSize="13.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="ATENDIÓ" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding Factura.CajeroNombre, TargetNullValue='—'}"
+                                   FontSize="13.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="VENTA" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock FontSize="13.5" FontWeight="SemiBold" Foreground="#2B3445"
+                                   HorizontalAlignment="Right">
+                            <Run Text="#" /><Run Text="{Binding Factura.IdVenta, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Renglones -->
+                <DataGrid Grid.Row="3" Style="{DynamicResource GrillaAdmin}"
+                          ItemsSource="{Binding Factura.Lineas}" RowHeight="34">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*" />
+                        <DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}" Width="70" />
+                        <DataGridTextColumn Header="P. unitario" Binding="{Binding PrecioUnitario, StringFormat={}{0:C0}}" Width="110" />
+                        <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat={}{0:C0}}" Width="120" />
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Total -->
+                <Border Grid.Row="4" Background="#F7F9FC" CornerRadius="10" Padding="16,12" Margin="0,16,0,0">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="13" Foreground="#2B3445" />
+                            <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="10,0,0,0">
+                                <Run Text="{Binding Factura.CantidadRenglones, Mode=OneWay}" />
+                                <Run Text="renglón(es)" />
+                            </TextBlock>
                         </StackPanel>
-                        <StackPanel Grid.Column="1">
-                            <TextBlock Text="Importe:" FontWeight="SemiBold" HorizontalAlignment="Right" />
-                            <TextBlock Text="{Binding Factura.Importe, StringFormat={}{0:C0}}" HorizontalAlignment="Right" />
-                        </StackPanel>
+                        <TextBlock Text="{Binding Factura.Importe, StringFormat={}{0:C0}}"
+                                   FontWeight="Bold" FontSize="22" Foreground="#1565C0"
+                                   HorizontalAlignment="Right" />
                     </Grid>
-
-                    <Border Background="#FAFAFC" CornerRadius="6" Padding="8" Margin="0,12,0,0">
-                        <DataGrid ItemsSource="{Binding Factura.Lineas}" AutoGenerateColumns="False" HeadersVisibility="Column" CanUserAddRows="False" CanUserResizeRows="False" IsReadOnly="True">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*" />
-                                <DataGridTextColumn Header="Cant." Binding="{Binding Cantidad}" Width="70" />
-                                <DataGridTextColumn Header="P. unit." Binding="{Binding PrecioUnitario, StringFormat={}{0:C0}}" Width="90" />
-                                <DataGridTextColumn Header="Subtotal" Binding="{Binding Subtotal, StringFormat={}{0:C0}}" Width="110" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-
-                    <Grid Margin="0,12,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="200" />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="1">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <TextBlock Text="Total:" FontWeight="Bold" Margin="0,0,8,0" />
-                                <TextBlock Text="{Binding Factura.Importe, StringFormat={}{0:C0}}" FontWeight="Bold" />
-                            </StackPanel>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-
-                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-                    <Button Content="Imprimir" Width="100" Margin="0,0,8,0" Click="Imprimir_Click" />
-                    <Button Content="Cerrar" Width="100" Click="Cerrar_Click" />
-                </StackPanel>
-            </DockPanel>
+                </Border>
+            </Grid>
         </Border>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Style="{DynamicResource BotonSecundario}" Padding="18,0" Margin="0,0,8,0"
+                    Command="{Binding ImprimirCommand}" CommandParameter="{Binding ElementName=Comprobante}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="PrinterOutline" Width="16" Height="16" VerticalAlignment="Center" />
+                    <TextBlock Text="Imprimir" Margin="6,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Style="{DynamicResource BotonPrimario}" Content="Cerrar" Padding="24,0" IsCancel="True"
+                    Command="{Binding CerrarCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+        </StackPanel>
     </Grid>
 </Window>

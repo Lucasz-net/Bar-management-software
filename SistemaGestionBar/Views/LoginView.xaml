@@ -117,9 +117,10 @@
                 <!-- Informational box (kept for usability during design) -->
                 <Border Background="#F4F7FB" CornerRadius="10" Padding="12" Margin="0,18,0,0">
                     <StackPanel>
-                        <TextBlock Text="Usuarios de prueba" FontSize="11" FontWeight="Bold" Foreground="#7A8699" Margin="0,0,0,4"/>
-                        <TextBlock Text="admin@bar.com · vendedor@bar.com · mesero@bar.com" FontSize="11" Foreground="#7A8699"/>
-                        <TextBlock Text="Contraseña: 12345678" FontSize="11" Foreground="#7A8699"/>
+                        <TextBlock Text="Correos de trabajo de prueba" FontSize="11" FontWeight="Bold" Foreground="#7A8699" Margin="0,0,0,4"/>
+                        <TextBlock Text="admin@bar.com · gerente@bar.com" FontSize="11" Foreground="#7A8699"/>
+                        <TextBlock Text="vendedor@bar.com · mesero@bar.com · valentina@bar.com" FontSize="11" Foreground="#7A8699"/>
+                        <TextBlock Text="Contraseña: 12345678" FontSize="11" Foreground="#7A8699" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
             </StackPanel>

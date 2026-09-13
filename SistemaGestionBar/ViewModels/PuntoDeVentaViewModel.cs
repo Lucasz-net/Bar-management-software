@@ -43,7 +43,7 @@ namespace SistemaGestionBar.ViewModels
             Clientes = new ObservableCollection<Cliente>(_repositorio.ObtenerClientes());
             MetodosPago = new ObservableCollection<MetodoPago>(_repositorio.ObtenerMetodosPago());
             Ubicaciones = new ObservableCollection<Ubicacion>(_repositorio.ObtenerUbicaciones());
-            Meseros = new ObservableCollection<Usuario>(_repositorio.ObtenerMeseros());
+            Meseros = new ObservableCollection<Usuario>(_repositorio.ObtenerPersonalDeAtencion());
             AlertasStock = new ObservableCollection<AlertaStock>();
 
             // Valores por defecto: Consumidor Final (RF-05) y efectivo (RF-06).
@@ -277,6 +277,10 @@ namespace SistemaGestionBar.ViewModels
         public ObservableCollection<Cliente> Clientes { get; }
         public ObservableCollection<MetodoPago> MetodosPago { get; }
         public ObservableCollection<Ubicacion> Ubicaciones { get; }
+        /// <summary>
+        /// RF-02. Personal de salón que puede figurar como mesero de la venta:
+        /// vendedores y meseros, porque las dos cuentas hacen el mismo trabajo.
+        /// </summary>
         public ObservableCollection<Usuario> Meseros { get; }
 
         private bool _esConsumoLocal = true;
