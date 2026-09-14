@@ -126,9 +126,25 @@ namespace SistemaGestionBar.Services
         public static ResultadoOperacion Error(string mensaje) => new(false, mensaje);
     }
 
-    /// <summary>Fila de la alerta de inventario (RF-08).</summary>
-    public record AlertaStock(string Nombre, decimal Stock, decimal StockMinimo, string UnidadMedida)
+    /// <summary>
+    /// Fila de la alerta de inventario (RF-08).
+    ///
+    /// Lleva de dónde salió —qué tabla y qué fila— porque la alerta no es solo un aviso:
+    /// desde el resumen se puede ir a reponer ese ítem, y para eso hay que poder
+    /// encontrarlo. <paramref name="EsInsumo"/> distingue un Ingrediente (se repone en
+    /// Inventario) de un producto de venta directa (se repone en Productos).
+    /// </summary>
+    public record AlertaStock(
+        string Nombre,
+        decimal Stock,
+        decimal StockMinimo,
+        string UnidadMedida,
+        bool EsInsumo,
+        int Id)
     {
         public string Descripcion => $"{Nombre}: quedan {Stock:0.##} {UnidadMedida} (mínimo {StockMinimo:0.##})";
+
+        /// <summary>Dónde se repone: el rótulo del botón lo usa para no mentirle al usuario.</summary>
+        public string DondeSeRepone => EsInsumo ? "Inventario" : "Productos";
     }
 }

@@ -16,7 +16,7 @@ namespace SistemaGestionBar.ViewModels.Admin
     public class AdminParametrosViewModel : SeccionAdminViewModel
     {
         public AdminParametrosViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
-            : base(repositorio, dialogo, "Parámetros", "TuneVariant",
+            : base(repositorio, dialogo, DestinoAdmin.Parametros, "Parámetros", "TuneVariant",
                    "Categorías, métodos de pago y ubicaciones del local")
         {
             Categorias = new ObservableCollection<Categoria>();
@@ -104,7 +104,7 @@ namespace SistemaGestionBar.ViewModels.Admin
         {
             if (categoria.IdCategoria == 0) { Categorias.Remove(categoria); return; }
 
-            if (!Dialogo.Confirmar("Eliminar categoría", $"¿Eliminar \"{categoria.NombreCategoria}\"?"))
+            if (!ConfirmarEliminacion("la categoría", categoria.NombreCategoria))
                 return;
 
             if (Aplicar(Repositorio.EliminarCategoria(categoria.IdCategoria)))
@@ -115,7 +115,7 @@ namespace SistemaGestionBar.ViewModels.Admin
         {
             if (metodo.IdMetodoPago == 0) { MetodosPago.Remove(metodo); return; }
 
-            if (!Dialogo.Confirmar("Eliminar método de pago", $"¿Eliminar \"{metodo.NombreMetodo}\"?"))
+            if (!ConfirmarEliminacion("el método de pago", metodo.NombreMetodo))
                 return;
 
             if (Aplicar(Repositorio.EliminarMetodoPago(metodo.IdMetodoPago)))
@@ -126,7 +126,7 @@ namespace SistemaGestionBar.ViewModels.Admin
         {
             if (ubicacion.IdUbicacion == 0) { Ubicaciones.Remove(ubicacion); return; }
 
-            if (!Dialogo.Confirmar("Eliminar ubicación", $"¿Eliminar \"{ubicacion.NombreUbicacion}\"?"))
+            if (!ConfirmarEliminacion("la ubicación", ubicacion.NombreUbicacion))
                 return;
 
             if (Aplicar(Repositorio.EliminarUbicacion(ubicacion.IdUbicacion)))

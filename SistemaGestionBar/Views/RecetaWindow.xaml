@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:RecetaViewModel}"
         Title="Receta"
-        Width="480"
+        Width="520"
         SizeToContent="Height"
         MaxHeight="720"
         WindowStartupLocation="CenterOwner"
@@ -33,24 +33,24 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
                     <TextBlock Text="{Binding NombreProducto}"
-                               FontSize="20"
+                               FontSize="22"
                                FontWeight="Bold"
                                Foreground="#2B3445" />
                     <TextBlock Text="{Binding Categoria}"
-                               FontSize="12"
+                               FontSize="13"
                                Foreground="#8A93A5" />
                 </StackPanel>
             </StackPanel>
 
             <TextBlock Text="{Binding Descripcion}"
-                       FontSize="13"
+                       FontSize="14"
                        Foreground="#5A6577"
                        TextWrapping="Wrap"
                        Margin="0,14,0,0" />
 
             <!-- Ingredientes: vienen de Producto_Ingrediente -->
             <TextBlock Text="INGREDIENTES"
-                       FontSize="11"
+                       FontSize="12"
                        FontWeight="Bold"
                        Foreground="#8A93A5"
                        Margin="0,22,0,8" />
@@ -62,7 +62,7 @@
                             <StackPanel Orientation="Horizontal" Margin="0,3">
                                 <Ellipse Width="6" Height="6" Fill="#7B5BD6" VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding}"
-                                           FontSize="13"
+                                           FontSize="14"
                                            Foreground="#2B3445"
                                            TextWrapping="Wrap"
                                            Margin="10,0,0,0" />
@@ -74,14 +74,14 @@
 
             <!-- Preparacion paso a paso (RF-04) -->
             <TextBlock Text="PREPARACIÓN"
-                       FontSize="11"
+                       FontSize="12"
                        FontWeight="Bold"
                        Foreground="#8A93A5"
                        Margin="0,20,0,8" />
 
             <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto">
                 <TextBlock Text="{Binding Instrucciones}"
-                           FontSize="13"
+                           FontSize="14"
                            Foreground="#2B3445"
                            LineHeight="22"
                            TextWrapping="Wrap" />
@@ -91,7 +91,7 @@
                     Style="{DynamicResource MaterialDesignRaisedButton}"
                     materialDesign:ButtonAssist.CornerRadius="16"
                     Height="44"
-                    FontSize="13"
+                    FontSize="14"
                     FontWeight="Bold"
                     Background="#7B5BD6"
                     BorderBrush="#7B5BD6"

@@ -22,7 +22,7 @@ namespace SistemaGestionBar.ViewModels.Admin
     public class AdminPersonalViewModel : SeccionAdminViewModel
     {
         public AdminPersonalViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
-            : base(repositorio, dialogo, "Personas", "AccountGroupOutline",
+            : base(repositorio, dialogo, DestinoAdmin.Personas, "Personas", "AccountGroupOutline",
                    "Padrón de clientes y empleados, y las cuentas de acceso al sistema")
         {
             Personas = new ObservableCollection<Persona>();
@@ -30,8 +30,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             OpcionesRol = new ObservableCollection<OpcionFiltro<Rol?>>();
 
             NuevoCommand = new RelayCommand(Nuevo);
-            EditarCommand = new RelayCommand(Editar, () => Seleccionada is not null);
-            GuardarCommand = new RelayCommand(Guardar, () => EnEdicion && FormularioValido);
+            EditarCommand = new RelayCommand(Editar, () => Seleccionada is not null && !EnEdicion);
+            GuardarCommand = new RelayCommand(Guardar, () => EnEdicion);
             CancelarCommand = new RelayCommand(Cancelar, () => EnEdicion);
             EliminarCommand = new RelayCommand(Eliminar, () => Seleccionada is not null && !EnEdicion);
 
@@ -137,15 +137,47 @@ namespace SistemaGestionBar.ViewModels.Admin
         // Selección
         // ---------------------------------------------------------------
         private Persona? _seleccionada;
+
+        /// <summary>
+        /// Con la ficha abierta para editar la selección queda congelada: si se pudiera
+        /// mover, quedaría remarcada una fila que no es la que muestra el formulario.
+        /// </summary>
         public Persona? Seleccionada
         {
             get => _seleccionada;
             set
             {
-                if (SetProperty(ref _seleccionada, value) && !EnEdicion)
-                    CargarEnEditor(value);
+                if (EnEdicion)
+                {
+                    if (ReferenceEquals(_seleccionada, value))
+                        return;
+
+                    if (value is not null)
+                        Fallar("Terminá la edición —guardá o cancelá— antes de elegir otra persona.");
+
+                    // Vuelve a avisar la propiedad para que la grilla devuelva la
+                    // selección a donde estaba.
+                    OnPropertyChanged(nameof(Seleccionada));
+                    return;
+                }
+
+                EstablecerSeleccion(value);
             }
         }
+
+        /// <summary>Cambia la selección sin pasar por el candado: lo usa Recargar.</summary>
+        private void EstablecerSeleccion(Persona? persona)
+        {
+            if (!SetProperty(ref _seleccionada, persona, nameof(Seleccionada)))
+                return;
+
+            OnPropertyChanged(nameof(HaySeleccion));
+
+            if (!EnEdicion)
+                CargarEnEditor(persona);
+        }
+
+        public bool HaySeleccion => Seleccionada is not null;
 
         private bool _enEdicion;
         public bool EnEdicion
@@ -318,6 +350,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             _esAlta = false;
             _seleccionada = Personas.FirstOrDefault(p => p.IdPersona == encontrada.IdPersona) ?? encontrada;
             OnPropertyChanged(nameof(Seleccionada));
+            OnPropertyChanged(nameof(HaySeleccion));
             OnPropertyChanged(nameof(EsAlta));
 
             CargarEnEditor(_seleccionada);
@@ -354,7 +387,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             _vinculo ??= OpcionesVinculo[0];
             RefrescarVista();
 
-            Seleccionada = Personas.FirstOrDefault(p => p.IdPersona == idPrevio) ?? Personas.FirstOrDefault();
+            EstablecerSeleccion(Personas.FirstOrDefault(p => p.IdPersona == idPrevio) ?? Personas.FirstOrDefault());
         }
 
         private void CargarEnEditor(Persona? persona)
@@ -382,7 +415,9 @@ namespace SistemaGestionBar.ViewModels.Admin
                 OnPropertyChanged(propiedad);
             }
 
-            Revalidar();
+            // Ficha recién cargada: las reglas se calculan, pero nada se pinta de rojo
+            // hasta que el usuario toque un campo o apriete Guardar.
+            ReiniciarValidacion();
         }
 
         private void Nuevo()
@@ -392,8 +427,10 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(EsAlta));
             _seleccionada = null;
             OnPropertyChanged(nameof(Seleccionada));
+            OnPropertyChanged(nameof(HaySeleccion));
             CargarEnEditor(null);
             EnEdicion = true;
+            ReiniciarValidacion();
         }
 
         private void Editar()
@@ -406,6 +443,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(EsAlta));
             CargarEnEditor(Seleccionada);
             EnEdicion = true;
+            ReiniciarValidacion();
         }
 
         private void Cancelar()
@@ -419,6 +457,14 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void Guardar()
         {
+            // El botón está habilitado aunque falten datos: deshabilitado no explica QUÉ
+            // falta. Se aprieta, se marcan los campos y se dice cuántos hay que corregir.
+            if (!IntentarConfirmar())
+            {
+                Fallar(MensajeDeFormularioInvalido);
+                return;
+            }
+
             var persona = _esAlta ? new Persona() : Seleccionada;
             if (persona is null)
             {
@@ -426,11 +472,11 @@ namespace SistemaGestionBar.ViewModels.Admin
                 return;
             }
 
-            persona.DniCuit = DniCuit;
-            persona.Nombre = Nombre;
-            persona.Apellido = Apellido;
-            persona.Telefono = Telefono;
-            persona.Email = Email;
+            persona.DniCuit = DniCuit.Trim();
+            persona.Nombre = Nombre.Trim();
+            persona.Apellido = Apellido.Trim();
+            persona.Telefono = Telefono.Trim();
+            persona.Email = Email.Trim();
 
             if (!Aplicar(Repositorio.GuardarPersona(persona, EsCliente)))
                 return;
@@ -441,7 +487,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             _esAlta = false;
             OnPropertyChanged(nameof(EsAlta));
             Recargar();
-            Seleccionada = Personas.FirstOrDefault(p => p.IdPersona == persona.IdPersona);
+            EstablecerSeleccion(Personas.FirstOrDefault(p => p.IdPersona == persona.IdPersona));
 
             if (resultadoCuenta is not null)
                 Aplicar(resultadoCuenta);
@@ -460,7 +506,7 @@ namespace SistemaGestionBar.ViewModels.Admin
                 var aGuardar = cuenta ?? new Usuario();
                 aGuardar.IdPersona = persona.IdPersona;
                 aGuardar.IdRol = RolSeleccionado?.IdRol ?? 0;
-                aGuardar.Email = EmailTrabajo;
+                aGuardar.Email = EmailTrabajo.Trim();
 
                 return Repositorio.GuardarUsuario(aGuardar, ClaveNueva);
             }
@@ -473,11 +519,11 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (Seleccionada is null)
                 return;
 
-            string aviso = Seleccionada.EsEmpleado
-                ? $"{Seleccionada.NombreCompleto} tiene cuenta de acceso. Se dará de baja junto con su ficha."
-                : $"¿Eliminar a {Seleccionada.NombreCompleto} del padrón?";
+            string? aviso = Seleccionada.EsEmpleado
+                ? "Tiene cuenta de acceso al sistema: se da de baja junto con su ficha."
+                : null;
 
-            if (!Dialogo.Confirmar("Eliminar persona", aviso))
+            if (!ConfirmarEliminacion("la persona", Seleccionada.NombreCompleto, aviso))
                 return;
 
             // La cuenta se va primero: el padrón no deja borrar a alguien que tiene acceso.

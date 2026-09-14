@@ -56,7 +56,61 @@
 
     <Style x:Key="TarjetaIndicador" TargetType="Border" BasedOn="{StaticResource PanelAdmin}">
         <Setter Property="Padding" Value="18,16" />
-        <Setter Property="MinWidth" Value="150" />
+        <Setter Property="MinWidth" Value="162" />
+    </Style>
+
+    <!-- Misma tarjeta, pero que se puede apretar: un Button con la piel del indicador.
+         Es un Button de verdad y no un Border con un MouseDown para que la navegación
+         salga gratis con teclado y el cursor de mano venga solo. La flecha del borde
+         superior derecho es lo que avisa que la tarjeta lleva a alguna parte. -->
+    <Style x:Key="TarjetaAccion" TargetType="Button">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Background" Value="White" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Stretch" />
+        <Setter Property="MinWidth" Value="162" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="tarjeta"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="16"
+                            BorderBrush="{DynamicResource Linea}"
+                            BorderThickness="1.5"
+                            Padding="18,16"
+                            Effect="{DynamicResource SombraTarjeta}"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="tarjeta" Property="BorderBrush" Value="{DynamicResource Acento}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="tarjeta" Property="Background" Value="#F7FAFE" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Flecha chiquita en la esquina de las tarjetas que navegan. Aparece al pasar
+         el mouse: si estuviera siempre visible compite con el número, que es el dato. -->
+    <Style x:Key="FlechaTarjeta" TargetType="materialDesign:PackIcon">
+        <Setter Property="Kind" Value="ArrowRight" />
+        <Setter Property="Width" Value="17" />
+        <Setter Property="Height" Value="17" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Top" />
+        <Setter Property="Foreground" Value="{DynamicResource TintaTenue}" />
+        <Setter Property="Opacity" Value="0" />
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                <Setter Property="Opacity" Value="1" />
+                <Setter Property="Foreground" Value="{DynamicResource Acento}" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Cuadrado de color con el icono adentro: el acento visual del POS -->
@@ -75,7 +129,7 @@
 
     <!-- ============ TIPOGRAFIA ============ -->
     <Style x:Key="TituloPanel" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
         <Setter Property="Margin" Value="0,0,0,12" />
@@ -87,27 +141,55 @@
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
+    <!-- El aire entre un campo y la etiqueta del siguiente lo pone el campo (margen
+         inferior), no la etiqueta. Es lo que deja libre la franja donde Material dibuja
+         el mensaje de error: ese mensaje va en la capa de adornos, que NO ocupa lugar en
+         el layout, así que si el próximo control arranca pegado el error le queda encima. -->
     <Style x:Key="EtiquetaAdmin" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="FontSize" Value="11.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
-        <Setter Property="Margin" Value="0,14,0,5" />
+        <Setter Property="Margin" Value="0,0,0,5" />
+    </Style>
+
+    <!-- Encabezado de bloque dentro de un formulario largo ("DATOS PERSONALES"). -->
+    <Style x:Key="TituloBloque" TargetType="TextBlock" BasedOn="{StaticResource EtiquetaAdmin}">
+        <Setter Property="Foreground" Value="{DynamicResource Acento}" />
+        <Setter Property="Margin" Value="0,0,0,10" />
+    </Style>
+
+    <!-- Par rótulo/valor de los paneles de detalle de solo lectura. -->
+    <Style x:Key="RotuloDato" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="ValorDato" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Right" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="MaxWidth" Value="225" />
     </Style>
 
     <Style x:Key="ValorIndicador" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="25" />
+        <Setter Property="FontSize" Value="27" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Foreground" Value="{DynamicResource Acento}" />
     </Style>
 
     <Style x:Key="RotuloIndicador" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
         <Setter Property="Margin" Value="0,2,0,0" />
     </Style>
 
     <Style x:Key="TextoAyuda" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{DynamicResource TintaTenue}" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="Margin" Value="0,5,0,0" />
@@ -115,7 +197,7 @@
 
     <!-- Estado vacio: lo que se ve cuando un filtro no deja nada -->
     <Style x:Key="TextoVacio" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="{DynamicResource TintaTenue}" />
         <Setter Property="HorizontalAlignment" Value="Center" />
         <Setter Property="TextAlignment" Value="Center" />
@@ -125,36 +207,60 @@
     <!-- IMPORTANTE: nada de Height fijo en los campos Material. El estilo Outlined mide
          su propio alto para ubicar el hint flotante, y forzarle una altura chica recorta
          el texto a la mitad. El tamano se controla con Padding y FontSize. -->
+    <!-- El margen inferior de 20 NO es aire decorativo: es la franja donde Material
+         dibuja el mensaje de error. Ese mensaje va en la capa de adornos (AdornerLayer),
+         que se pinta por encima del resto y no ocupa lugar en el layout, así que sin esta
+         reserva "El nombre del producto es obligatorio" cae encima de la etiqueta y del
+         campo siguientes. Reservarlo siempre cuesta unos pocos píxeles; calcularlo solo
+         cuando hay error haría saltar el formulario entero cada vez que se tipea. -->
     <Style x:Key="CampoAdmin" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Margin" Value="0,0,0,22" />
         <Setter Property="VerticalAlignment" Value="Top" />
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
         <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="10" />
         <Setter Property="materialDesign:ValidationAssist.UsePopup" Value="False" />
-        <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11" />
+        <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11.5" />
+    </Style>
+
+    <!-- Campo dentro de una fila de la receta: ahí no hay lugar para el mensaje y la
+         validación la hace el formulario, no la celda. -->
+    <Style x:Key="CampoEnLinea" TargetType="TextBox" BasedOn="{StaticResource CampoAdmin}">
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="7,5" />
+    </Style>
+
+    <!-- Campo angosto de una fila de dos o tres columnas (precio, stock, mínimo). El
+         mensaje de error tiene ahí un tercio del ancho, así que se parte en dos renglones
+         y necesita el doble de franja reservada. -->
+    <Style x:Key="CampoAngosto" TargetType="TextBox" BasedOn="{StaticResource CampoAdmin}">
+        <Setter Property="Margin" Value="0,0,0,40" />
     </Style>
 
     <Style x:Key="ComboAdmin" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Margin" Value="0,0,0,22" />
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
         <Setter Property="materialDesign:ValidationAssist.UsePopup" Value="False" />
-        <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11" />
+        <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11.5" />
     </Style>
 
     <Style x:Key="ClaveAdmin" TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignOutlinedPasswordBox}">
-        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Margin" Value="0,0,0,22" />
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
         <Setter Property="materialDesign:ValidationAssist.UsePopup" Value="False" />
-        <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11" />
+        <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11.5" />
     </Style>
 
     <!-- Buscador sin marco: va adentro de una tarjeta que ya hace de marco,
          igual que el buscador del punto de venta. -->
     <Style x:Key="BuscadorPlano" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
-        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="FontSize" Value="14.5" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Margin" Value="10,6" />
@@ -169,14 +275,14 @@
     <Style x:Key="ChipFiltro" TargetType="ListBoxItem">
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Margin" Value="0,0,8,0" />
-        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontSize" Value="13.5" />
         <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
                     <Border x:Name="fondo"
                             CornerRadius="14"
-                            Padding="14,7"
+                            Padding="15,8"
                             Background="#F1F4F9"
                             BorderBrush="#E4E8F0"
                             BorderThickness="1"
@@ -218,15 +324,15 @@
     <!-- Combo compacto para las listas largas (categorias, roles), donde los chips
          no entran. Sin Height fijo, por lo mismo que los campos. -->
     <Style x:Key="FiltroCombo" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontSize" Value="13.5" />
         <Setter Property="Padding" Value="12,9" />
-        <Setter Property="MinWidth" Value="170" />
+        <Setter Property="MinWidth" Value="184" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
     </Style>
 
     <Style x:Key="ContadorFiltro" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontSize" Value="12.5" />
         <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
@@ -234,8 +340,8 @@
     <!-- ============ BOTONES ============ -->
     <Style x:Key="BotonPrimario" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
-        <Setter Property="Height" Value="38" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Height" Value="42" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Background" Value="{DynamicResource Acento}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Acento}" />
@@ -251,8 +357,8 @@
 
     <Style x:Key="BotonSecundario" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
         <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
-        <Setter Property="Height" Value="38" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Height" Value="42" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="Foreground" Value="#5A6577" />
         <Setter Property="BorderBrush" Value="#CFD7E3" />
         <Setter Property="Cursor" Value="Hand" />
@@ -265,9 +371,40 @@
     </Style>
 
     <Style x:Key="BotonIconoFila" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
-        <Setter Property="Width" Value="30" />
-        <Setter Property="Height" Value="30" />
+        <Setter Property="Width" Value="33" />
+        <Setter Property="Height" Value="33" />
         <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- Editar / Eliminar viven al pie del panel de detalle, debajo de los datos del ítem
+         que están afectando. Cuando estaban arriba de la lista había que acordarse de qué
+         fila estaba seleccionada para saber sobre qué iban a actuar. -->
+    <Style x:Key="BotonPanel" TargetType="Button" BasedOn="{StaticResource BotonSecundario}">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="BotonPanelPeligro" TargetType="Button" BasedOn="{StaticResource BotonPeligro}">
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- Zona de lista que se atenúa mientras hay un formulario abierto. El bloqueo real
+         lo hace SelectorAssist.SeleccionBloqueada; esto es el aviso visual de que ahí no
+         se puede elegir nada, para que el usuario no insista con el clic. -->
+    <Style x:Key="ZonaBloqueable" TargetType="Grid">
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding EnEdicion}" Value="True">
+                <Setter Property="Opacity" Value="0.55" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Línea divisoria dentro de un editor largo -->
+    <Style x:Key="SeparadorEditor" TargetType="Border">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="#EDF1F6" />
+        <Setter Property="Margin" Value="0,4,0,16" />
     </Style>
 
     <!-- ============ GRILLAS ============ -->
@@ -275,7 +412,7 @@
          la tabla deja de parecer una planilla y pasa a leerse como una lista. -->
     <Style x:Key="EncabezadoGrilla" TargetType="DataGridColumnHeader"
            BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="FontSize" Value="11.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
         <Setter Property="Padding" Value="10,10" />
@@ -284,13 +421,87 @@
         <Setter Property="SeparatorVisibility" Value="Collapsed" />
     </Style>
 
+    <!-- SELECCION POR CONTORNO, NO POR RELLENO.
+         Pintar la fila entera de azul obliga a leer texto oscuro sobre un fondo de color:
+         la fila seleccionada termina siendo la MAS dificil de leer de la grilla, que es
+         justo al reves de lo que uno quiere. Acá la selección se marca con un contorno de
+         acento y las esquinas redondeadas, y el fondo queda blanco.
+
+         Hace falta un ControlTemplate propio porque el borde de DataGridRow no se puede
+         redondear con setters: CornerRadius no es una propiedad de la fila sino del Border
+         que vive adentro de su plantilla. Se omite el DataGridRowHeader a propósito:
+         GrillaAdmin usa HeadersVisibility="Column", así que nunca se dibuja. -->
     <Style x:Key="FilaGrilla" TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <!-- El grosor es el mismo esté o no seleccionada (transparente cuando no lo
+             está): si apareciera recién al seleccionar, la fila se movería un píxel
+             al hacerle clic. RowHeight lo compensa. -->
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <!-- El fondo y el contorno son dos capas SUPERPUESTAS a las celdas, no un
+                     Border que las contenga. Si el contorno envolviera las celdas se
+                     comería 3 px de ancho, y como el DataGrid calcula las columnas
+                     estrella contra el ancho del viewport (no contra el de la fila),
+                     el contenido mide 3 px más que el viewport: aparece una barra
+                     horizontal de la nada y, con el scroll deshabilitado, se recortan
+                     las últimas columnas. Superpuesto no ocupa lugar. -->
+                <ControlTemplate TargetType="DataGridRow">
+                    <Grid>
+                        <Border x:Name="fondo"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10" />
+
+                        <SelectiveScrollingGrid>
+                            <SelectiveScrollingGrid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </SelectiveScrollingGrid.RowDefinitions>
+                            <DataGridCellsPresenter Grid.Row="0"
+                                                    ItemsPanel="{TemplateBinding ItemsPanel}"
+                                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                            <DataGridDetailsPresenter Grid.Row="1"
+                                                      Visibility="{TemplateBinding DetailsVisibility}" />
+                        </SelectiveScrollingGrid>
+
+                        <Border x:Name="contorno"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10"
+                                IsHitTestVisible="False"
+                                SnapsToDevicePixels="True" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="fondo" Property="Background" Value="#F7F9FC" />
+                        </Trigger>
+                        <!-- Después del de mouse: una fila seleccionada sobre la que se
+                             pasa el mouse tiene que seguir viéndose seleccionada. -->
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="contorno" Property="BorderBrush" Value="{DynamicResource Acento}" />
+                            <Setter TargetName="fondo" Property="Background" Value="Transparent" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- La otra mitad del problema: Material pinta la CELDA seleccionada con el color
+         primario y le cambia el texto. Se neutraliza acá, para que el único indicio de
+         selección sea el contorno de la fila. Los triggers del estilo derivado se evalúan
+         después que los del base, así que estos ganan. -->
+    <Style x:Key="CeldaGrilla" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#F7F9FC" />
-            </Trigger>
             <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="{DynamicResource AcentoSuave}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
                 <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
             </Trigger>
         </Style.Triggers>
@@ -303,20 +514,28 @@
         <Setter Property="IsReadOnly" Value="True" />
         <Setter Property="SelectionMode" Value="Single" />
         <Setter Property="HeadersVisibility" Value="Column" />
-        <Setter Property="GridLinesVisibility" Value="Horizontal" />
-        <Setter Property="HorizontalGridLinesBrush" Value="#F0F3F8" />
+        <!-- Sin líneas de grilla: las dibuja el borde de cada celda, y ese borde es el
+             mismo que necesitamos libre para que la selección se vea como un contorno. -->
+        <Setter Property="GridLinesVisibility" Value="None" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="RowBackground" Value="Transparent" />
-        <Setter Property="RowHeight" Value="46" />
-        <Setter Property="FontSize" Value="13" />
+        <!-- Auto y no Disabled: el contorno de la fila ya no ocupa ancho (va superpuesto),
+             así que no aparece la barra fantasma de 3 px, y si la ventana se achica de
+             verdad las columnas se pueden scrollear en vez de quedar recortadas. -->
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
+        <!-- 50 y no 46: el contorno de la fila se come 3 px de alto y la celda de
+             "acceso al sistema" tiene tres renglones que quedaban cortados. -->
+        <Setter Property="RowHeight" Value="56" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="ColumnHeaderStyle" Value="{StaticResource EncabezadoGrilla}" />
         <Setter Property="RowStyle" Value="{StaticResource FilaGrilla}" />
+        <Setter Property="CellStyle" Value="{StaticResource CeldaGrilla}" />
     </Style>
 
     <Style x:Key="GrillaEditable" TargetType="DataGrid" BasedOn="{StaticResource GrillaAdmin}">
         <Setter Property="IsReadOnly" Value="False" />
-        <Setter Property="RowHeight" Value="42" />
+        <Setter Property="RowHeight" Value="50" />
     </Style>
 
     <!-- ============ BARRA DE STOCK ============ -->
@@ -354,14 +573,14 @@
     <!-- ============ CHIPS DE ESTADO EN GRILLA ============ -->
     <Style x:Key="ChipGrilla" TargetType="Border">
         <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Padding" Value="9,4" />
+        <Setter Property="Padding" Value="10,5" />
         <Setter Property="Margin" Value="0,0,5,0" />
         <Setter Property="HorizontalAlignment" Value="Left" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
     <Style x:Key="TextoChip" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
@@ -383,7 +602,7 @@
     </Style>
 
     <Style x:Key="TextoMensaje" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontSize" Value="13.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="VerticalAlignment" Value="Center" />
@@ -410,22 +629,35 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Aviso de formulario invalido, arriba de los botones Guardar/Cancelar -->
-    <Style x:Key="AvisoValidacion" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="11.5" />
-        <Setter Property="Foreground" Value="{DynamicResource Peligro}" />
-        <Setter Property="TextWrapping" Value="Wrap" />
-        <Setter Property="Margin" Value="0,14,0,0" />
+    <!-- ============ RESUMEN DE VALIDACION ============ -->
+    <!-- Va arriba de Guardar/Cancelar y junta lo que falta. Se muestra recién cuando hay
+         errores VISIBLES, es decir campos que el usuario ya tocó o el intento de guardar:
+         un formulario recién abierto está vacío y por lo tanto es inválido, pero avisarlo
+         antes de que escriba una letra es ruido, no ayuda. -->
+    <Style x:Key="PanelValidacion" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource PeligroSuave}" />
+        <Setter Property="BorderBrush" Value="#F2C7C7" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="12,9" />
+        <Setter Property="Margin" Value="0,12,0,0" />
         <Setter Property="Visibility" Value="Collapsed" />
         <Style.Triggers>
             <MultiDataTrigger>
                 <MultiDataTrigger.Conditions>
                     <Condition Binding="{Binding EnEdicion}" Value="True" />
-                    <Condition Binding="{Binding HasErrors}" Value="True" />
+                    <Condition Binding="{Binding HayErroresVisibles}" Value="True" />
                 </MultiDataTrigger.Conditions>
                 <Setter Property="Visibility" Value="Visible" />
             </MultiDataTrigger>
         </Style.Triggers>
+    </Style>
+
+    <Style x:Key="AvisoValidacion" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="#A93226" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
 </ResourceDictionary>

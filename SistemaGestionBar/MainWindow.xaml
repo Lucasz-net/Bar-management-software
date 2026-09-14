@@ -5,9 +5,10 @@
         Title="Sistema de Gestión de Bar"
         Height="820"
         Width="1360"
-        MinHeight="720"
-        MinWidth="1180"
+        MinHeight="740"
+        MinWidth="1280"
         WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
         Background="#F4F6FA">
 
     <Window.DataContext>

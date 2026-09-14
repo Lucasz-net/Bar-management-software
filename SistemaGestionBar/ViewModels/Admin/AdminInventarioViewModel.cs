@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,14 +15,14 @@ namespace SistemaGestionBar.ViewModels.Admin
     public class AdminInventarioViewModel : SeccionAdminViewModel
     {
         public AdminInventarioViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
-            : base(repositorio, dialogo, "Inventario", "PackageVariantClosed",
+            : base(repositorio, dialogo, DestinoAdmin.Inventario, "Inventario", "PackageVariantClosed",
                    "Insumos que consumen las recetas, con su stock y punto de reposición")
         {
             Ingredientes = new ObservableCollection<Ingrediente>();
 
             NuevoCommand = new RelayCommand(Nuevo);
-            EditarCommand = new RelayCommand(Editar, () => Seleccionado is not null);
-            GuardarCommand = new RelayCommand(Guardar, () => EnEdicion && FormularioValido);
+            EditarCommand = new RelayCommand(Editar, () => Seleccionado is not null && !EnEdicion);
+            GuardarCommand = new RelayCommand(Guardar, () => EnEdicion);
             CancelarCommand = new RelayCommand(Cancelar, () => EnEdicion);
             EliminarCommand = new RelayCommand(Eliminar, () => Seleccionado is not null && !EnEdicion);
 
@@ -87,15 +88,51 @@ namespace SistemaGestionBar.ViewModels.Admin
         // Selección y editor
         // ---------------------------------------------------------------
         private Ingrediente? _seleccionado;
+
+        /// <summary>
+        /// Con el formulario abierto la selección queda congelada: si se pudiera mover,
+        /// quedaría remarcada una fila que no es la que está mostrando el editor.
+        /// </summary>
         public Ingrediente? Seleccionado
         {
             get => _seleccionado;
             set
             {
-                if (SetProperty(ref _seleccionado, value) && !EnEdicion)
-                    CargarEnEditor(value);
+                if (EnEdicion)
+                {
+                    if (ReferenceEquals(_seleccionado, value))
+                        return;
+
+                    if (value is not null)
+                        Fallar("Terminá la edición —guardá o cancelá— antes de elegir otro insumo.");
+
+                    // Vuelve a avisar la propiedad para que la grilla devuelva la
+                    // selección a donde estaba.
+                    OnPropertyChanged(nameof(Seleccionado));
+                    return;
+                }
+
+                EstablecerSeleccion(value);
             }
         }
+
+        /// <summary>Cambia la selección sin pasar por el candado: lo usan Recargar y Enfocar.</summary>
+        private void EstablecerSeleccion(Ingrediente? ingrediente)
+        {
+            if (!SetProperty(ref _seleccionado, ingrediente, nameof(Seleccionado)))
+                return;
+
+            OnPropertyChanged(nameof(HaySeleccion));
+
+            if (!EnEdicion)
+                CargarEnEditor(ingrediente);
+        }
+
+        public bool HaySeleccion => Seleccionado is not null;
+
+        /// <summary>Cuánto le falta para llegar al mínimo, para la ficha de solo lectura.</summary>
+        public decimal FaltanteParaElMinimo =>
+            Seleccionado is null ? 0 : Math.Max(0, Seleccionado.StockMinimo - Seleccionado.Stock);
 
         private bool _enEdicion;
         public bool EnEdicion
@@ -105,11 +142,15 @@ namespace SistemaGestionBar.ViewModels.Admin
             {
                 if (SetProperty(ref _enEdicion, value))
                 {
+                    OnPropertyChanged(nameof(NoEnEdicion));
                     OnPropertyChanged(nameof(TituloEditor));
                     Revalidar();
                 }
             }
         }
+
+        /// <summary>La ficha de solo lectura y el formulario son excluyentes.</summary>
+        public bool NoEnEdicion => !EnEdicion;
 
         protected override bool ValidacionActiva => EnEdicion;
 
@@ -170,8 +211,26 @@ namespace SistemaGestionBar.ViewModels.Admin
             _estadoStock ??= OpcionesStock[0];
             RefrescarVista();
 
-            Seleccionado = Ingredientes.FirstOrDefault(i => i.IdIngrediente == idPrevio)
-                           ?? Ingredientes.FirstOrDefault();
+            EstablecerSeleccion(Ingredientes.FirstOrDefault(i => i.IdIngrediente == idPrevio)
+                                ?? Ingredientes.FirstOrDefault());
+        }
+
+        /// <summary>
+        /// Llega acá cuando el resumen manda a reponer un insumo: se lo selecciona y se
+        /// abre el formulario listo para cargar el stock nuevo.
+        /// </summary>
+        public override void Enfocar(object? foco)
+        {
+            if (foco is not AlertaStock alerta || !alerta.EsInsumo)
+                return;
+
+            var ingrediente = Ingredientes.FirstOrDefault(i => i.IdIngrediente == alerta.Id);
+            if (ingrediente is null)
+                return;
+
+            EstablecerSeleccion(ingrediente);
+            Editar();
+            Informar($"Cargá el stock repuesto de \"{ingrediente.Nombre}\" y guardá.");
         }
 
         private void CargarEnEditor(Ingrediente? ingrediente)
@@ -186,17 +245,21 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(Stock));
             OnPropertyChanged(nameof(StockMinimo));
             OnPropertyChanged(nameof(TituloEditor));
+            OnPropertyChanged(nameof(FaltanteParaElMinimo));
 
-            Revalidar();
+            // Formulario recién cargado: las reglas se calculan, pero nada se pinta de
+            // rojo hasta que el usuario toque un campo o apriete Guardar.
+            ReiniciarValidacion();
         }
 
         private void Nuevo()
         {
             LimpiarMensaje();
             _esAlta = true;
-            Seleccionado = null;
+            EstablecerSeleccion(null);
             CargarEnEditor(null);
             EnEdicion = true;
+            ReiniciarValidacion();
         }
 
         private void Editar()
@@ -208,6 +271,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             _esAlta = false;
             CargarEnEditor(Seleccionado);
             EnEdicion = true;
+            ReiniciarValidacion();
         }
 
         private void Cancelar()
@@ -220,6 +284,14 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void Guardar()
         {
+            // El botón está habilitado aunque falten datos: deshabilitado no explica QUÉ
+            // falta. Se aprieta, se marcan los campos y se dice cuántos hay que corregir.
+            if (!IntentarConfirmar())
+            {
+                Fallar(MensajeDeFormularioInvalido);
+                return;
+            }
+
             var ingrediente = _esAlta ? new Ingrediente() : Seleccionado;
             if (ingrediente is null)
             {
@@ -227,8 +299,8 @@ namespace SistemaGestionBar.ViewModels.Admin
                 return;
             }
 
-            ingrediente.Nombre = Nombre;
-            ingrediente.UnidadMedida = UnidadMedida;
+            ingrediente.Nombre = Nombre.Trim();
+            ingrediente.UnidadMedida = UnidadMedida.Trim();
             ingrediente.Stock = Stock;
             ingrediente.StockMinimo = StockMinimo;
 
@@ -238,7 +310,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             EnEdicion = false;
             _esAlta = false;
             Recargar();
-            Seleccionado = Ingredientes.FirstOrDefault(i => i.IdIngrediente == ingrediente.IdIngrediente);
+            EstablecerSeleccion(Ingredientes.FirstOrDefault(i => i.IdIngrediente == ingrediente.IdIngrediente));
         }
 
         private void Eliminar()
@@ -246,7 +318,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (Seleccionado is null)
                 return;
 
-            if (!Dialogo.Confirmar("Eliminar insumo", $"¿Eliminar \"{Seleccionado.Nombre}\" del inventario?"))
+            if (!ConfirmarEliminacion("el insumo", Seleccionado.Nombre))
                 return;
 
             if (Aplicar(Repositorio.EliminarIngrediente(Seleccionado.IdIngrediente)))

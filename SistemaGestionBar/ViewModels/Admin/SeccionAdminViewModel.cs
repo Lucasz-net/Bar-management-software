@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -22,12 +24,14 @@ namespace SistemaGestionBar.ViewModels.Admin
         protected SeccionAdminViewModel(
             IRepositorioBar repositorio,
             IServicioDialogo dialogo,
+            DestinoAdmin destino,
             string titulo,
             string icono,
             string subtitulo)
         {
             Repositorio = repositorio;
             Dialogo = dialogo;
+            Destino = destino;
             Titulo = titulo;
             Icono = icono;
             Subtitulo = subtitulo;
@@ -37,6 +41,13 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         protected IRepositorioBar Repositorio { get; }
         protected IServicioDialogo Dialogo { get; }
+
+        /// <summary>
+        /// Identidad de la sección dentro del tablero. Es lo que permite que una pantalla
+        /// pida "llevame a Productos" sin conocer la instancia del ViewModel destino:
+        /// el equivalente al nombre de una ruta en un router web.
+        /// </summary>
+        public DestinoAdmin Destino { get; }
 
         /// <summary>Texto del ítem en el menú lateral.</summary>
         public string Titulo { get; }
@@ -224,5 +235,77 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         /// <summary>Se llama al entrar a la sección: cada una recarga sus listas.</summary>
         public abstract void Recargar();
+
+        // ---------------------------------------------------------------
+        // Navegación entre secciones
+        // ---------------------------------------------------------------
+        /// <summary>
+        /// Lo escucha <c>AdminViewModel</c>, que es el único que sabe qué secciones
+        /// existen para el rol que está usando el tablero.
+        /// </summary>
+        public event EventHandler<PedidoDeNavegacion>? NavegacionSolicitada;
+
+        /// <summary>Pide saltar a otra sección, opcionalmente señalando un ítem.</summary>
+        protected void IrA(DestinoAdmin destino, object? foco = null) =>
+            NavegacionSolicitada?.Invoke(this, new PedidoDeNavegacion(destino, foco));
+
+        private IReadOnlyCollection<DestinoAdmin> _destinos = Array.Empty<DestinoAdmin>();
+
+        /// <summary>
+        /// Se lo pasa <c>AdminViewModel</c> al armar el tablero. Un gerente no tiene
+        /// Personas ni Parámetros (RF-09), así que las pantallas que ofrecen atajos a
+        /// esas secciones tienen que poder esconderlos en vez de ofrecer un botón muerto.
+        /// </summary>
+        public void ConfigurarDestinos(IReadOnlyCollection<DestinoAdmin> destinos)
+        {
+            _destinos = destinos;
+            AlCambiarLosDestinos();
+        }
+
+        protected bool PuedeIrA(DestinoAdmin destino) => _destinos.Contains(destino);
+
+        /// <summary>Gancho para refrescar los atajos que dependen del rol.</summary>
+        protected virtual void AlCambiarLosDestinos() { }
+
+        /// <summary>
+        /// La sección de destino recibe acá lo que venía en el pedido de navegación,
+        /// ya recargada. Por defecto no hace nada: solo las que saben seleccionar un
+        /// ítem la redefinen.
+        /// </summary>
+        public virtual void Enfocar(object? foco) { }
+
+        // ---------------------------------------------------------------
+        // Confirmación de borrado
+        // ---------------------------------------------------------------
+        /// <summary>
+        /// Ventana de confirmación única para todos los ABM del tablero. Borrar es la
+        /// única acción del panel que no se puede deshacer, así que siempre pasa por acá.
+        /// </summary>
+        protected bool ConfirmarEliminacion(string queEs, string nombre, string? detalle = null)
+        {
+            string cuerpo = $"¿Estás seguro de que querés eliminar {queEs} \"{nombre}\"?";
+
+            if (!string.IsNullOrWhiteSpace(detalle))
+                cuerpo += $"\n\n{detalle}";
+
+            return Dialogo.Confirmar($"Eliminar {queEs}", cuerpo + "\n\nEsta acción no se puede deshacer.");
+        }
     }
+
+    /// <summary>Secciones del tablero, para poder nombrarlas sin instanciarlas.</summary>
+    public enum DestinoAdmin
+    {
+        Resumen,
+        Productos,
+        Inventario,
+        Personas,
+        Ventas,
+        Parametros
+    }
+
+    /// <summary>
+    /// Salto de una sección a otra. <paramref name="Foco"/> es lo que la sección destino
+    /// tiene que dejar seleccionado (un insumo, un producto), o null para entrar y ya.
+    /// </summary>
+    public record PedidoDeNavegacion(DestinoAdmin Destino, object? Foco);
 }

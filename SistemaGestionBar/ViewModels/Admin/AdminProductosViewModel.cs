@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows.Input;
 using SistemaGestionBar.Models;
 using SistemaGestionBar.Services;
@@ -13,11 +16,17 @@ namespace SistemaGestionBar.ViewModels.Admin
     /// El editor trabaja sobre campos sueltos y no sobre la entidad seleccionada:
     /// si escribiéramos directo sobre el Producto de la lista, cancelar no podría
     /// deshacer nada porque los cambios ya estarían aplicados.
+    ///
+    /// El panel derecho tiene dos caras: con el formulario cerrado muestra la ficha del
+    /// producto elegido y ofrece Editar y Eliminar; con el formulario abierto muestra los
+    /// campos y ofrece Guardar y Cancelar. Las acciones están al pie de los datos que
+    /// afectan, no arriba de la lista: así no hay que acordarse de qué tarjeta quedó
+    /// seleccionada para saber qué se va a borrar.
     /// </summary>
     public class AdminProductosViewModel : SeccionAdminViewModel
     {
         public AdminProductosViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
-            : base(repositorio, dialogo, "Productos", "GlassCocktail",
+            : base(repositorio, dialogo, DestinoAdmin.Productos, "Productos", "GlassCocktail",
                    "Catálogo del punto de venta, precios, stock y recetas")
         {
             Productos = new ObservableCollection<Producto>();
@@ -27,8 +36,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             OpcionesCategoria = new ObservableCollection<OpcionFiltro<Categoria?>>();
 
             NuevoCommand = new RelayCommand(Nuevo);
-            EditarCommand = new RelayCommand(Editar, () => Seleccionado is not null);
-            GuardarCommand = new RelayCommand(Guardar, () => EnEdicion && FormularioValido);
+            EditarCommand = new RelayCommand(Editar, () => Seleccionado is not null && !EnEdicion);
+            GuardarCommand = new RelayCommand(Guardar, () => EnEdicion);
             CancelarCommand = new RelayCommand(Cancelar, () => EnEdicion);
             EliminarCommand = new RelayCommand(Eliminar, () => Seleccionado is not null && !EnEdicion);
             AgregarIngredienteCommand = new RelayCommand(AgregarIngrediente, () => EnEdicion && Ingredientes.Any());
@@ -122,19 +131,66 @@ namespace SistemaGestionBar.ViewModels.Admin
             EstadoStockFiltro = OpcionesStock[0];
         }
 
+        // ---------------------------------------------------------------
+        // Selección
+        // ---------------------------------------------------------------
         private Producto? _seleccionado;
+
+        /// <summary>
+        /// Lo que elige el usuario en el catálogo.
+        ///
+        /// <b>Con el formulario abierto la selección queda congelada.</b> Si se pudiera
+        /// mover, quedaría remarcada una tarjeta que no es la que está mostrando el
+        /// editor: el usuario vería "Vino Malbec" resaltado mientras edita otra cosa.
+        /// Se rechaza el cambio y se vuelve a avisar la propiedad, que es lo que hace
+        /// que la lista devuelva la selección a donde estaba.
+        /// </summary>
         public Producto? Seleccionado
         {
             get => _seleccionado;
             set
             {
-                if (!SetProperty(ref _seleccionado, value))
-                    return;
+                if (EnEdicion)
+                {
+                    if (ReferenceEquals(_seleccionado, value))
+                        return;
 
-                if (!EnEdicion)
-                    CargarEnEditor(value);
+                    // Solo se avisa cuando el intento vino de un clic. Si el filtro dejó
+                    // la lista sin selección (value nulo) no hay nada que explicar.
+                    if (value is not null)
+                        Fallar("Terminá la edición —guardá o cancelá— antes de elegir otro producto.");
+
+                    OnPropertyChanged(nameof(Seleccionado));
+                    return;
+                }
+
+                EstablecerSeleccion(value);
             }
         }
+
+        /// <summary>
+        /// Cambia la selección sin pasar por el candado. Lo usan Recargar y Enfocar, que
+        /// mueven la selección por su cuenta y no son el usuario haciendo clic.
+        /// </summary>
+        private void EstablecerSeleccion(Producto? producto)
+        {
+            if (!SetProperty(ref _seleccionado, producto, nameof(Seleccionado)))
+                return;
+
+            OnPropertyChanged(nameof(HaySeleccion));
+            OnPropertyChanged(nameof(RecetaDelSeleccionado));
+
+            if (!EnEdicion)
+                CargarEnEditor(producto);
+        }
+
+        public bool HaySeleccion => Seleccionado is not null;
+
+        /// <summary>Procedimiento del producto elegido, para la ficha de solo lectura.</summary>
+        public string RecetaDelSeleccionado =>
+            string.IsNullOrWhiteSpace(Seleccionado?.Receta?.Instrucciones)
+                ? "Sin procedimiento cargado."
+                : Seleccionado!.Receta!.Instrucciones!;
 
         private bool _enEdicion;
         public bool EnEdicion
@@ -144,11 +200,15 @@ namespace SistemaGestionBar.ViewModels.Admin
             {
                 if (SetProperty(ref _enEdicion, value))
                 {
+                    OnPropertyChanged(nameof(NoEnEdicion));
                     OnPropertyChanged(nameof(TituloEditor));
                     Revalidar();
                 }
             }
         }
+
+        /// <summary>La ficha de solo lectura y el formulario son excluyentes.</summary>
+        public bool NoEnEdicion => !EnEdicion;
 
         protected override bool ValidacionActiva => EnEdicion;
 
@@ -160,8 +220,19 @@ namespace SistemaGestionBar.ViewModels.Admin
         // ---------------------------------------------------------------
         // Campos del editor
         // ---------------------------------------------------------------
+        /// <summary>
+        /// Mientras se carga la ficha en el editor los setters no deben reaccionar como
+        /// si el usuario hubiera cambiado algo: cambiar de categoría borra la receta, y
+        /// eso no puede pasar por el solo hecho de abrir un producto.
+        /// </summary>
+        private bool _cargando;
+
         private string _nombre = string.Empty;
-        public string Nombre { get => _nombre; set => SetCampo(ref _nombre, value); }
+        public string Nombre
+        {
+            get => _nombre;
+            set { if (SetCampo(ref _nombre, value)) OnPropertyChanged(nameof(TituloEditor)); }
+        }
 
         private string _descripcion = string.Empty;
         public string Descripcion { get => _descripcion; set => SetCampo(ref _descripcion, value); }
@@ -176,7 +247,25 @@ namespace SistemaGestionBar.ViewModels.Admin
         public int StockMinimo { get => _stockMinimo; set => SetCampo(ref _stockMinimo, value); }
 
         private Categoria? _categoria;
-        public Categoria? CategoriaSeleccionada { get => _categoria; set => SetCampo(ref _categoria, value); }
+        public Categoria? CategoriaSeleccionada
+        {
+            get => _categoria;
+            set
+            {
+                if (!SetCampo(ref _categoria, value))
+                    return;
+
+                // Pasar un cóctel a Botellas deja una receta que ya no se ve: se limpia
+                // acá, mientras el usuario está mirando, y no en silencio al guardar.
+                if (!_cargando && !CategoriaAdmiteReceta)
+                {
+                    LimpiarComposicion();
+                    Instrucciones = string.Empty;
+                }
+
+                RefrescarVisibilidadDeReceta();
+            }
+        }
 
         private string _rutaImagen = string.Empty;
         public string RutaImagen { get => _rutaImagen; set => SetCampo(ref _rutaImagen, value); }
@@ -189,6 +278,57 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         /// <summary>Si no hay composición, el producto es de venta directa y usa su propio stock.</summary>
         public bool EsDeVentaDirecta => Composicion.Count == 0;
+
+        // ---------------------------------------------------------------
+        // Qué categorías llevan receta
+        // ---------------------------------------------------------------
+        /// <summary>
+        /// Una botella o una gaseosa se venden cerradas: no tienen procedimiento ni
+        /// insumos, así que mostrarles el bloque de receta es ofrecer un formulario que
+        /// nunca se completa. Solo los cócteles se preparan.
+        ///
+        /// La condición mira el NOMBRE de la categoría porque el DER no tiene una columna
+        /// que diga "esta categoría se prepara"; si el bar agrega otra familia preparada,
+        /// el lugar para arreglarlo es una columna nueva en Categoria, no un if más acá.
+        /// </summary>
+        public bool CategoriaAdmiteReceta => EsCategoriaPreparada(CategoriaSeleccionada);
+
+        /// <summary>
+        /// Lo que realmente decide si el bloque se ve. Incluye el caso del producto que
+        /// ya tiene receta cargada aunque su categoría hoy diga otra cosa: esconderla
+        /// sería hacer desaparecer datos existentes sin avisar.
+        /// </summary>
+        public bool MostrarReceta => CategoriaAdmiteReceta || Composicion.Count > 0;
+
+        private static bool EsCategoriaPreparada(Categoria? categoria)
+        {
+            if (categoria is null)
+                return false;
+
+            return SinAcentos(categoria.NombreCategoria).Contains("coctel", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>"Cócteles" y "Cocteles" tienen que ser la misma palabra para esta regla.</summary>
+        private static string SinAcentos(string texto)
+        {
+            var descompuesto = texto.Normalize(NormalizationForm.FormD);
+            var limpio = new StringBuilder(descompuesto.Length);
+
+            foreach (char c in descompuesto)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    limpio.Append(c);
+            }
+
+            return limpio.ToString().Normalize(NormalizationForm.FormC);
+        }
+
+        private void RefrescarVisibilidadDeReceta()
+        {
+            OnPropertyChanged(nameof(CategoriaAdmiteReceta));
+            OnPropertyChanged(nameof(MostrarReceta));
+            OnPropertyChanged(nameof(EsDeVentaDirecta));
+        }
 
         // ---------------------------------------------------------------
         // Comandos
@@ -225,6 +365,10 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (Composicion.Count > 0 && string.IsNullOrWhiteSpace(Instrucciones))
                 Agregar(nameof(Instrucciones),
                         "El producto tiene receta: escriba el procedimiento de preparación.");
+
+            foreach (var linea in Composicion.Where(l => l.Cantidad <= 0))
+                Agregar(nameof(Composicion),
+                        $"La cantidad de \"{linea.Ingrediente.Nombre}\" debe ser mayor a cero.");
         }
 
         public sealed override void Recargar()
@@ -263,11 +407,31 @@ namespace SistemaGestionBar.ViewModels.Admin
             _estadoStock ??= OpcionesStock[0];
             RefrescarVista();
 
-            Seleccionado = Productos.FirstOrDefault(p => p.IdProducto == idPrevio) ?? Productos.FirstOrDefault();
+            EstablecerSeleccion(Productos.FirstOrDefault(p => p.IdProducto == idPrevio) ?? Productos.FirstOrDefault());
+        }
+
+        /// <summary>
+        /// Llega acá cuando el resumen manda a reponer un producto de venta directa:
+        /// se lo selecciona y se abre el formulario listo para corregir el stock.
+        /// </summary>
+        public override void Enfocar(object? foco)
+        {
+            if (foco is not AlertaStock alerta || alerta.EsInsumo)
+                return;
+
+            var producto = Productos.FirstOrDefault(p => p.IdProducto == alerta.Id);
+            if (producto is null)
+                return;
+
+            EstablecerSeleccion(producto);
+            Editar();
+            Informar($"Actualizá el stock de \"{producto.Nombre}\" y guardá.");
         }
 
         private void CargarEnEditor(Producto? producto)
         {
+            _cargando = true;
+
             Nombre = producto?.Nombre ?? string.Empty;
             Descripcion = producto?.Descripcion ?? string.Empty;
             Precio = producto?.Precio ?? 0;
@@ -275,28 +439,38 @@ namespace SistemaGestionBar.ViewModels.Admin
             StockMinimo = producto?.StockMinimo ?? 0;
             RutaImagen = producto?.RutaImagen ?? string.Empty;
             Instrucciones = producto?.Receta?.Instrucciones ?? string.Empty;
+            // En un alta la categoría arranca vacía y no en la primera de la lista:
+            // elegirla es lo que decide si el producto lleva receta, así que tiene que
+            // ser una decisión del usuario y no un default que pasa desapercibido.
             CategoriaSeleccionada = producto is null
-                ? Categorias.FirstOrDefault()
+                ? null
                 : Categorias.FirstOrDefault(c => c.IdCategoria == producto.IdCategoria);
 
-            Composicion.Clear();
+            LimpiarComposicion();
             if (producto is not null)
             {
                 foreach (var linea in producto.Ingredientes.OrderByDescending(i => i.CantidadNecesaria))
-                    Composicion.Add(new LineaRecetaViewModel(linea.Ingrediente, linea.CantidadNecesaria));
+                    Composicion.Add(Vigilar(new LineaRecetaViewModel(linea.Ingrediente, linea.CantidadNecesaria)));
             }
 
-            OnPropertyChanged(nameof(EsDeVentaDirecta));
-            Revalidar();
+            _cargando = false;
+
+            RefrescarVisibilidadDeReceta();
+
+            // Un formulario recién cargado arranca sin nada en rojo: las reglas se
+            // calculan igual, pero no se muestran hasta que el usuario toque un campo
+            // o apriete Guardar.
+            ReiniciarValidacion();
         }
 
         private void Nuevo()
         {
             LimpiarMensaje();
             _esAlta = true;
-            EnEdicion = true;
-            Seleccionado = null;
+            EstablecerSeleccion(null);
             CargarEnEditor(null);
+            EnEdicion = true;
+            ReiniciarValidacion();
         }
 
         private void Editar()
@@ -306,8 +480,9 @@ namespace SistemaGestionBar.ViewModels.Admin
 
             LimpiarMensaje();
             _esAlta = false;
-            EnEdicion = true;
             CargarEnEditor(Seleccionado);
+            EnEdicion = true;
+            ReiniciarValidacion();
         }
 
         private void Cancelar()
@@ -320,6 +495,14 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void Guardar()
         {
+            // El botón está habilitado aunque falten datos: deshabilitado no explica QUÉ
+            // falta. Se aprieta, se marcan los campos y se dice cuántos hay que corregir.
+            if (!IntentarConfirmar())
+            {
+                Fallar(MensajeDeFormularioInvalido);
+                return;
+            }
+
             var producto = _esAlta ? new Producto() : Seleccionado;
             if (producto is null)
             {
@@ -328,7 +511,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
 
             // Se copian los campos del editor recién ahora, cuando el usuario confirmó.
-            producto.Nombre = Nombre;
+            producto.Nombre = Nombre.Trim();
             producto.Descripcion = string.IsNullOrWhiteSpace(Descripcion) ? null : Descripcion.Trim();
             producto.Precio = Precio;
             producto.Stock = Stock;
@@ -353,7 +536,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             Informar(resultado.Mensaje);
 
             Recargar();
-            Seleccionado = Productos.FirstOrDefault(p => p.IdProducto == producto.IdProducto);
+            EstablecerSeleccion(Productos.FirstOrDefault(p => p.IdProducto == producto.IdProducto));
         }
 
         private void Eliminar()
@@ -361,8 +544,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (Seleccionado is null)
                 return;
 
-            if (!Dialogo.Confirmar("Eliminar producto",
-                    $"¿Eliminar \"{Seleccionado.Nombre}\" del catálogo?"))
+            if (!ConfirmarEliminacion("el producto", Seleccionado.Nombre))
                 return;
 
             if (Aplicar(Repositorio.EliminarProducto(Seleccionado.IdProducto)))
@@ -380,17 +562,41 @@ namespace SistemaGestionBar.ViewModels.Admin
                 return;
             }
 
-            Composicion.Add(new LineaRecetaViewModel(IngredienteAAgregar, 1));
-            OnPropertyChanged(nameof(EsDeVentaDirecta));
+            Composicion.Add(Vigilar(new LineaRecetaViewModel(IngredienteAAgregar, 1)));
+            RefrescarVisibilidadDeReceta();
             LimpiarMensaje();
             Revalidar();
         }
 
         private void QuitarIngrediente(LineaRecetaViewModel linea)
         {
+            linea.PropertyChanged -= AlCambiarUnaLinea;
             Composicion.Remove(linea);
-            OnPropertyChanged(nameof(EsDeVentaDirecta));
+            RefrescarVisibilidadDeReceta();
             Revalidar();
         }
+
+        /// <summary>
+        /// La cantidad de cada renglón se edita en su propio ViewModel, así que el
+        /// formulario no se entera por su cuenta. Sin esto, una cantidad en cero no se
+        /// marcaría hasta apretar Guardar.
+        /// </summary>
+        private LineaRecetaViewModel Vigilar(LineaRecetaViewModel linea)
+        {
+            linea.PropertyChanged += AlCambiarUnaLinea;
+            return linea;
+        }
+
+        /// <summary>Vacía la receta soltando primero las suscripciones de cada renglón.</summary>
+        private void LimpiarComposicion()
+        {
+            foreach (var linea in Composicion)
+                linea.PropertyChanged -= AlCambiarUnaLinea;
+
+            Composicion.Clear();
+        }
+
+        private void AlCambiarUnaLinea(object? origen, System.ComponentModel.PropertyChangedEventArgs e) =>
+            Revalidar();
     }
 }

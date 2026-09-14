@@ -32,7 +32,7 @@
         </Style>
 
         <Style x:Key="TextoMenu" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="FontSize" Value="14.5" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="12,0,0,0" />
             <Setter Property="Foreground" Value="#A8C3E8" />
@@ -59,7 +59,7 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="248" />
+            <ColumnDefinition Width="264" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -82,8 +82,8 @@
                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
-                        <TextBlock Text="{Binding TituloTablero}" FontSize="13" FontWeight="Bold" Foreground="White" />
-                        <TextBlock Text="Sistema de Gestión de Bar" FontSize="10.5" Foreground="#7FA6DA" />
+                        <TextBlock Text="{Binding TituloTablero}" FontSize="14" FontWeight="Bold" Foreground="White" />
+                        <TextBlock Text="Sistema de Gestión de Bar" FontSize="11.5" Foreground="#7FA6DA" />
                     </StackPanel>
                 </StackPanel>
 
@@ -115,19 +115,19 @@
                         <StackPanel Orientation="Horizontal">
                             <Border Background="#2D89EF" CornerRadius="16" Width="32" Height="32">
                                 <TextBlock Text="{Binding InicialesUsuario}" Foreground="White"
-                                           FontWeight="Bold" FontSize="12"
+                                           FontWeight="Bold" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
-                                <TextBlock Text="{Binding NombreUsuario}" FontSize="12.5" FontWeight="SemiBold" Foreground="White" />
-                                <TextBlock Text="{Binding RolUsuario}" FontSize="10.5" Foreground="#7FA6DA" />
+                                <TextBlock Text="{Binding NombreUsuario}" FontSize="13.5" FontWeight="SemiBold" Foreground="White" />
+                                <TextBlock Text="{Binding RolUsuario}" FontSize="11.5" Foreground="#7FA6DA" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
                     <Button Style="{DynamicResource MaterialDesignOutlinedButton}"
                             materialDesign:ButtonAssist.CornerRadius="16"
-                            Height="36" FontSize="12"
+                            Height="36" FontSize="13"
                             Foreground="#A8C3E8" BorderBrush="#2A5490"
                             Cursor="Hand"
                             Margin="0,0,0,8"
@@ -140,7 +140,7 @@
 
                     <Button Style="{DynamicResource MaterialDesignOutlinedButton}"
                             materialDesign:ButtonAssist.CornerRadius="16"
-                            Height="36" FontSize="12"
+                            Height="36" FontSize="13"
                             Foreground="#F0A6A0" BorderBrush="#5C3540"
                             Cursor="Hand"
                             Command="{Binding CerrarSesionCommand}">
@@ -177,9 +177,9 @@
                     </Border>
                     <StackPanel VerticalAlignment="Center" Margin="14,0,0,0">
                         <TextBlock Text="{Binding SeccionActual.Titulo}"
-                                   FontSize="22" FontWeight="Bold" Foreground="#2B3445" />
+                                   FontSize="24" FontWeight="Bold" Foreground="#2B3445" />
                         <TextBlock Text="{Binding SeccionActual.Subtitulo}"
-                                   FontSize="12.5" Foreground="#8A93A5" Margin="0,2,0,0" />
+                                   FontSize="13.5" Foreground="#8A93A5" Margin="0,2,0,0" />
                     </StackPanel>
                 </StackPanel>
 
@@ -189,7 +189,7 @@
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="CalendarBlankOutline" Width="15" Height="15"
                                                  Foreground="#9AA3B2" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding FechaActual}" FontSize="12.5" Foreground="#5A6577"
+                        <TextBlock Text="{Binding FechaActual}" FontSize="13.5" Foreground="#5A6577"
                                    Margin="8,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Border>

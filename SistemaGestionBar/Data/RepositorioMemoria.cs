@@ -122,13 +122,13 @@ namespace SistemaGestionBar.Data
         {
             var alertas = _datos.Ingredientes
                 .Where(i => i.StockBajo)
-                .Select(i => new AlertaStock(i.Nombre, i.Stock, i.StockMinimo, i.UnidadMedida))
+                .Select(i => new AlertaStock(i.Nombre, i.Stock, i.StockMinimo, i.UnidadMedida, true, i.IdIngrediente))
                 .ToList();
 
             // Productos de venta directa: cada uno con su propio stock_minimo.
             alertas.AddRange(_datos.Productos
                 .Where(p => p.StockBajo)
-                .Select(p => new AlertaStock(p.Nombre, p.Stock, p.StockMinimo, "u.")));
+                .Select(p => new AlertaStock(p.Nombre, p.Stock, p.StockMinimo, "u.", false, p.IdProducto)));
 
             return alertas.OrderBy(a => a.Stock).ToList();
         }

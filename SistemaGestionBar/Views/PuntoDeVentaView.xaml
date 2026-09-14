@@ -57,7 +57,7 @@
         </Style>
 
         <Style x:Key="TituloCategoria" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="17" />
+            <Setter Property="FontSize" Value="18" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#2B3445" />
             <!-- Al repartirse el ancho, un nombre largo tiene que envolver y no recortarse -->
@@ -70,7 +70,7 @@
         </Style>
 
         <Style x:Key="SubtituloCategoria" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontSize" Value="13" />
             <Setter Property="Foreground" Value="#8A93A5" />
             <Setter Property="Margin" Value="0,4,0,0" />
             <Style.Triggers>
@@ -109,7 +109,7 @@
 
         <!-- ============ ETIQUETAS DE FORMULARIO DEL TICKET ============ -->
         <Style x:Key="EtiquetaCampo" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Foreground" Value="#8A93A5" />
             <Setter Property="Margin" Value="0,0,0,4" />
@@ -161,8 +161,8 @@
                                                      VerticalAlignment="Center" />
                         </Border>
                         <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
-                            <TextBlock Text="PUNTO DE VENTA" FontWeight="Bold" FontSize="15" Foreground="#1565C0" />
-                            <TextBlock Text="{Binding FechaActual}" FontSize="12" Foreground="#8A93A5" />
+                            <TextBlock Text="PUNTO DE VENTA" FontWeight="Bold" FontSize="16" Foreground="#1565C0" />
+                            <TextBlock Text="{Binding FechaActual}" FontSize="13" Foreground="#8A93A5" />
                         </StackPanel>
                     </StackPanel>
 
@@ -175,7 +175,7 @@
 
                         <Border Background="#F4F6FA" CornerRadius="12" Padding="14,8" Margin="0,0,10,0">
                             <TextBlock Text="{Binding TextoVentasDelDia}"
-                                       FontSize="12"
+                                       FontSize="13"
                                        FontWeight="SemiBold"
                                        Foreground="#5A6577" />
                         </Border>
@@ -200,7 +200,7 @@
                                                          Foreground="#E65100"
                                                          VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding TextoAlertas}"
-                                           FontSize="12"
+                                           FontSize="13"
                                            FontWeight="SemiBold"
                                            Foreground="#E65100"
                                            Margin="6,0,0,0"
@@ -215,13 +215,13 @@
                             <TextBlock Text="{Binding InicialesUsuario}"
                                        Foreground="White"
                                        FontWeight="Bold"
-                                       FontSize="13"
+                                       FontSize="14"
                                        HorizontalAlignment="Center"
                                        VerticalAlignment="Center" />
                         </Border>
                         <StackPanel VerticalAlignment="Center" Margin="10,0,10,0">
-                            <TextBlock Text="{Binding NombreUsuario}" FontSize="13" FontWeight="SemiBold" Foreground="#2B3445" />
-                            <TextBlock Text="{Binding RolUsuario}" FontSize="11" Foreground="#8A93A5" />
+                            <TextBlock Text="{Binding NombreUsuario}" FontSize="14" FontWeight="SemiBold" Foreground="#2B3445" />
+                            <TextBlock Text="{Binding RolUsuario}" FontSize="12" Foreground="#8A93A5" />
                         </StackPanel>
                         <!-- Volver al tablero: solo para el administrador (RF-09) -->
                         <Button materialDesign:ButtonAssist.CornerRadius="16"
@@ -229,7 +229,7 @@
                                 ToolTip="Volver al tablero de administración"
                                 Height="34"
                                 Padding="14,0"
-                                FontSize="12"
+                                FontSize="13"
                                 Foreground="#1565C0"
                                 BorderBrush="#BBD5F2"
                                 Cursor="Hand"
@@ -282,7 +282,7 @@
                              materialDesign:HintAssist.Hint="Buscar producto por nombre o descripción"
                              materialDesign:TextFieldAssist.DecorationVisibility="Hidden"
                              BorderThickness="0"
-                             FontSize="14"
+                             FontSize="15"
                              Margin="10,8"
                              VerticalContentAlignment="Center"
                              Text="{Binding TextoBusqueda, UpdateSourceTrigger=PropertyChanged, Delay=200}" />
@@ -321,7 +321,7 @@
 
             <TextBlock Grid.Row="3"
                        Text="Un clic en la tarjeta agrega el producto al ticket."
-                       FontSize="11"
+                       FontSize="12"
                        Foreground="#9AA3B2"
                        Margin="2,14,0,10" />
 
@@ -374,7 +374,7 @@
                                             <TextBlock Text="{Binding Iniciales}"
                                                        Foreground="#1565C0"
                                                        FontWeight="Bold"
-                                                       FontSize="28"
+                                                       FontSize="30"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center" />
                                         </Border>
@@ -418,7 +418,7 @@
                                                 </Style>
                                             </Border.Style>
                                             <TextBlock Text="{Binding TextoStock}"
-                                                       FontSize="10"
+                                                       FontSize="11"
                                                        FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
@@ -464,14 +464,14 @@
                                     <TextBlock Grid.Row="1"
                                                Text="{Binding Nombre}"
                                                FontWeight="SemiBold"
-                                               FontSize="14"
+                                               FontSize="15"
                                                Foreground="#2B3445"
                                                TextWrapping="Wrap"
                                                Margin="0,8,0,0" />
 
                                     <TextBlock Grid.Row="2"
                                                Text="{Binding Descripcion}"
-                                               FontSize="11"
+                                               FontSize="12"
                                                Foreground="#9AA3B2"
                                                TextWrapping="Wrap"
                                                TextTrimming="CharacterEllipsis"
@@ -487,13 +487,13 @@
                                         <TextBlock Grid.Column="0"
                                                    Text="{Binding Precio, StringFormat={}{0:C0}}"
                                                    FontWeight="Bold"
-                                                   FontSize="16"
+                                                   FontSize="17"
                                                    Foreground="#2E7D32"
                                                    VerticalAlignment="Center" />
 
                                         <StackPanel Grid.Column="1" Orientation="Horizontal">
                                             <TextBlock Text="{Binding CantidadEnTicket}"
-                                                       FontSize="14"
+                                                       FontSize="15"
                                                        FontWeight="Bold"
                                                        Foreground="#2B3445"
                                                        MinWidth="18"
@@ -552,10 +552,10 @@
 
                 <!-- ==== Titulo ==== -->
                 <Grid Grid.Row="0">
-                    <TextBlock Text="Ticket actual" FontSize="17" FontWeight="Bold" Foreground="#2B3445" />
+                    <TextBlock Text="Ticket actual" FontSize="18" FontWeight="Bold" Foreground="#2B3445" />
                     <Border Background="#E3F0FE" CornerRadius="10" Padding="10,4" HorizontalAlignment="Right">
                         <TextBlock Text="{Binding CantidadUnidades, StringFormat={}{0} u.}"
-                                   FontSize="12"
+                                   FontSize="13"
                                    FontWeight="SemiBold"
                                    Foreground="#1565C0" />
                     </Border>
@@ -583,7 +583,7 @@
 
                     <!-- Ubicación: solo en consumo local (RF-03) -->
                     <ComboBox materialDesign:HintAssist.Hint="Mesa o barra"
-                              FontSize="13"
+                              FontSize="14"
                               DisplayMemberPath="Descripcion"
                               ItemsSource="{Binding Ubicaciones}"
                               SelectedItem="{Binding UbicacionSeleccionada}">
@@ -602,7 +602,7 @@
                     <!-- Mesero: solo si la ubicación es una mesa. En la barra atiende
                          el barman, así que la venta va sin mesero (RF-02). -->
                     <ComboBox materialDesign:HintAssist.Hint="Mesero"
-                              FontSize="13"
+                              FontSize="14"
                               Margin="0,14,0,0"
                               DisplayMemberPath="NombreCompleto"
                               ItemsSource="{Binding Meseros}"
@@ -621,7 +621,7 @@
 
                     <ComboBox Style="{DynamicResource MaterialDesignOutlinedComboBox}"
                               materialDesign:HintAssist.Hint="Cliente"
-                              FontSize="13"
+                              FontSize="14"
                               Margin="0,14,0,0"
                               DisplayMemberPath="NombreMostrado"
                               ItemsSource="{Binding Clientes}"
@@ -629,7 +629,7 @@
 
                     <ComboBox Style="{DynamicResource MaterialDesignOutlinedComboBox}"
                               materialDesign:HintAssist.Hint="Método de pago"
-                              FontSize="13"
+                              FontSize="14"
                               Margin="0,14,0,0"
                               DisplayMemberPath="NombreMetodo"
                               ItemsSource="{Binding MetodosPago}"
@@ -640,7 +640,7 @@
                 <Grid Grid.Row="3" Margin="0,18,0,0">
 
                     <TextBlock Text="Todavía no agregaste productos"
-                               FontSize="13"
+                               FontSize="14"
                                Foreground="#9AA3B2"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center">
@@ -675,10 +675,10 @@
                                             <StackPanel Grid.Column="0" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Nombre}"
                                                            FontWeight="SemiBold"
-                                                           FontSize="13"
+                                                           FontSize="14"
                                                            Foreground="#2B3445"
                                                            TextWrapping="Wrap" />
-                                                <TextBlock FontSize="11"
+                                                <TextBlock FontSize="12"
                                                            Foreground="#8A93A5"
                                                            Margin="0,2,0,0">
                                                     <Run Text="{Binding Cantidad, Mode=OneWay}" />
@@ -700,7 +700,7 @@
                                             <TextBlock Grid.Column="2"
                                                        Text="{Binding Subtotal, StringFormat={}{0:C0}}"
                                                        FontWeight="Bold"
-                                                       FontSize="14"
+                                                       FontSize="15"
                                                        Foreground="#2E7D32"
                                                        VerticalAlignment="Center"
                                                        Margin="10,0,6,0" />
@@ -730,7 +730,7 @@
 
                     <!-- Mensajes de validacion del ViewModel -->
                     <TextBlock Text="{Binding Mensaje}"
-                               FontSize="12"
+                               FontSize="13"
                                FontWeight="SemiBold"
                                TextWrapping="Wrap"
                                Margin="0,0,0,10">
@@ -751,10 +751,10 @@
                     </TextBlock>
 
                     <Grid Margin="0,0,0,14">
-                        <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="15" Foreground="#2B3445" VerticalAlignment="Center" />
+                        <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="16" Foreground="#2B3445" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Total, StringFormat={}{0:C0}}"
                                    FontWeight="Bold"
-                                   FontSize="24"
+                                   FontSize="26"
                                    Foreground="#1565C0"
                                    HorizontalAlignment="Right" />
                     </Grid>
@@ -772,7 +772,7 @@
                                 Height="48"
                                 Width="110"
                                 Margin="0,0,10,0"
-                                FontSize="13"
+                                FontSize="14"
                                 Foreground="#C62828"
                                 BorderBrush="#F2C7C7"
                                 Cursor="Hand"
@@ -782,7 +782,7 @@
                                 Style="{DynamicResource MaterialDesignRaisedButton}"
                                 materialDesign:ButtonAssist.CornerRadius="16"
                                 Height="48"
-                                FontSize="14"
+                                FontSize="15"
                                 FontWeight="Bold"
                                 Background="#2E7D32"
                                 BorderBrush="#2E7D32"

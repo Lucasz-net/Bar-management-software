@@ -17,7 +17,7 @@ namespace SistemaGestionBar.ViewModels.Admin
     public class AdminVentasViewModel : SeccionAdminViewModel
     {
         public AdminVentasViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
-            : base(repositorio, dialogo, "Ventas", "ReceiptTextOutline",
+            : base(repositorio, dialogo, DestinoAdmin.Ventas, "Ventas", "ReceiptTextOutline",
                    "Historial de ventas con su detalle, cajero, mesero, ubicación y factura")
         {
             Ventas = new ObservableCollection<Venta>();

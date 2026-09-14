@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminInventarioViewModel}"
@@ -12,7 +13,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="340" />
+            <ColumnDefinition Width="372" />
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0" Margin="0,0,18,0">
@@ -23,7 +24,9 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- ==== ACCIONES Y BÚSQUEDA ==== -->
+            <!-- ==== ACCIONES Y BÚSQUEDA ====
+                 Acá quedó solo el alta: Editar y Eliminar viven al pie de la ficha del
+                 insumo, en el panel de la derecha. -->
             <Border Grid.Row="0" Style="{DynamicResource PanelAdmin}" Padding="14">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -44,28 +47,23 @@
                                  Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
 
-                    <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Style="{DynamicResource BotonPrimario}" Command="{Binding NuevoCommand}" Margin="0,0,8,0">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="PackageVariantPlus" Width="16" Height="16" VerticalAlignment="Center" />
-                                <TextBlock Text="Nuevo insumo" Margin="7,0,0,0" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-                        <Button Style="{DynamicResource BotonSecundario}" Command="{Binding EditarCommand}"
-                                Margin="0,0,8,0" ToolTip="Editar el insumo seleccionado" Padding="12,0">
-                            <materialDesign:PackIcon Kind="PencilOutline" Width="16" Height="16" />
-                        </Button>
-                        <Button Style="{DynamicResource BotonPeligro}" Command="{Binding EliminarCommand}"
-                                ToolTip="Eliminar del inventario" Padding="12,0">
-                            <materialDesign:PackIcon Kind="TrashCanOutline" Width="16" Height="16" />
-                        </Button>
-                    </StackPanel>
+                    <Button Grid.Column="1" Style="{DynamicResource BotonPrimario}" Command="{Binding NuevoCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="PackageVariantPlus" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock Text="Nuevo insumo" Margin="7,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                 </Grid>
             </Border>
 
             <!-- ==== FILTROS ==== -->
             <Grid Grid.Row="1" Margin="0,14,0,0">
-                <StackPanel Orientation="Horizontal">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <WrapPanel Grid.Column="0" Orientation="Horizontal">
                     <ListBox Style="{DynamicResource GrupoChips}"
                              DisplayMemberPath="Texto"
                              ItemsSource="{Binding OpcionesStock}"
@@ -75,9 +73,9 @@
                             Command="{Binding LimpiarFiltrosCommand}" ToolTip="Quitar todos los filtros">
                         <materialDesign:PackIcon Kind="FilterRemoveOutline" Width="16" Height="16" />
                     </Button>
-                </StackPanel>
+                </WrapPanel>
 
-                <TextBlock Style="{DynamicResource ContadorFiltro}" HorizontalAlignment="Right">
+                <TextBlock Grid.Column="1" Style="{DynamicResource ContadorFiltro}" HorizontalAlignment="Right" Margin="12,0,0,0">
                     <Run Text="{Binding CantidadVisible, Mode=OneWay}" FontWeight="SemiBold" />
                     <Run Text="de" />
                     <Run Text="{Binding CantidadTotal, Mode=OneWay}" />
@@ -93,13 +91,15 @@
             </Border>
 
             <!-- ==== GRILLA ==== -->
-            <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="10,6,10,10" Margin="0,14,0,0">
-                <Grid>
+            <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="8,6,8,10" Margin="0,14,0,0">
+                <Grid Style="{DynamicResource ZonaBloqueable}">
                     <DataGrid Style="{DynamicResource GrillaAdmin}"
                               ItemsSource="{Binding Vista}"
-                              SelectedItem="{Binding Seleccionado}">
+                              SelectedItem="{Binding Seleccionado}"
+                              b:SelectorAssist.DesplazarASeleccion="True"
+                              b:SelectorAssist.SeleccionBloqueada="{Binding EnEdicion}">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="INSUMO" Width="*" MinWidth="200" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="INSUMO" Width="*" MinWidth="218" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
@@ -109,9 +109,9 @@
                                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
                                             <StackPanel VerticalAlignment="Center" Margin="11,0,0,0">
-                                                <TextBlock Text="{Binding Nombre}" FontSize="13.5" FontWeight="SemiBold"
+                                                <TextBlock Text="{Binding Nombre}" FontSize="14.5" FontWeight="SemiBold"
                                                            Foreground="{DynamicResource TintaFuerte}" />
-                                                <TextBlock Text="{Binding UnidadMedida}" FontSize="11"
+                                                <TextBlock Text="{Binding UnidadMedida}" FontSize="12"
                                                            Foreground="{DynamicResource TintaSuave}" />
                                             </StackPanel>
                                         </StackPanel>
@@ -121,18 +121,18 @@
 
                             <!-- Stock con barra: el número solo no dice si alcanza; la barra
                                  contra el mínimo se lee de un vistazo. -->
-                            <DataGridTemplateColumn Header="STOCK" Width="230" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="STOCK" Width="248" MinWidth="248" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
                                             <Grid Margin="0,0,0,5">
-                                                <TextBlock FontSize="13" FontWeight="SemiBold"
+                                                <TextBlock FontSize="14" FontWeight="SemiBold"
                                                            Foreground="{DynamicResource TintaFuerte}">
                                                     <Run Text="{Binding Stock, StringFormat={}{0:0.##}, Mode=OneWay}" />
                                                     <Run Text="{Binding UnidadMedida, Mode=OneWay}" FontWeight="Normal"
                                                          Foreground="{DynamicResource TintaSuave}" />
                                                 </TextBlock>
-                                                <TextBlock HorizontalAlignment="Right" FontSize="11"
+                                                <TextBlock HorizontalAlignment="Right" FontSize="12"
                                                            Foreground="{DynamicResource TintaSuave}">
                                                     <Run Text="mín." />
                                                     <Run Text="{Binding StockMinimo, StringFormat={}{0:0.##}, Mode=OneWay}" />
@@ -149,7 +149,7 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="ESTADO" Width="130" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="ESTADO" Width="144" MinWidth="144" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border>
@@ -220,10 +220,20 @@
             </Border>
         </Grid>
 
-        <!-- ============ EDITOR ============ -->
-        <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" VerticalAlignment="Top">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+        <!-- ============================================================
+             PANEL DERECHO: FICHA O FORMULARIO
+             Misma mecánica que en Productos: la ficha del insumo elegido con Editar y
+             Eliminar al pie, o el formulario con Cancelar y Guardar.
+             ============================================================ -->
+        <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
                     <Border Style="{DynamicResource ChipIconoChico}">
                         <materialDesign:PackIcon Kind="PackageVariantClosed" Width="18" Height="18"
                                                  Foreground="{DynamicResource Acento}"
@@ -233,56 +243,223 @@
                                Margin="11,0,0,0" TextWrapping="Wrap" />
                 </StackPanel>
 
-                <StackPanel IsEnabled="{Binding EnEdicion}">
-                    <TextBlock Text="NOMBRE" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,5" />
-                    <TextBox Style="{DynamicResource CampoAdmin}"
-                             Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" />
+                <Grid Grid.Row="1">
 
-                    <TextBlock Text="UNIDAD DE MEDIDA" Style="{DynamicResource EtiquetaAdmin}" />
-                    <TextBox Style="{DynamicResource CampoAdmin}"
-                             materialDesign:HintAssist.Hint="ml, g, hojas, cubos..."
-                             Text="{Binding UnidadMedida, UpdateSourceTrigger=PropertyChanged}" />
+                    <!-- ======== CARA 1: FICHA ======== -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0" VerticalAlignment="Top">
+                        <ScrollViewer.Style>
+                            <Style TargetType="ScrollViewer">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding NoEnEdicion}" Value="True" />
+                                            <Condition Binding="{Binding HaySeleccion}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ScrollViewer.Style>
 
-                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Seleccionado.Nombre}" FontSize="18" FontWeight="Bold"
+                                       Foreground="{DynamicResource TintaFuerte}" TextWrapping="Wrap" />
+
+                            <Border Margin="0,8,0,0">
+                                <Border.Style>
+                                    <Style TargetType="Border" BasedOn="{StaticResource ChipGrilla}">
+                                        <Setter Property="Background" Value="{DynamicResource ExitoSuave}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Seleccionado.StockBajo}" Value="True">
+                                                <Setter Property="Background" Value="{DynamicResource AvisoSuave}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource TextoChip}">
+                                            <Setter Property="Text" Value="STOCK EN NIVEL" />
+                                            <Setter Property="Foreground" Value="#17703F" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Seleccionado.StockBajo}" Value="True">
+                                                    <Setter Property="Text" Value="HAY QUE REPONER" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource Aviso}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Border>
+
+                            <Border Style="{DynamicResource SubPanel}" Margin="0,16,0,0">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,9">
+                                        <TextBlock Text="Stock actual" Style="{DynamicResource RotuloDato}" />
+                                        <TextBlock Style="{DynamicResource ValorDato}" FontSize="16">
+                                            <Run Text="{Binding Seleccionado.Stock, StringFormat={}{0:0.##}, Mode=OneWay}" />
+                                            <Run Text="{Binding Seleccionado.UnidadMedida, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </Grid>
+                                    <Grid Margin="0,0,0,9">
+                                        <TextBlock Text="Punto de reposición" Style="{DynamicResource RotuloDato}" />
+                                        <TextBlock Style="{DynamicResource ValorDato}">
+                                            <Run Text="{Binding Seleccionado.StockMinimo, StringFormat={}{0:0.##}, Mode=OneWay}" />
+                                            <Run Text="{Binding Seleccionado.UnidadMedida, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </Grid>
+                                    <Grid>
+                                        <TextBlock Text="Falta para el mínimo" Style="{DynamicResource RotuloDato}" />
+                                        <TextBlock Style="{DynamicResource ValorDato}"
+                                                   Foreground="{DynamicResource Aviso}">
+                                            <Run Text="{Binding FaltanteParaElMinimo, StringFormat={}{0:0.##}, Mode=OneWay}" />
+                                            <Run Text="{Binding Seleccionado.UnidadMedida, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="BellRingOutline" Width="16" Height="16"
+                                                             Foreground="{DynamicResource Aviso}"
+                                                             VerticalAlignment="Top" Margin="0,1,0,0" />
+                                    <TextBlock Style="{DynamicResource TextoAyuda}" Margin="9,0,0,0" Width="252"
+                                               Text="Al llegar al mínimo, el insumo aparece en las alertas del resumen y del punto de venta." />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Sin nada elegido y sin formulario abierto -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding NoEnEdicion}" Value="True" />
+                                            <Condition Binding="{Binding HaySeleccion}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <materialDesign:PackIcon Kind="GestureTapButton" Width="36" Height="36"
+                                                 Foreground="{DynamicResource Linea}" HorizontalAlignment="Center" />
+                        <TextBlock Style="{DynamicResource TextoVacio}" Margin="0,12,0,0"
+                                   Text="Elegí un insumo de la lista para ver su ficha, editarlo o eliminarlo." />
+                    </StackPanel>
+
+                    <!-- ======== CARA 2: FORMULARIO ======== -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0" VerticalAlignment="Top"
+                                  Visibility="{Binding EnEdicion, Converter={StaticResource BoolAVisibilidad}}">
+                        <StackPanel>
+                            <TextBlock Text="NOMBRE" Style="{DynamicResource EtiquetaAdmin}" />
+                            <TextBox Style="{DynamicResource CampoAdmin}"
+                                     materialDesign:HintAssist.Hint="Ej: Ron blanco"
+                                     Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <TextBlock Text="UNIDAD DE MEDIDA" Style="{DynamicResource EtiquetaAdmin}" />
+                            <TextBox Style="{DynamicResource CampoAdmin}"
+                                     materialDesign:HintAssist.Hint="ml, g, hojas, cubos..."
+                                     Text="{Binding UnidadMedida, UpdateSourceTrigger=PropertyChanged}" />
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                                    <TextBlock Text="STOCK ACTUAL" Style="{DynamicResource EtiquetaAdmin}" />
+                                    <TextBox Style="{DynamicResource CampoAngosto}"
+                                             Text="{Binding Stock, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                                    <TextBlock Text="STOCK MÍNIMO" Style="{DynamicResource EtiquetaAdmin}" />
+                                    <TextBox Style="{DynamicResource CampoAngosto}"
+                                             Text="{Binding StockMinimo, UpdateSourceTrigger=PropertyChanged}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Border Style="{DynamicResource SubPanel}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="BellRingOutline" Width="16" Height="16"
+                                                             Foreground="{DynamicResource Aviso}"
+                                                             VerticalAlignment="Top" Margin="0,1,0,0" />
+                                    <TextBlock Style="{DynamicResource TextoAyuda}" Margin="9,0,0,0" Width="252"
+                                               Text="Al llegar al mínimo, el insumo aparece en las alertas del resumen y del punto de venta." />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ==== PIE DE ACCIONES ==== -->
+                <Grid Grid.Row="2">
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding NoEnEdicion}" Value="True" />
+                                            <Condition Binding="{Binding HaySeleccion}" Value="True" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,6,0">
-                            <TextBlock Text="STOCK ACTUAL" Style="{DynamicResource EtiquetaAdmin}" />
-                            <TextBox Style="{DynamicResource CampoAdmin}"
-                                     Text="{Binding Stock, UpdateSourceTrigger=PropertyChanged}" />
-                        </StackPanel>
-                        <StackPanel Grid.Column="1" Margin="6,0,0,0">
-                            <TextBlock Text="STOCK MÍNIMO" Style="{DynamicResource EtiquetaAdmin}" />
-                            <TextBox Style="{DynamicResource CampoAdmin}"
-                                     Text="{Binding StockMinimo, UpdateSourceTrigger=PropertyChanged}" />
-                        </StackPanel>
+
+                        <Button Grid.Column="0" Style="{DynamicResource BotonPanel}" Margin="0,0,5,0"
+                                Command="{Binding EditarCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="PencilOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                                <TextBlock Text="Editar" Margin="7,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="1" Style="{DynamicResource BotonPanelPeligro}" Margin="5,0,0,0"
+                                Command="{Binding EliminarCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="TrashCanOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                                <TextBlock Text="Eliminar" Margin="7,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
                     </Grid>
 
-                    <Border Style="{DynamicResource SubPanel}" Margin="0,16,0,0">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="BellRingOutline" Width="16" Height="16"
-                                                     Foreground="{DynamicResource Aviso}" VerticalAlignment="Top" Margin="0,1,0,0" />
-                            <TextBlock Style="{DynamicResource TextoAyuda}" Margin="9,0,0,0" Width="230"
-                                       Text="Al llegar al mínimo, el insumo aparece en las alertas del resumen y del punto de venta (RF-08)." />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                    <StackPanel Visibility="{Binding EnEdicion, Converter={StaticResource BoolAVisibilidad}}">
+                        <Border Style="{DynamicResource PanelValidacion}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16"
+                                                         Foreground="#A93226" VerticalAlignment="Top" Margin="0,1,9,0" />
+                                <TextBlock Style="{DynamicResource AvisoValidacion}" Width="270"
+                                           Text="{Binding ResumenDeErrores}" />
+                            </StackPanel>
+                        </Border>
 
-                <TextBlock Style="{DynamicResource AvisoValidacion}" Text="{Binding ResumenDeErrores}" />
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
-                    <Button Style="{DynamicResource BotonSecundario}" Content="Cancelar"
-                            Margin="0,0,8,0" Command="{Binding CancelarCommand}" />
-                    <Button Style="{DynamicResource BotonExito}" Command="{Binding GuardarCommand}" Padding="20,0">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ContentSaveOutline" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="Guardar" Margin="7,0,0,0" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+                            <Button Style="{DynamicResource BotonSecundario}" Content="Cancelar"
+                                    Margin="0,0,8,0" Command="{Binding CancelarCommand}" />
+                            <Button Style="{DynamicResource BotonExito}" Command="{Binding GuardarCommand}" Padding="20,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ContentSaveOutline" Width="16" Height="16" VerticalAlignment="Center" />
+                                    <TextBlock Text="Guardar" Margin="7,0,0,0" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
-                    </Button>
-                </StackPanel>
-            </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>

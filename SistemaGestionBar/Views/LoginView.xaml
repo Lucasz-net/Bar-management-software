@@ -32,7 +32,7 @@
             <Setter Property="BorderBrush" Value="#E5E7EB" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontSize" Value="14" />
         </Style>
 
         <Style x:Key="SimplePasswordBox" TargetType="PasswordBox" BasedOn="{StaticResource InputBase}">
@@ -40,7 +40,7 @@
             <Setter Property="BorderBrush" Value="#E5E7EB" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontSize" Value="14" />
         </Style>
 
         <Style x:Key="PrimaryButton" TargetType="Button">
@@ -74,19 +74,19 @@
                 <!-- Header -->
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
                     <Border Width="48" Height="48" Background="{StaticResource AccentBrush}" CornerRadius="10">
-                        <TextBlock Text="B" Foreground="White" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock Text="B" Foreground="White" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </Border>
                     <StackPanel Margin="12,0,0,0">
                         <TextBlock Text="Sistema Gestión Bar" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" />
-                        <TextBlock Text="Accede a tu cuenta" FontSize="12" Foreground="{StaticResource SubtleBrush}" />
+                        <TextBlock Text="Accede a tu cuenta" FontSize="13" Foreground="{StaticResource SubtleBrush}" />
                     </StackPanel>
                 </StackPanel>
 
-                <TextBlock Text="Iniciar sesión" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" Margin="0,6,0,8" />
-                <TextBlock Text="Introduce tus credenciales para continuar" FontSize="12" Foreground="{StaticResource SubtleBrush}" Margin="0,0,0,12" />
+                <TextBlock Text="Iniciar sesión" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" Margin="0,6,0,8" />
+                <TextBlock Text="Introduce tus credenciales para continuar" FontSize="13" Foreground="{StaticResource SubtleBrush}" Margin="0,0,0,12" />
 
                 <!-- Mensaje de estado (ViewModel) -->
-                <TextBlock Text="{Binding Mensaje}" TextWrapping="Wrap" Margin="0,0,0,8" FontSize="12">
+                <TextBlock Text="{Binding Mensaje}" TextWrapping="Wrap" Margin="0,0,0,8" FontSize="13">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed" />
@@ -110,17 +110,17 @@
                 <Button Style="{StaticResource PrimaryButton}" Content="Entrar" Command="{Binding IngresarCommand}" />
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
-                    <TextBlock Text="¿No tienes una cuenta?" Foreground="{StaticResource SubtleBrush}" FontSize="12" />
-                    <TextBlock Text=" Registrarse" Foreground="{StaticResource AccentBrush}" FontSize="12" FontWeight="SemiBold" Cursor="Hand" />
+                    <TextBlock Text="¿No tienes una cuenta?" Foreground="{StaticResource SubtleBrush}" FontSize="13" />
+                    <TextBlock Text=" Registrarse" Foreground="{StaticResource AccentBrush}" FontSize="13" FontWeight="SemiBold" Cursor="Hand" />
                 </StackPanel>
 
                 <!-- Informational box (kept for usability during design) -->
                 <Border Background="#F4F7FB" CornerRadius="10" Padding="12" Margin="0,18,0,0">
                     <StackPanel>
-                        <TextBlock Text="Correos de trabajo de prueba" FontSize="11" FontWeight="Bold" Foreground="#7A8699" Margin="0,0,0,4"/>
-                        <TextBlock Text="admin@bar.com · gerente@bar.com" FontSize="11" Foreground="#7A8699"/>
-                        <TextBlock Text="vendedor@bar.com · mesero@bar.com · valentina@bar.com" FontSize="11" Foreground="#7A8699"/>
-                        <TextBlock Text="Contraseña: 12345678" FontSize="11" Foreground="#7A8699" Margin="0,4,0,0"/>
+                        <TextBlock Text="Correos de trabajo de prueba" FontSize="12" FontWeight="Bold" Foreground="#7A8699" Margin="0,0,0,4"/>
+                        <TextBlock Text="admin@bar.com · gerente@bar.com" FontSize="12" Foreground="#7A8699"/>
+                        <TextBlock Text="vendedor@bar.com · mesero@bar.com · valentina@bar.com" FontSize="12" Foreground="#7A8699"/>
+                        <TextBlock Text="Contraseña: 12345678" FontSize="12" Foreground="#7A8699" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
             </StackPanel>

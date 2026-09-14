@@ -81,8 +81,16 @@
         </Border>
 
         <!-- ==== FILTROS ==== -->
+        <!-- Los filtros en un WrapPanel y el contador en su propia columna: apilados en
+             la misma celda, al angostar la ventana el contador se montaba encima del
+             último chip. -->
         <Grid Grid.Row="2" Margin="0,14,0,0">
-            <StackPanel Orientation="Horizontal">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <WrapPanel Grid.Column="0" Orientation="Horizontal">
                 <ListBox Style="{DynamicResource GrupoChips}"
                          DisplayMemberPath="Texto"
                          ItemsSource="{Binding OpcionesPeriodo}"
@@ -99,9 +107,10 @@
                         Command="{Binding LimpiarFiltrosCommand}" ToolTip="Quitar todos los filtros">
                     <materialDesign:PackIcon Kind="FilterRemoveOutline" Width="16" Height="16" />
                 </Button>
-            </StackPanel>
+            </WrapPanel>
 
-            <TextBlock Style="{DynamicResource ContadorFiltro}" HorizontalAlignment="Right">
+            <TextBlock Grid.Column="1" Style="{DynamicResource ContadorFiltro}"
+                       HorizontalAlignment="Right" Margin="12,0,0,0">
                 <Run Text="{Binding CantidadVisible, Mode=OneWay}" FontWeight="SemiBold" />
                 <Run Text="de" />
                 <Run Text="{Binding CantidadTotal, Mode=OneWay}" />
@@ -113,31 +122,31 @@
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="372" />
+                <ColumnDefinition Width="394" />
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Padding="10,6,10,10" Margin="0,0,18,0">
+            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Padding="8,6,8,10" Margin="0,0,18,0">
                 <Grid>
                     <DataGrid Style="{DynamicResource GrillaAdmin}"
                               ItemsSource="{Binding Vista}"
                               SelectedItem="{Binding Seleccionada}">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="VENTA" Width="132" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="VENTA" Width="144" MinWidth="144" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center" Margin="6,0,0,0">
-                                            <TextBlock FontSize="13.5" FontWeight="SemiBold"
+                                            <TextBlock FontSize="14.5" FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TintaFuerte}">
                                                 <Run Text="#" /><Run Text="{Binding IdVenta, Mode=OneWay}" />
                                             </TextBlock>
                                             <TextBlock Text="{Binding FechaHora, StringFormat={}{0:dd/MM/yy HH:mm}}"
-                                                       FontSize="11" Foreground="{DynamicResource TintaSuave}" />
+                                                       FontSize="12" Foreground="{DynamicResource TintaSuave}" />
                                         </StackPanel>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="DÓNDE" Width="145" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="DÓNDE" Width="158" MinWidth="158" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -159,8 +168,8 @@
                                                      eslabon del camino (Ubicacion) y no el valor final, WPF usa el
                                                      Fallback y el TargetNullValue nunca llega a aplicarse. -->
                                                 <TextBlock Text="{Binding Ubicacion.NombreUbicacion, TargetNullValue='Para llevar', FallbackValue='Para llevar'}"
-                                                           FontSize="12.5" Foreground="{DynamicResource TintaFuerte}" />
-                                                <TextBlock Text="{Binding MetodoPago.NombreMetodo}" FontSize="11"
+                                                           FontSize="13.5" Foreground="{DynamicResource TintaFuerte}" />
+                                                <TextBlock Text="{Binding MetodoPago.NombreMetodo}" FontSize="12"
                                                            Foreground="{DynamicResource TintaSuave}" />
                                             </StackPanel>
                                         </StackPanel>
@@ -168,13 +177,13 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="QUIÉN ATENDIÓ" Width="*" MinWidth="175" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="QUIÉN ATENDIÓ" Width="*" MinWidth="190" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Cajero.NombreCompleto}" FontSize="12.5"
+                                            <TextBlock Text="{Binding Cajero.NombreCompleto}" FontSize="13.5"
                                                        Foreground="{DynamicResource TintaFuerte}" />
-                                            <TextBlock FontSize="11" Foreground="{DynamicResource TintaSuave}">
+                                            <TextBlock FontSize="12" Foreground="{DynamicResource TintaSuave}">
                                                 <Run Text="mesero:" />
                                                 <Run Text="{Binding Mesero.NombreCompleto, Mode=OneWay, TargetNullValue='sin mesero', FallbackValue='sin mesero'}" />
                                             </TextBlock>
@@ -183,14 +192,14 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTextColumn Header="CLIENTE" Width="*" MinWidth="140"
+                            <DataGridTextColumn Header="CLIENTE" Width="*" MinWidth="152"
                                                 Binding="{Binding Cliente.NombreMostrado}" />
 
-                            <DataGridTemplateColumn Header="TOTAL" Width="105" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="TOTAL" Width="116" MinWidth="116" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding Total, StringFormat={}{0:C0}}"
-                                                   FontSize="13.5" FontWeight="Bold"
+                                                   FontSize="14.5" FontWeight="Bold"
                                                    Foreground="{DynamicResource Acento}"
                                                    HorizontalAlignment="Right" VerticalAlignment="Center"
                                                    Margin="0,0,10,0" />
@@ -254,26 +263,26 @@
                             <StackPanel>
                                 <Grid Margin="0,0,0,7">
                                     <TextBlock Text="Cliente" Style="{DynamicResource RotuloIndicador}" Margin="0" />
-                                    <TextBlock Text="{Binding Seleccionada.Cliente.NombreMostrado}" FontSize="12.5"
+                                    <TextBlock Text="{Binding Seleccionada.Cliente.NombreMostrado}" FontSize="13.5"
                                                FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}"
                                                HorizontalAlignment="Right" />
                                 </Grid>
                                 <Grid Margin="0,0,0,7">
                                     <TextBlock Text="Método de pago" Style="{DynamicResource RotuloIndicador}" Margin="0" />
-                                    <TextBlock Text="{Binding Seleccionada.MetodoPago.NombreMetodo}" FontSize="12.5"
+                                    <TextBlock Text="{Binding Seleccionada.MetodoPago.NombreMetodo}" FontSize="13.5"
                                                FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}"
                                                HorizontalAlignment="Right" />
                                 </Grid>
                                 <Grid Margin="0,0,0,7">
                                     <TextBlock Text="Estado" Style="{DynamicResource RotuloIndicador}" Margin="0" />
-                                    <TextBlock Text="{Binding Seleccionada.EstadoVenta}" FontSize="12.5"
+                                    <TextBlock Text="{Binding Seleccionada.EstadoVenta}" FontSize="13.5"
                                                FontWeight="SemiBold" Foreground="{DynamicResource Exito}"
                                                HorizontalAlignment="Right" />
                                 </Grid>
                                 <Grid>
                                     <TextBlock Text="Factura" Style="{DynamicResource RotuloIndicador}" Margin="0" />
                                     <TextBlock Text="{Binding FacturaDeLaVenta.Numero, TargetNullValue='sin emitir', FallbackValue='sin emitir'}"
-                                               FontSize="12.5" FontWeight="SemiBold"
+                                               FontSize="13.5" FontWeight="SemiBold"
                                                Foreground="{DynamicResource TintaFuerte}"
                                                HorizontalAlignment="Right" />
                                 </Grid>
@@ -293,18 +302,18 @@
                               ItemsSource="{Binding Detalle}" RowHeight="38">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="PRODUCTO" Binding="{Binding Producto.Nombre}" Width="*" />
-                            <DataGridTextColumn Header="CANT." Binding="{Binding Cantidad}" Width="52" />
-                            <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat={}{0:C0}}" Width="90" />
+                            <DataGridTextColumn Header="CANT." Binding="{Binding Cantidad}" Width="58" MinWidth="58" />
+                            <DataGridTextColumn Header="SUBTOTAL" Binding="{Binding Subtotal, StringFormat={}{0:C0}}" Width="98" MinWidth="98" />
                         </DataGrid.Columns>
                     </DataGrid>
 
                     <Border Grid.Row="3" Background="{DynamicResource AcentoSuave}" CornerRadius="12"
                             Padding="16,12" Margin="0,14,0,0">
                         <Grid>
-                            <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="12"
+                            <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="13"
                                        Foreground="{DynamicResource TintaFuerte}" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding Seleccionada.Total, StringFormat={}{0:C0}}"
-                                       FontWeight="Bold" FontSize="20" Foreground="{DynamicResource Acento}"
+                                       FontWeight="Bold" FontSize="22" Foreground="{DynamicResource Acento}"
                                        HorizontalAlignment="Right" />
                         </Grid>
                     </Border>

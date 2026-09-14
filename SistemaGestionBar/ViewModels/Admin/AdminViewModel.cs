@@ -43,6 +43,17 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (esAdministrador)
                 Secciones.Add(new AdminParametrosViewModel(repositorio, dialogo));
 
+            // Las secciones no se conocen entre sí: piden "llevame a Productos" y este
+            // router resuelve si esa sección existe para el rol actual. Además se les
+            // avisa qué destinos hay, para que no ofrezcan atajos a pantallas que este
+            // usuario no tiene.
+            var destinos = Secciones.Select(s => s.Destino).ToList();
+            foreach (var seccion in Secciones)
+            {
+                seccion.NavegacionSolicitada += AlPedirNavegacion;
+                seccion.ConfigurarDestinos(destinos);
+            }
+
             SeleccionarSeccionCommand = new RelayCommand<SeccionAdminViewModel>(SeleccionarSeccion);
             CerrarSesionCommand = new RelayCommand(() => CierreSesionSolicitado?.Invoke(this, EventArgs.Empty));
             IrAlPuntoDeVentaCommand = new RelayCommand(() => PuntoDeVentaSolicitado?.Invoke(this, EventArgs.Empty));
@@ -100,6 +111,24 @@ namespace SistemaGestionBar.ViewModels.Admin
             // pantalla (o una venta nueva) se ven sin reiniciar la aplicación.
             seccion.Recargar();
             SeccionActual = seccion;
+        }
+
+        /// <summary>
+        /// Resuelve un pedido de navegación hecho desde otra sección (las tarjetas del
+        /// resumen, el botón Reponer de una alerta). Si el rol no tiene esa sección el
+        /// pedido se ignora en silencio: lo que no está no se puede alcanzar (RF-09).
+        /// </summary>
+        private void AlPedirNavegacion(object? origen, PedidoDeNavegacion pedido)
+        {
+            var destino = Secciones.FirstOrDefault(s => s.Destino == pedido.Destino);
+            if (destino is null)
+                return;
+
+            SeleccionarSeccion(destino);
+
+            // Después de Recargar, para que la sección ya tenga sus listas cargadas
+            // cuando busque el ítem que le señalaron.
+            destino.Enfocar(pedido.Foco);
         }
     }
 }

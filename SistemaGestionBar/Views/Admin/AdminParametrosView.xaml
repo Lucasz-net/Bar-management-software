@@ -13,7 +13,7 @@
         <!-- Encabezado repetido de cada tarjeta paramétrica: chip de color con el icono,
              título y bajada. Definido una vez porque las tres tarjetas son iguales. -->
         <Style x:Key="TituloTarjeta" TargetType="TextBlock" BasedOn="{StaticResource TituloEnLinea}">
-            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontSize" Value="15" />
         </Style>
     </UserControl.Resources>
 
@@ -62,7 +62,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="NOMBRE" Width="*"
                                                 Binding="{Binding NombreCategoria, UpdateSourceTrigger=PropertyChanged}" />
-                            <DataGridTemplateColumn Width="78" IsReadOnly="True">
+                            <DataGridTemplateColumn Width="86" MinWidth="86" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -120,7 +120,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="NOMBRE" Width="*"
                                                 Binding="{Binding NombreMetodo, UpdateSourceTrigger=PropertyChanged}" />
-                            <DataGridTemplateColumn Width="78" IsReadOnly="True">
+                            <DataGridTemplateColumn Width="86" MinWidth="86" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
@@ -178,14 +178,14 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="NOMBRE" Width="*"
                                                 Binding="{Binding NombreUbicacion, UpdateSourceTrigger=PropertyChanged}" />
-                            <DataGridTextColumn Header="CAPACIDAD" Width="95"
+                            <DataGridTextColumn Header="CAPACIDAD" Width="104" MinWidth="104"
                                                 Binding="{Binding Capacidad, UpdateSourceTrigger=PropertyChanged}" />
                             <!-- Estatica a proposito: un DataGridComboBoxColumn no forma parte del
                                  arbol visual, asi que no hereda el DataContext. -->
-                            <DataGridComboBoxColumn Header="TIPO" Width="100"
+                            <DataGridComboBoxColumn Header="TIPO" Width="110" MinWidth="110"
                                                     SelectedItemBinding="{Binding Tipo, UpdateSourceTrigger=PropertyChanged}"
                                                     ItemsSource="{Binding Source={x:Static vm:AdminParametrosViewModel.TodosLosTipos}}" />
-                            <DataGridTemplateColumn Width="78" IsReadOnly="True">
+                            <DataGridTemplateColumn Width="86" MinWidth="86" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal">
