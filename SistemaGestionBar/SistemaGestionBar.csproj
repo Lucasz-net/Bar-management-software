@@ -21,8 +21,7 @@
        la condicion: en una copia recien clonada todavia no existe y el build no debe fallar. -->
   <ItemGroup>
     <None Update="conexion.ejemplo.txt" CopyToOutputDirectory="PreserveNewest" />
-    <None Update="conexion.local.txt" CopyToOutputDirectory="PreserveNewest"
-          Condition="Exists('conexion.local.txt')" />
+    <None Update="conexion.local.txt" CopyToOutputDirectory="PreserveNewest" Condition="Exists('conexion.local.txt')" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +33,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <PackageReference Include="QuestPDF" Version="2026.9.0" />
   </ItemGroup>
 
 </Project>

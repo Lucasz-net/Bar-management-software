@@ -300,6 +300,7 @@ namespace SistemaGestionBar.ViewModels.Admin
         Inventario,
         Personas,
         Ventas,
+        Reportes,
         Parametros
     }
 

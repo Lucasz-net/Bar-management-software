@@ -18,5 +18,17 @@ namespace SistemaGestionBar.Services
         void Informar(string titulo, string mensaje);
 
         bool Confirmar(string titulo, string mensaje);
+
+        /// <summary>
+        /// Pregunta al usuario dónde guardar un PDF. Devuelve la ruta elegida, o null si
+        /// cerró el cuadro sin elegir.
+        ///
+        /// Va acá y no en el ViewModel por la misma razón que el resto: SaveFileDialog es
+        /// WPF, y el ViewModel no debe conocer WPF.
+        /// </summary>
+        string? ElegirDondeGuardarPdf(string nombreSugerido);
+
+        /// <summary>Abre un archivo con el programa que el sistema tenga asociado.</summary>
+        void AbrirArchivo(string ruta);
     }
 }

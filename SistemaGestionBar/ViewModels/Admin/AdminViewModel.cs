@@ -40,6 +40,11 @@ namespace SistemaGestionBar.ViewModels.Admin
 
             Secciones.Add(new AdminVentasViewModel(repositorio, dialogo));
 
+            // Reportes lo ven los dos roles: es información de gestión del negocio, que es
+            // exactamente el alcance del gerente. Además no escribe nada —arma un PDF y lo
+            // guarda en el disco del usuario—, así que no hay riesgo en dárselo.
+            Secciones.Add(new AdminReportesViewModel(repositorio, dialogo, UsuarioActual));
+
             if (esAdministrador)
                 Secciones.Add(new AdminParametrosViewModel(repositorio, dialogo));
 

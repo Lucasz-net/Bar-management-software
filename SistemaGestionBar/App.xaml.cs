@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Threading;
 using System.Windows;
 using System.Windows.Markup;
+using QuestPDF.Infrastructure;
 using SistemaGestionBar.Data;
 using SistemaGestionBar.Services;
 
@@ -24,6 +25,11 @@ namespace SistemaGestionBar
             FrameworkElement.LanguageProperty.OverrideMetadata(
                 typeof(FrameworkElement),
                 new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(cultura.IetfLanguageTag)));
+
+            // QuestPDF exige declarar la licencia antes de generar el primer PDF. Community
+            // es la gratuita y alcanza de sobra: es para uso no comercial y para empresas
+            // chicas. Sin esta linea, el primer reporte tira una excepcion.
+            QuestPDF.Settings.License = LicenseType.Community;
 
             // La base se prepara ANTES de abrir la ventana. Si algo falla —MySQL apagado,
             // falta el archivo de conexión, la clave cambió— hay que decirlo con un

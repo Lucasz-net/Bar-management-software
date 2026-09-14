@@ -61,6 +61,9 @@
             <DataTemplate DataType="{x:Type vmAdmin:AdminVentasViewModel}">
                 <viewsAdmin:AdminVentasView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminReportesViewModel}">
+                <viewsAdmin:AdminReportesView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type vmAdmin:AdminParametrosViewModel}">
                 <viewsAdmin:AdminParametrosView />
             </DataTemplate>
