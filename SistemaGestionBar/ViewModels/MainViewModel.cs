@@ -23,9 +23,20 @@ namespace SistemaGestionBar.ViewModels
         {
         }
 
-        private MainViewModel(SesionActual sesion)
-            : this(new RepositorioMemoria(sesion), new ServicioDialogo(), sesion)
+        /// <summary>
+        /// El arranque real de la aplicación: se conecta a MySQL, aplica las migraciones
+        /// que falten y siembra los datos si la base está vacía. Recién entonces se
+        /// construye el repositorio que van a usar todas las pantallas.
+        /// </summary>
+        private MainViewModel(SesionActual sesion) : this(Conectar(sesion), new ServicioDialogo(), sesion)
         {
+        }
+
+        private static IRepositorioBar Conectar(SesionActual sesion)
+        {
+            var fabrica = new FabricaDeContexto(sesion);
+            SembradorDeDatos.Preparar(fabrica);
+            return new RepositorioSql(fabrica, sesion);
         }
 
         public MainViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo, SesionActual sesion)

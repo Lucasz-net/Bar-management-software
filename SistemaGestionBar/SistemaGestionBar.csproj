@@ -16,10 +16,24 @@
     <Resource Include="Assets\**\*.jpg" />
   </ItemGroup>
 
+  <!-- La cadena de conexion viaja junto al .exe, como haria un appsettings.json.
+       El archivo .local lleva la contrasena de cada uno y esta en el .gitignore, por eso
+       la condicion: en una copia recien clonada todavia no existe y el build no debe fallar. -->
+  <ItemGroup>
+    <None Update="conexion.ejemplo.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="conexion.local.txt" CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('conexion.local.txt')" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="MaterialDesignThemes" Version="5.3.2" />
     <PackageReference Include="MaterialDesignColors" Version="5.3.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
   </ItemGroup>
 
 </Project>

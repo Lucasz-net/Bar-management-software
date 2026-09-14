@@ -373,3 +373,7 @@ CLAUDE.local.md
 .aider*
 .cursor/
 .windsurf/
+
+# Cadena de conexion local a MySQL: cada integrante crea la suya.
+# Lleva la contrasena de la base, asi que NUNCA se sube.
+conexion.local.txt

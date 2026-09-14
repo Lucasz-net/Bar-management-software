@@ -294,6 +294,12 @@ namespace SistemaGestionBar.Data
             int idDetalle = 1;
             int idFactura = 1;
 
+            // Contador GLOBAL y no uno por comprobante: id_factura_linea es la clave
+            // primaria de la tabla. Reiniciándolo en cada factura, la segunda repetía
+            // los ids de la primera. En memoria no molestaba porque nadie controlaba la
+            // unicidad; contra la base es una clave duplicada.
+            int idLinea = 1;
+
             void Registrar(
                 int diasAtras, int hora, int minuto,
                 int idCajero, int idCliente, int idMetodoPago,
@@ -357,7 +363,6 @@ namespace SistemaGestionBar.Data
                     Venta = venta
                 };
 
-                int idLinea = 1;
                 foreach (var detalle in venta.Detalles)
                 {
                     factura.Lineas.Add(new FacturaLinea
