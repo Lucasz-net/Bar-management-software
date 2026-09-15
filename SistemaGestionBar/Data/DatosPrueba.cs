@@ -28,7 +28,6 @@ namespace SistemaGestionBar.Data
         public List<MetodoPago> MetodosPago { get; } = new();
         public List<Ubicacion> Ubicaciones { get; } = new();
         public List<Venta> Ventas { get; } = new();
-        public List<Factura> Facturas { get; } = new();
 
         /// <summary>Clave en texto plano de los cuatro usuarios de prueba.</summary>
         public const string ClaveDemo = "12345678";
@@ -276,10 +275,11 @@ namespace SistemaGestionBar.Data
         }
 
         // ---------------------------------------------------------------
-        // Venta + Venta_Detalle + Factura: una semana de operación del bar.
+        // Venta + Venta_Detalle: una semana de operación del bar.
         //
         // Sin esto, el historial de ventas y los indicadores del resumen arrancan
-        // vacíos y no hay forma de ver funcionar la sección Ventas ni las facturas.
+        // vacíos y no hay forma de ver funcionar la sección Ventas ni las facturas
+        // (que ahora se arman al vuelo a partir de estas mismas ventas).
         //
         // Dos decisiones deliberadas:
         //  - Las ventas se siembran COMO DATOS, no llamando a RegistrarVenta: son ventas
@@ -292,13 +292,6 @@ namespace SistemaGestionBar.Data
         {
             int idVenta = 1;
             int idDetalle = 1;
-            int idFactura = 1;
-
-            // Contador GLOBAL y no uno por comprobante: id_factura_linea es la clave
-            // primaria de la tabla. Reiniciándolo en cada factura, la segunda repetía
-            // los ids de la primera. En memoria no molestaba porque nadie controlaba la
-            // unicidad; contra la base es una clave duplicada.
-            int idLinea = 1;
 
             void Registrar(
                 int diasAtras, int hora, int minuto,
@@ -346,37 +339,6 @@ namespace SistemaGestionBar.Data
                 }
 
                 Ventas.Add(venta);
-
-                // Cada venta confirmada tiene su comprobante, igual que las que se
-                // cobran desde el punto de venta.
-                var factura = new Factura
-                {
-                    IdFactura = idFactura,
-                    IdVenta = venta.IdVenta,
-                    Numero = $"F-{idFactura:0000}",
-                    FechaEmision = fecha,
-                    Importe = venta.Total,
-                    ClienteNombre = venta.Cliente.NombreMostrado,
-                    CajeroNombre = venta.Cajero.NombreCompleto,
-                    FechaCreacion = fecha,
-                    UsuarioModificacion = idCajero,
-                    Venta = venta
-                };
-
-                foreach (var detalle in venta.Detalles)
-                {
-                    factura.Lineas.Add(new FacturaLinea
-                    {
-                        IdFacturaLinea = idLinea++,
-                        IdFactura = factura.IdFactura,
-                        NombreProducto = detalle.Producto.Nombre,
-                        Cantidad = detalle.Cantidad,
-                        PrecioUnitario = detalle.PrecioUnitario
-                    });
-                }
-
-                Facturas.Add(factura);
-                idFactura++;
             }
 
             //        días  hh  mm  cajero cliente pago  modalidad                  ubic  mesero  renglones

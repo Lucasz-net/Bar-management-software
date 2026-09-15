@@ -5,27 +5,30 @@ using System.Linq;
 namespace SistemaGestionBar.Models
 {
     /// <summary>
-    /// EXTENSIÓN AL DER. Comprobante de una venta. Se emite solo al confirmarla.
+    /// Comprobante de una venta. NO es una entidad de EF Core ni tiene tabla propia:
+    /// se arma en memoria a partir de Venta/VentaDetalle cada vez que se pide, en
+    /// <see cref="Data.RepositorioSql"/>.
     ///
-    /// Guarda los importes y los nombres COPIADOS, no resueltos por clave foránea:
-    /// un comprobante emitido no puede cambiar porque después se renombre un producto
-    /// o se actualice un precio. Por eso duplica datos a propósito.
+    /// Los importes y los nombres se copian igual que antes (no se resuelven por clave
+    /// foránea al vuelo desde otro lado), pero la copia ahora se hace en el momento de
+    /// leer, no al emitir: si después se renombra un producto o un cliente, el
+    /// comprobante de una venta vieja va a reflejar ese cambio. Es la contrapartida de
+    /// no tener tablas propias para este dato.
     /// </summary>
-    public class Factura : EntidadAuditable
+    public class Factura
     {
-        public int IdFactura { get; set; }
         public int IdVenta { get; set; }
 
-        /// <summary>Número del comprobante con el formato F-0001.</summary>
+        /// <summary>Número del comprobante con el formato F-0001. Se deriva de IdVenta.</summary>
         public string Numero { get; set; } = string.Empty;
 
         public DateTime FechaEmision { get; set; }
         public decimal Importe { get; set; }
 
-        /// <summary>Nombre del cliente tal como estaba el día de la emisión.</summary>
+        /// <summary>Nombre del cliente al momento de leer el comprobante.</summary>
         public string? ClienteNombre { get; set; }
 
-        /// <summary>Quién cobró, copiado igual que el nombre del cliente.</summary>
+        /// <summary>Quién cobró, igual que el nombre del cliente.</summary>
         public string? CajeroNombre { get; set; }
 
         public List<FacturaLinea> Lineas { get; set; } = new();

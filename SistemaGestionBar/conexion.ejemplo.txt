@@ -1,1 +1,0 @@
-server=127.0.0.1;port=3306;database=sistema_gestion_bar;user=bar_app;password=PONE_TU_CLAVE;CharSet=utf8mb4;

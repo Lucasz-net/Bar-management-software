@@ -52,8 +52,10 @@ namespace SistemaGestionBar.Data
         public DbSet<Ubicacion> Ubicaciones => Set<Ubicacion>();
         public DbSet<Venta> Ventas => Set<Venta>();
         public DbSet<VentaDetalle> VentaDetalles => Set<VentaDetalle>();
-        public DbSet<Factura> Facturas => Set<Factura>();
-        public DbSet<FacturaLinea> FacturaLineas => Set<FacturaLinea>();
+
+        // Factura y FacturaLinea NO son entidades de EF Core: no tienen tabla propia.
+        // El comprobante se arma en memoria a partir de Venta/VentaDetalle, ver
+        // RepositorioSql.ConstruirFactura().
 
         // Tipos de columna, en un solo lugar para no repetirlos quince veces.
         private const string Dinero = "decimal(12,2)";
@@ -112,7 +114,6 @@ namespace SistemaGestionBar.Data
             ConfigurarCatalogo(modelo);
             ConfigurarParametricas(modelo);
             ConfigurarVentas(modelo);
-            ConfigurarFacturacion(modelo);
 
             ConfigurarAuditoria(modelo);
         }
@@ -419,58 +420,6 @@ namespace SistemaGestionBar.Data
 
                 detalle.HasOne(d => d.Producto).WithMany()
                        .HasForeignKey(d => d.IdProducto).OnDelete(DeleteBehavior.Restrict);
-            });
-        }
-
-        // ---------------------------------------------------------------
-        // Facturación
-        // ---------------------------------------------------------------
-        private static void ConfigurarFacturacion(ModelBuilder modelo)
-        {
-            modelo.Entity<Factura>(factura =>
-            {
-                factura.ToTable("factura");
-                factura.HasKey(f => f.IdFactura);
-                factura.Property(f => f.IdFactura).HasColumnName("id_factura");
-                factura.Property(f => f.IdVenta).HasColumnName("id_venta");
-                factura.Property(f => f.Numero).HasColumnName("numero").HasMaxLength(20).IsRequired();
-                factura.Property(f => f.FechaEmision).HasColumnName("fecha_emision").HasColumnType(Fecha);
-                factura.Property(f => f.Importe).HasColumnName("importe").HasColumnType(Dinero);
-
-                // El nombre del cliente y el del cajero van COPIADOS, no por clave
-                // foránea: un comprobante emitido tiene que seguir diciendo lo mismo
-                // aunque después esa persona cambie de apellido o se dé de baja.
-                factura.Property(f => f.ClienteNombre).HasColumnName("cliente_nombre").HasMaxLength(120);
-                factura.Property(f => f.CajeroNombre).HasColumnName("cajero_nombre").HasMaxLength(120);
-
-                factura.HasIndex(f => f.Numero).IsUnique();
-                factura.HasIndex(f => f.IdVenta).IsUnique();
-
-                factura.HasOne(f => f.Venta).WithOne()
-                       .HasForeignKey<Factura>(f => f.IdVenta)
-                       .OnDelete(DeleteBehavior.Restrict);
-
-                factura.Ignore(f => f.TotalCalculado);
-                factura.Ignore(f => f.CantidadRenglones);
-            });
-
-            modelo.Entity<FacturaLinea>(linea =>
-            {
-                linea.ToTable("factura_linea");
-                linea.HasKey(l => l.IdFacturaLinea);
-                linea.Property(l => l.IdFacturaLinea).HasColumnName("id_factura_linea");
-                linea.Property(l => l.IdFactura).HasColumnName("id_factura");
-                linea.Property(l => l.NombreProducto).HasColumnName("nombre_producto").HasMaxLength(80).IsRequired();
-                linea.Property(l => l.Cantidad).HasColumnName("cantidad");
-                linea.Property(l => l.PrecioUnitario).HasColumnName("precio_unitario").HasColumnType(Dinero);
-
-                // Subtotal es calculada acá (cantidad × precio), a diferencia de
-                // venta_detalle, donde se persiste.
-                linea.Ignore(l => l.Subtotal);
-
-                linea.HasOne<Factura>().WithMany(f => f.Lineas)
-                     .HasForeignKey(l => l.IdFactura)
-                     .OnDelete(DeleteBehavior.Cascade);
             });
         }
 

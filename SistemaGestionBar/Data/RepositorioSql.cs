@@ -269,11 +269,8 @@ namespace SistemaGestionBar.Data
                 db.Ventas.Add(nueva);
                 DescontarStock(nueva, productos);
 
-                // Primer SaveChanges: la venta se numera sola (auto_increment) y recién
-                // ahí se sabe su id, que es lo que necesita la factura.
-                db.SaveChanges();
-
-                var factura = EmitirFactura(db, nueva, venta);
+                // La venta se numera sola (auto_increment) y recién ahí se sabe su id,
+                // que es lo que necesita el número de factura (F-0001 = IdVenta).
                 db.SaveChanges();
 
                 transaccion.Commit();
@@ -285,7 +282,7 @@ namespace SistemaGestionBar.Data
                 venta.EstadoVenta = nueva.EstadoVenta;
 
                 return ResultadoOperacion.Ok(
-                    $"Venta #{nueva.IdVenta} confirmada por {nueva.Total:C0}. Factura {factura.Numero}.");
+                    $"Venta #{nueva.IdVenta} confirmada por {nueva.Total:C0}. Factura {NumeroDeFactura(nueva.IdVenta)}.");
             }
             catch (Exception ex)
             {
@@ -294,54 +291,69 @@ namespace SistemaGestionBar.Data
             }
         }
 
+        /// <summary>
+        /// La factura ya no es una tabla propia: se arma al vuelo con los mismos datos
+        /// que trae <see cref="ObtenerVentas"/> (Cliente, Cajero y Producto ya incluidos),
+        /// así que no hace falta una consulta aparte.
+        /// </summary>
         public IReadOnlyList<Factura> ObtenerFacturas()
         {
             using var db = _fabrica.Crear();
-            return db.Facturas.AsNoTracking()
-                     .Include(f => f.Lineas)
-                     .OrderByDescending(f => f.IdFactura)
+
+            // El ToList() trae las ventas antes de mapear: ConstruirFactura no es
+            // traducible a SQL (arma objetos y concatena texto), así que tiene que
+            // correr del lado del cliente, sobre la lista ya materializada.
+            return VentasParaFacturar(db)
+                     .OrderByDescending(v => v.IdVenta)
+                     .ToList()
+                     .Select(ConstruirFactura)
                      .ToList();
         }
 
         public Factura? ObtenerFacturaDeVenta(int idVenta)
         {
             using var db = _fabrica.Crear();
-            return db.Facturas.AsNoTracking()
-                     .Include(f => f.Lineas)
-                     .FirstOrDefault(f => f.IdVenta == idVenta);
+            var venta = VentasParaFacturar(db).FirstOrDefault(v => v.IdVenta == idVenta);
+            return venta is null ? null : ConstruirFactura(venta);
         }
 
-        private static Factura EmitirFactura(BarDbContext db, Venta venta, Venta original)
+        /// <summary>Solo las ventas confirmadas emiten comprobante (igual que antes).</summary>
+        private static IQueryable<Venta> VentasParaFacturar(BarDbContext db) =>
+            db.Ventas.AsNoTracking()
+              .Include(v => v.Cliente).ThenInclude(c => c.Persona)
+              .Include(v => v.Cajero).ThenInclude(u => u.Persona)
+              .Include(v => v.Detalles).ThenInclude(d => d.Producto)
+              .Where(v => v.EstadoVenta == EstadoVenta.Confirmada);
+
+        /// <summary>
+        /// Arma el comprobante en memoria a partir de una venta ya cargada con Cliente,
+        /// Cajero y el Producto de cada renglón. Los nombres se copian igual que antes,
+        /// pero reflejan el dato ACTUAL de Persona/Producto, no el del día de la venta:
+        /// ver la nota en <see cref="Factura"/>.
+        /// </summary>
+        private static Factura ConstruirFactura(Venta venta)
         {
             var factura = new Factura
             {
                 IdVenta = venta.IdVenta,
+                Numero = NumeroDeFactura(venta.IdVenta),
                 FechaEmision = venta.FechaHora,
                 Importe = venta.Total,
-
-                // El nombre va COPIADO, no por clave foránea: un comprobante emitido tiene
-                // que seguir diciendo lo mismo aunque después esa persona cambie de datos.
-                ClienteNombre = original.Cliente?.NombreMostrado,
-                CajeroNombre = original.Cajero?.NombreCompleto
+                ClienteNombre = venta.Cliente?.NombreMostrado,
+                CajeroNombre = venta.Cajero?.NombreCompleto,
+                Venta = venta
             };
-
-            factura.Numero = NumeroDeFactura(venta.IdVenta);
-
-            var nombres = db.Productos.AsNoTracking()
-                            .Where(p => venta.Detalles.Select(d => d.IdProducto).Contains(p.IdProducto))
-                            .ToDictionary(p => p.IdProducto, p => p.Nombre);
 
             foreach (var detalle in venta.Detalles)
             {
                 factura.Lineas.Add(new FacturaLinea
                 {
-                    NombreProducto = nombres.TryGetValue(detalle.IdProducto, out var nombre) ? nombre : string.Empty,
+                    NombreProducto = detalle.Producto?.Nombre ?? string.Empty,
                     Cantidad = detalle.Cantidad,
                     PrecioUnitario = detalle.PrecioUnitario
                 });
             }
 
-            db.Facturas.Add(factura);
             return factura;
         }
 

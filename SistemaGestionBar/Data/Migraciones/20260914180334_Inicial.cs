@@ -334,37 +334,6 @@ namespace SistemaGestionBar.Data.Migraciones
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "factura",
-                columns: table => new
-                {
-                    id_factura = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    id_venta = table.Column<int>(type: "int", nullable: false),
-                    numero = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    fecha_emision = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    importe = table.Column<decimal>(type: "decimal(12,2)", nullable: false),
-                    cliente_nombre = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    cajero_nombre = table.Column<string>(type: "varchar(120)", maxLength: 120, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    fecha_creacion = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    fecha_modificacion = table.Column<DateTime>(type: "datetime(6)", nullable: true),
-                    usuario_modificacion = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_factura", x => x.id_factura);
-                    table.ForeignKey(
-                        name: "FK_factura_venta_id_venta",
-                        column: x => x.id_venta,
-                        principalTable: "venta",
-                        principalColumn: "id_venta",
-                        onDelete: ReferentialAction.Restrict);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
                 name: "venta_detalle",
                 columns: table => new
                 {
@@ -394,30 +363,6 @@ namespace SistemaGestionBar.Data.Migraciones
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
-                name: "factura_linea",
-                columns: table => new
-                {
-                    id_factura_linea = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    id_factura = table.Column<int>(type: "int", nullable: false),
-                    nombre_producto = table.Column<string>(type: "varchar(80)", maxLength: 80, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    cantidad = table.Column<int>(type: "int", nullable: false),
-                    precio_unitario = table.Column<decimal>(type: "decimal(12,2)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_factura_linea", x => x.id_factura_linea);
-                    table.ForeignKey(
-                        name: "FK_factura_linea_factura_id_factura",
-                        column: x => x.id_factura,
-                        principalTable: "factura",
-                        principalColumn: "id_factura",
-                        onDelete: ReferentialAction.Cascade);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
             migrationBuilder.CreateIndex(
                 name: "IX_categoria_nombre_categoria",
                 table: "categoria",
@@ -429,23 +374,6 @@ namespace SistemaGestionBar.Data.Migraciones
                 table: "cliente",
                 column: "id_persona",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_factura_id_venta",
-                table: "factura",
-                column: "id_venta",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_factura_numero",
-                table: "factura",
-                column: "numero",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_factura_linea_id_factura",
-                table: "factura_linea",
-                column: "id_factura");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ingrediente_nombre",
@@ -550,9 +478,6 @@ namespace SistemaGestionBar.Data.Migraciones
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "factura_linea");
-
-            migrationBuilder.DropTable(
                 name: "producto_ingrediente");
 
             migrationBuilder.DropTable(
@@ -560,9 +485,6 @@ namespace SistemaGestionBar.Data.Migraciones
 
             migrationBuilder.DropTable(
                 name: "venta_detalle");
-
-            migrationBuilder.DropTable(
-                name: "factura");
 
             migrationBuilder.DropTable(
                 name: "ingrediente");

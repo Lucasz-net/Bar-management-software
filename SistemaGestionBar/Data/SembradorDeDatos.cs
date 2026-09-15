@@ -62,7 +62,6 @@ namespace SistemaGestionBar.Data
             db.Ubicaciones.AddRange(datos.Ubicaciones);
 
             db.Ventas.AddRange(datos.Ventas);
-            db.Facturas.AddRange(datos.Facturas);
 
             db.SaveChanges();
             db.AuditarCambios = true;

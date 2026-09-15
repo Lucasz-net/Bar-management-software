@@ -94,100 +94,6 @@ namespace SistemaGestionBar.Data.Migraciones
                     b.ToTable("cliente", (string)null);
                 });
 
-            modelBuilder.Entity("SistemaGestionBar.Models.Factura", b =>
-                {
-                    b.Property<int>("IdFactura")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id_factura");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdFactura"));
-
-                    b.Property<string>("CajeroNombre")
-                        .HasMaxLength(120)
-                        .HasColumnType("varchar(120)")
-                        .HasColumnName("cajero_nombre");
-
-                    b.Property<string>("ClienteNombre")
-                        .HasMaxLength(120)
-                        .HasColumnType("varchar(120)")
-                        .HasColumnName("cliente_nombre");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("fecha_creacion");
-
-                    b.Property<DateTime>("FechaEmision")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("fecha_emision");
-
-                    b.Property<DateTime?>("FechaModificacion")
-                        .HasColumnType("datetime(6)")
-                        .HasColumnName("fecha_modificacion");
-
-                    b.Property<int>("IdVenta")
-                        .HasColumnType("int")
-                        .HasColumnName("id_venta");
-
-                    b.Property<decimal>("Importe")
-                        .HasColumnType("decimal(12,2)")
-                        .HasColumnName("importe");
-
-                    b.Property<string>("Numero")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("numero");
-
-                    b.Property<int?>("UsuarioModificacion")
-                        .HasColumnType("int")
-                        .HasColumnName("usuario_modificacion");
-
-                    b.HasKey("IdFactura");
-
-                    b.HasIndex("IdVenta")
-                        .IsUnique();
-
-                    b.HasIndex("Numero")
-                        .IsUnique();
-
-                    b.ToTable("factura", (string)null);
-                });
-
-            modelBuilder.Entity("SistemaGestionBar.Models.FacturaLinea", b =>
-                {
-                    b.Property<int>("IdFacturaLinea")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id_factura_linea");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdFacturaLinea"));
-
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("int")
-                        .HasColumnName("cantidad");
-
-                    b.Property<int>("IdFactura")
-                        .HasColumnType("int")
-                        .HasColumnName("id_factura");
-
-                    b.Property<string>("NombreProducto")
-                        .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("varchar(80)")
-                        .HasColumnName("nombre_producto");
-
-                    b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(12,2)")
-                        .HasColumnName("precio_unitario");
-
-                    b.HasKey("IdFacturaLinea");
-
-                    b.HasIndex("IdFactura");
-
-                    b.ToTable("factura_linea", (string)null);
-                });
-
             modelBuilder.Entity("SistemaGestionBar.Models.Ingrediente", b =>
                 {
                     b.Property<int>("IdIngrediente")
@@ -696,26 +602,6 @@ namespace SistemaGestionBar.Data.Migraciones
                     b.Navigation("Persona");
                 });
 
-            modelBuilder.Entity("SistemaGestionBar.Models.Factura", b =>
-                {
-                    b.HasOne("SistemaGestionBar.Models.Venta", "Venta")
-                        .WithOne()
-                        .HasForeignKey("SistemaGestionBar.Models.Factura", "IdVenta")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Venta");
-                });
-
-            modelBuilder.Entity("SistemaGestionBar.Models.FacturaLinea", b =>
-                {
-                    b.HasOne("SistemaGestionBar.Models.Factura", null)
-                        .WithMany("Lineas")
-                        .HasForeignKey("IdFactura")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("SistemaGestionBar.Models.Producto", b =>
                 {
                     b.HasOne("SistemaGestionBar.Models.Categoria", "Categoria")
@@ -839,11 +725,6 @@ namespace SistemaGestionBar.Data.Migraciones
             modelBuilder.Entity("SistemaGestionBar.Models.Categoria", b =>
                 {
                     b.Navigation("Productos");
-                });
-
-            modelBuilder.Entity("SistemaGestionBar.Models.Factura", b =>
-                {
-                    b.Navigation("Lineas");
                 });
 
             modelBuilder.Entity("SistemaGestionBar.Models.Persona", b =>
