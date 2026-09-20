@@ -74,14 +74,14 @@ namespace SistemaGestionBar.Data
             // empleado inicia sesión va en Usuario, más abajo.
             Personas.AddRange(new[]
             {
-                new Persona { IdPersona = 1, Nombre = "Nazareno", Apellido = "Villalba",  DniCuit = "40.123.456",   Telefono = "351-5550101", Email = "nazareno.villalba@gmail.com" },
-                new Persona { IdPersona = 2, Nombre = "Martina",  Apellido = "Gómez",     DniCuit = "38.987.654",   Telefono = "351-5550102", Email = "martina.gomez@gmail.com" },
-                new Persona { IdPersona = 3, Nombre = "Jose",     Apellido = "Hernandez", DniCuit = "41.222.333",   Telefono = "351-5550103", Email = "jose.hernandez@gmail.com" },
-                new Persona { IdPersona = 4, Nombre = "Consumidor", Apellido = "Final",   DniCuit = "00.000.000" },
-                new Persona { IdPersona = 5, Nombre = "Sofía",    Apellido = "Ramírez",   DniCuit = "37.444.555",   Telefono = "351-5550104", Email = "sofia@mail.com" },
-                new Persona { IdPersona = 6, Nombre = "Bar El Ancla", Apellido = "S.R.L.", DniCuit = "30-71234567-9", Telefono = "351-5550105", Email = "compras@elancla.com" },
-                new Persona { IdPersona = 7, Nombre = "Diego",    Apellido = "Ferrari",   DniCuit = "35.666.777",   Telefono = "351-5550106", Email = "diego.ferrari@gmail.com" },
-                new Persona { IdPersona = 8, Nombre = "Valentina", Apellido = "Suárez",   DniCuit = "42.888.999",   Telefono = "351-5550107", Email = "valen.suarez@gmail.com" }
+                new Persona { IdPersona = 1, Nombre = "Nazareno", Apellido = "Villalba",  DniCuit = "40123456",   Telefono = "351-5550101", Email = "nazareno.villalba@gmail.com" },
+                new Persona { IdPersona = 2, Nombre = "Martina",  Apellido = "Gómez",     DniCuit = "38987654",   Telefono = "351-5550102", Email = "martina.gomez@gmail.com" },
+                new Persona { IdPersona = 3, Nombre = "Jose",     Apellido = "Hernandez", DniCuit = "41222333",   Telefono = "351-5550103", Email = "jose.hernandez@gmail.com" },
+                new Persona { IdPersona = 4, Nombre = "Consumidor", Apellido = "Final",   DniCuit = "00000000" },
+                new Persona { IdPersona = 5, Nombre = "Sofía",    Apellido = "Ramírez",   DniCuit = "37444555",   Telefono = "351-5550104", Email = "sofia@mail.com" },
+                new Persona { IdPersona = 6, Nombre = "Bar El Ancla", Apellido = "S.R.L.", DniCuit = "33555777",   Telefono = "351-5550105", Email = "compras@elancla.com" },
+                new Persona { IdPersona = 7, Nombre = "Diego",    Apellido = "Ferrari",   DniCuit = "35666777",   Telefono = "351-5550106", Email = "diego.ferrari@gmail.com" },
+                new Persona { IdPersona = 8, Nombre = "Valentina", Apellido = "Suárez",   DniCuit = "42888999",   Telefono = "351-5550107", Email = "valen.suarez@gmail.com" }
             });
 
             // Las claves se hashean igual que lo hará el alta real de usuarios (RF-09).

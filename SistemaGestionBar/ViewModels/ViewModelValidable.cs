@@ -203,14 +203,33 @@ namespace SistemaGestionBar.ViewModels
                 Agregar(propiedad, "El correo no tiene un formato válido (nombre@dominio.com).");
         }
 
-        /// <summary>DNI o CUIT: dígitos, puntos y guiones. Nada de letras.</summary>
-        protected void FormatoDocumento(string? valor, string propiedad)
+        /// <summary>Largo del DNI. Lo usan la regla de abajo y el MaxLength de los campos.</summary>
+        public const int DigitosDeDni = Models.Documento.Digitos;
+
+        /// <summary>
+        /// DNI argentino. El sistema identifica a las personas por DNI y nada más —no se
+        /// cargan CUIL ni CUIT—, así que el documento son siempre 8 números.
+        ///
+        /// <b>Se carga sin puntos.</b> Los puntos son cómo se lee un documento, no cómo se
+        /// guarda: si el campo los admitiera, la misma persona podría entrar dos veces
+        /// escrita de dos formas. Se muestran recién al mostrar el dato, y de eso se
+        /// encarga <see cref="Models.Documento.Formatear"/>.
+        /// </summary>
+        protected void FormatoDni(string? valor, string propiedad)
         {
             if (string.IsNullOrWhiteSpace(valor))
                 return;
 
-            if (!valor.Trim().All(c => char.IsDigit(c) || c is '.' or '-' or ' '))
-                Agregar(propiedad, "El DNI/CUIT solo admite números, puntos y guiones.");
+            string texto = valor.Trim();
+
+            if (!texto.All(char.IsDigit))
+            {
+                Agregar(propiedad, "El DNI se carga sin puntos ni guiones: solo los números.");
+                return;
+            }
+
+            if (texto.Length != DigitosDeDni)
+                Agregar(propiedad, $"El DNI tiene que tener {DigitosDeDni} números (van {texto.Length}).");
         }
 
         protected void FormatoTelefono(string? valor, string propiedad)

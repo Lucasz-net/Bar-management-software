@@ -185,6 +185,22 @@ namespace SistemaGestionBar.ViewModels.Admin
             !string.IsNullOrEmpty(texto) &&
             texto.Contains(termino, StringComparison.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Busca por documento sin que importen los puntos. Hace falta porque el DNI se
+        /// guarda pelado pero la grilla lo muestra agrupado: quien ve "38.987.654" en
+        /// pantalla y lo teclea tal cual espera encontrar esa fila, y quien escribe
+        /// "38987" también.
+        /// </summary>
+        protected static bool ContieneDocumento(string? documento, string termino)
+        {
+            // Un término sin números —"mar"— no se compara contra el documento: buscar ""
+            // adentro de cualquier texto da verdadero y la grilla dejaría de filtrar.
+            string numeros = Models.Documento.Normalizar(termino);
+
+            return (numeros.Length > 0 && Contiene(Models.Documento.Normalizar(documento), numeros))
+                || Contiene(Models.Documento.Formatear(documento), termino);
+        }
+
         // ---------------------------------------------------------------
         // Barra de mensajes
         // ---------------------------------------------------------------
@@ -295,10 +311,20 @@ namespace SistemaGestionBar.ViewModels.Admin
     /// <summary>Secciones del tablero, para poder nombrarlas sin instanciarlas.</summary>
     public enum DestinoAdmin
     {
+        /// <summary>Estado del sistema: qué hay cargado. Solo el administrador.</summary>
         Resumen,
+
+        /// <summary>Cómo viene el negocio hoy. Es la pantalla de entrada del gerente.</summary>
+        Gestion,
+
         Productos,
         Inventario,
         Personas,
+        Usuarios,
+
+        /// <summary>Cuánto vendió cada uno. Solo lectura: las cuentas se tocan en Usuarios.</summary>
+        Equipo,
+
         Ventas,
         Reportes,
         Parametros

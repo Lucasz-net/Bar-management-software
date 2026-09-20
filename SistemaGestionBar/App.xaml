@@ -49,6 +49,12 @@
             <DataTemplate DataType="{x:Type vmAdmin:AdminResumenViewModel}">
                 <viewsAdmin:AdminResumenView />
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:GestionViewModel}">
+                <viewsAdmin:GestionView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:EquipoViewModel}">
+                <viewsAdmin:EquipoView />
+            </DataTemplate>
             <DataTemplate DataType="{x:Type vmAdmin:AdminProductosViewModel}">
                 <viewsAdmin:AdminProductosView />
             </DataTemplate>
@@ -57,6 +63,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vmAdmin:AdminPersonalViewModel}">
                 <viewsAdmin:AdminPersonalView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vmAdmin:AdminUsuariosViewModel}">
+                <viewsAdmin:AdminUsuariosView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vmAdmin:AdminVentasViewModel}">
                 <viewsAdmin:AdminVentasView />

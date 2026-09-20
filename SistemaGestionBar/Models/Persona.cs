@@ -19,6 +19,11 @@ namespace SistemaGestionBar.Models
         /// </summary>
         public string Apellido { get; set; } = string.Empty;
 
+        /// <summary>
+        /// El DNI, guardado con los 8 números pelados. La columna conserva el nombre
+        /// <c>dni_cuit</c> del DER original; el sistema ya no carga CUIL ni CUIT.
+        /// Para mostrarlo va <see cref="DniFormateado"/>, nunca este valor crudo.
+        /// </summary>
         public string? DniCuit { get; set; }
         public string? Telefono { get; set; }
         public string? Email { get; set; }
@@ -29,6 +34,13 @@ namespace SistemaGestionBar.Models
 
         /// <summary>Para mostrar: "Nombre Apellido". Único lugar donde se arma el nombre.</summary>
         public string NombreCompleto => $"{Nombre} {Apellido}".Trim();
+
+        /// <summary>
+        /// El DNI como se lee: "38.987.654". Es lo que muestran las grillas y las fichas,
+        /// así el listado se ve parejo aunque en la base haya filas viejas guardadas con
+        /// puntos. Ver <see cref="Documento"/>.
+        /// </summary>
+        public string DniFormateado => Documento.Formatear(DniCuit);
 
         /// <summary>Para listados ordenados por apellido: "Apellido, Nombre".</summary>
         public string NombreParaListado =>

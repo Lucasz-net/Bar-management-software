@@ -1,0 +1,376 @@
+<UserControl x:Class="SistemaGestionBar.Views.Admin.EquipoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:EquipoViewModel}"
+             d:DesignHeight="700" d:DesignWidth="1180">
+
+    <UserControl.Resources>
+        <!-- Barra de participacion de cada fila. Template propio por lo mismo que la de
+             stock: la clave de Material no existe en esta version del paquete. -->
+        <Style x:Key="BarraParticipacion" TargetType="ProgressBar">
+            <Setter Property="Height" Value="7" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="#E2E7F0" />
+            <Setter Property="Foreground" Value="{DynamicResource Acento}" />
+            <Setter Property="Minimum" Value="0" />
+            <Setter Property="Maximum" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4" ClipToBounds="True">
+                            <Grid>
+                                <Decorator x:Name="PART_Track" />
+                                <Border x:Name="PART_Indicator"
+                                        Background="{TemplateBinding Foreground}"
+                                        HorizontalAlignment="Left"
+                                        CornerRadius="4" />
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ValorFicha" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="19" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="360" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ============================================================
+             LISTA
+             Sin boton de alta: esta pantalla no crea nada. Las cuentas se
+             dan de alta en Usuarios y los datos personales en Personas.
+             ============================================================ -->
+        <Grid Grid.Column="0" Margin="0,0,18,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{DynamicResource PanelAdmin}" Padding="14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <materialDesign:PackIcon Grid.Column="0" Kind="Magnify" Width="20" Height="20"
+                                             Foreground="{DynamicResource TintaTenue}"
+                                             VerticalAlignment="Center" Margin="6,0,0,0" />
+                    <TextBox Grid.Column="1" Style="{DynamicResource BuscadorPlano}"
+                             materialDesign:HintAssist.Hint="Buscar por nombre, rol, correo o DNI"
+                             Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" />
+                </Grid>
+            </Border>
+
+            <!-- ==== FILTROS ====
+                 El periodo no esconde filas: cambia el numero de cada una. -->
+            <Grid Grid.Row="1" Margin="0,14,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <WrapPanel Grid.Column="0" Orientation="Horizontal">
+                    <ListBox Style="{DynamicResource GrupoChips}"
+                             DisplayMemberPath="Texto"
+                             ItemsSource="{Binding OpcionesPeriodo}"
+                             SelectedItem="{Binding Periodo}" />
+
+                    <CheckBox VerticalAlignment="Center" Margin="14,0,0,0" FontSize="13"
+                              Foreground="{DynamicResource TintaSuave}"
+                              Content="Solo quienes vendieron"
+                              IsChecked="{Binding SoloConVentas}" />
+
+                    <Button Style="{DynamicResource BotonSecundario}" Margin="10,0,0,0" Padding="11,0"
+                            Command="{Binding LimpiarFiltrosCommand}" ToolTip="Quitar todos los filtros">
+                        <materialDesign:PackIcon Kind="FilterRemoveOutline" Width="16" Height="16" />
+                    </Button>
+                </WrapPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right"
+                            VerticalAlignment="Center" Margin="12,0,0,0">
+                    <TextBlock Style="{DynamicResource ContadorFiltro}">
+                        <Run Text="{Binding CantidadVisible, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="de" />
+                        <Run Text="{Binding CantidadTotal, Mode=OneWay}" />
+                        <Run Text="·" />
+                        <Run Text="{Binding TotalDelPeriodo, StringFormat={}{0:C0}, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="facturados" />
+                    </TextBlock>
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="2" Style="{DynamicResource BarraMensaje}" Margin="0,14,0,0">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Style="{DynamicResource IconoMensaje}" />
+                    <TextBlock Style="{DynamicResource TextoMensaje}" Text="{Binding Mensaje}" />
+                </StackPanel>
+            </Border>
+
+            <!-- ==== GRILLA ==== -->
+            <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="8,6,8,10" Margin="0,14,0,0">
+                <Grid>
+                    <DataGrid Style="{DynamicResource GrillaAdmin}"
+                              ItemsSource="{Binding Vista}"
+                              SelectedItem="{Binding Seleccionado}"
+                              b:SelectorAssist.DesplazarASeleccion="True">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="EMPLEADO" Width="*" MinWidth="200" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
+                                            <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource AcentoSuave}">
+                                                <TextBlock Text="{Binding Iniciales}" FontSize="12.5" FontWeight="Bold"
+                                                           Foreground="{DynamicResource Acento}"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel VerticalAlignment="Center" Margin="11,0,0,0">
+                                                <TextBlock Text="{Binding Nombre}" FontSize="14.5"
+                                                           FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}" />
+                                                <TextBlock Text="{Binding Rol}" FontSize="12"
+                                                           Foreground="{DynamicResource TintaSuave}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- El importe y el porcentaje van en el MISMO renglon, con la
+                                 barra debajo. En tres renglones la celda no entra en el
+                                 alto de fila de la grilla y "de lo facturado" salia cortado. -->
+                            <DataGridTemplateColumn Header="COBRADO" Width="*" MinWidth="165" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Margin="0,0,14,0">
+                                            <TextBlock FontSize="14">
+                                                <Run Text="{Binding TotalCobrado, StringFormat={}{0:C0}, Mode=OneWay}"
+                                                     FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}" />
+                                                <Run Text="{Binding PorcentajeParticipacion, Mode=OneWay}"
+                                                     FontSize="12" Foreground="{DynamicResource TintaSuave}" />
+                                            </TextBlock>
+                                            <ProgressBar Style="{StaticResource BarraParticipacion}" Margin="0,6,0,0"
+                                                         Value="{Binding Participacion, Mode=OneWay}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="VENTAS" Width="122" MinWidth="122" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock FontSize="14" Foreground="{DynamicResource TintaFuerte}">
+                                                <Run Text="{Binding VentasCobradas, Mode=OneWay}" FontWeight="SemiBold" />
+                                                <Run Text="cobradas" />
+                                            </TextBlock>
+                                            <TextBlock FontSize="12" Foreground="{DynamicResource TintaSuave}">
+                                                <Run Text="ticket" />
+                                                <Run Text="{Binding TicketPromedio, StringFormat={}{0:C0}, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- En la barra y para llevar no hay mesero (RF-02), asi que un
+                                 barman puede tener mucho cobrado y ninguna mesa. -->
+                            <DataGridTemplateColumn Header="MESAS" Width="108" MinWidth="108" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Grid VerticalAlignment="Center">
+                                            <TextBlock FontSize="14" Foreground="{DynamicResource TintaFuerte}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding MesasAtendidas}" Value="0">
+                                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                                <Run Text="{Binding MesasAtendidas, Mode=OneWay}" FontWeight="SemiBold" />
+                                                <Run Text="mesas" />
+                                            </TextBlock>
+                                            <TextBlock Text="—" FontSize="14" Foreground="{DynamicResource TintaTenue}"
+                                                       VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Visibility" Value="Collapsed" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding MesasAtendidas}" Value="0">
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </Grid>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding CantidadVisible}" Value="0">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <materialDesign:PackIcon Kind="AccountSearchOutline" Width="40" Height="40"
+                                                 Foreground="{DynamicResource Linea}" HorizontalAlignment="Center" />
+                        <TextBlock Style="{DynamicResource TextoVacio}" Margin="0,10,0,0"
+                                   Text="Nadie coincide con el filtro." />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ============================================================
+             PANEL DERECHO: FICHA
+             Sin Editar ni Eliminar: esta pantalla no escribe nada.
+             ============================================================ -->
+        <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                    <Border Style="{DynamicResource ChipIconoChico}">
+                        <materialDesign:PackIcon Kind="ChartBoxOutline" Width="18" Height="18"
+                                                 Foreground="{DynamicResource Acento}"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="Desempeño" Style="{DynamicResource TituloEnLinea}" Margin="11,0,0,0" />
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,0,8,0"
+                              VerticalAlignment="Top"
+                              Visibility="{Binding HaySeleccion, Converter={StaticResource BoolAVisibilidad}}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="52" Height="52" CornerRadius="26" Background="{DynamicResource AcentoSuave}">
+                                <TextBlock Text="{Binding Seleccionado.Iniciales}" FontSize="18" FontWeight="Bold"
+                                           Foreground="{DynamicResource Acento}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center" Margin="13,0,0,0">
+                                <TextBlock Text="{Binding Seleccionado.Nombre}" FontSize="17" FontWeight="Bold"
+                                           Foreground="{DynamicResource TintaFuerte}" TextWrapping="Wrap" MaxWidth="210" />
+                                <TextBlock Text="{Binding Seleccionado.Correo}" FontSize="12.5"
+                                           Foreground="{DynamicResource TintaSuave}" Margin="0,2,0,0" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource AcentoSuave}"
+                                HorizontalAlignment="Left" Margin="0,12,0,0">
+                            <TextBlock Style="{DynamicResource TextoChip}" Foreground="{DynamicResource Acento}"
+                                       Text="{Binding Seleccionado.Rol}" />
+                        </Border>
+
+                        <TextBlock Text="EN EL PERÍODO" Style="{DynamicResource TituloBloque}" Margin="0,20,0,10" />
+
+                        <Border Style="{DynamicResource SubPanel}">
+                            <StackPanel>
+                                <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="0" Text="Total cobrado" />
+                                <TextBlock Style="{StaticResource ValorFicha}" Foreground="{DynamicResource Exito}"
+                                           Text="{Binding Seleccionado.TotalCobrado, StringFormat={}{0:C0}}" />
+
+                                <ProgressBar Style="{StaticResource BarraParticipacion}" Margin="0,12,0,6"
+                                             Value="{Binding Seleccionado.Participacion, Mode=OneWay}" />
+                                <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0">
+                                    <Run Text="{Binding Seleccionado.PorcentajeParticipacion, Mode=OneWay}" FontWeight="SemiBold" />
+                                    <Run Text="de todo lo facturado en el período" />
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,9">
+                                    <TextBlock Text="Ventas cobradas" Style="{DynamicResource RotuloDato}" />
+                                    <TextBlock Style="{DynamicResource ValorDato}"
+                                               Text="{Binding Seleccionado.VentasCobradas}" />
+                                </Grid>
+                                <Grid Margin="0,0,0,9">
+                                    <TextBlock Text="Ticket promedio" Style="{DynamicResource RotuloDato}" />
+                                    <TextBlock Style="{DynamicResource ValorDato}"
+                                               Text="{Binding Seleccionado.TicketPromedio, StringFormat={}{0:C0}}" />
+                                </Grid>
+                                <Grid Margin="0,0,0,9">
+                                    <TextBlock Text="Mesas atendidas" Style="{DynamicResource RotuloDato}" />
+                                    <TextBlock Style="{DynamicResource ValorDato}"
+                                               Text="{Binding Seleccionado.MesasAtendidas}" />
+                                </Grid>
+                                <Grid>
+                                    <TextBlock Text="Importe de esas mesas" Style="{DynamicResource RotuloDato}" />
+                                    <TextBlock Style="{DynamicResource ValorDato}"
+                                               Text="{Binding Seleccionado.ImporteAtendido, StringFormat={}{0:C0}}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Los datos se corrigen en otra pantalla: esta solo mide. -->
+                        <Button Style="{DynamicResource BotonPanel}" HorizontalAlignment="Stretch" Margin="0,16,0,0"
+                                Command="{Binding IrAPersonasCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CardAccountDetailsOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                                <TextBlock Text="Ver su ficha personal" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Style="{DynamicResource BotonPanel}" HorizontalAlignment="Stretch" Margin="0,9,0,0"
+                                Command="{Binding IrAUsuariosCommand}"
+                                Visibility="{Binding PuedeVerCuentas, Converter={StaticResource BoolAVisibilidad}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="AccountKeyOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                                <TextBlock Text="Gestionar su cuenta" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <StackPanel Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HaySeleccion}" Value="False">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <materialDesign:PackIcon Kind="GestureTapButton" Width="36" Height="36"
+                                             Foreground="{DynamicResource Linea}" HorizontalAlignment="Center" />
+                    <TextBlock Style="{DynamicResource TextoVacio}" Margin="0,12,0,0"
+                               Text="Elegí a alguien de la lista para ver su desempeño." />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

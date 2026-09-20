@@ -27,8 +27,11 @@ namespace SistemaGestionBar.ViewModels.Admin
             IrAVentasCommand = new RelayCommand(() => IrA(DestinoAdmin.Ventas));
             IrAProductosCommand = new RelayCommand(() => IrA(DestinoAdmin.Productos));
             IrAInventarioCommand = new RelayCommand(() => IrA(DestinoAdmin.Inventario));
-            IrAEmpleadosCommand = new RelayCommand(() => IrA(DestinoAdmin.Personas),
-                                                   () => PuedeIrA(DestinoAdmin.Personas));
+            // Empleado = persona con cuenta, así que la tarjeta lleva a Usuarios, que es
+            // donde ahora viven las cuentas. Personas es el padrón completo, y ahí los
+            // empleados son apenas una parte.
+            IrAEmpleadosCommand = new RelayCommand(() => IrA(DestinoAdmin.Usuarios),
+                                                   () => PuedeIrA(DestinoAdmin.Usuarios));
             ReponerCommand = new RelayCommand<AlertaStock>(Reponer);
 
             Recargar();
@@ -131,8 +134,8 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand IrAEmpleadosCommand { get; }
         public ICommand ReponerCommand { get; }
 
-        /// <summary>Un gerente no tiene la sección Personas: la tarjeta no se muestra (RF-09).</summary>
-        public bool PuedeVerEmpleados => PuedeIrA(DestinoAdmin.Personas);
+        /// <summary>Un gerente no tiene la sección Usuarios: la tarjeta no se muestra (RF-09).</summary>
+        public bool PuedeVerEmpleados => PuedeIrA(DestinoAdmin.Usuarios);
 
         protected override void AlCambiarLosDestinos() =>
             OnPropertyChanged(nameof(PuedeVerEmpleados));

@@ -1,5 +1,6 @@
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using SistemaGestionBar.Models;
 
 namespace SistemaGestionBar.Data
 {
@@ -29,10 +30,59 @@ namespace SistemaGestionBar.Data
 
             db.Database.Migrate();
 
+            NormalizarDocumentos(db);
+
             if (db.Roles.Any())
                 return;
 
             Sembrar(db);
+        }
+
+        /// <summary>
+        /// Deja los DNI guardados con los números pelados.
+        ///
+        /// Hace falta porque hasta el 2026-09-15 el padrón se cargaba con puntos
+        /// ("38.987.654") y ahora se guarda sin ellos ("38987654"). Sin esta pasada la
+        /// columna quedaría con las dos formas conviviendo: se ven iguales en pantalla
+        /// —de eso se encarga <see cref="Documento.Formatear"/>— pero el dato guardado
+        /// sería inconsistente, y la unicidad del DNI se apoya en él.
+        ///
+        /// Es idempotente y no borra nada: solo saca los separadores, así que una segunda
+        /// corrida no encuentra nada que hacer. Si dos filas quedaran con el mismo número
+        /// se saltea la segunda antes que romper el índice único: son datos del usuario y
+        /// quién se queda con ese DNI no es una decisión que le toque tomar al arranque.
+        /// </summary>
+        private static void NormalizarDocumentos(BarDbContext db)
+        {
+            var personas = db.Personas.ToList();
+
+            var pendientes = personas
+                .Where(p => p.DniCuit != Documento.Normalizar(p.DniCuit))
+                .ToList();
+
+            if (pendientes.Count == 0)
+                return;
+
+            foreach (var persona in pendientes)
+            {
+                string normalizado = Documento.Normalizar(persona.DniCuit);
+
+                // El normalizado de esta misma fila ya está en el conjunto; si aparece dos
+                // veces es porque otra persona lo tiene tal cual y habría choque.
+                bool loTieneOtro = personas.Any(otra => otra.IdPersona != persona.IdPersona &&
+                                                        otra.DniCuit == normalizado);
+
+                if (normalizado.Length == 0 || loTieneOtro)
+                    continue;
+
+                persona.DniCuit = normalizado;
+            }
+
+            // Sin auditoría: esto es un arreglo de formato, no una edición del usuario, y
+            // no tiene por qué figurar como que alguien tocó esas fichas hoy (RF-11).
+            db.AuditarCambios = false;
+            db.SaveChanges();
+            db.AuditarCambios = true;
         }
 
         private static void Sembrar(BarDbContext db)

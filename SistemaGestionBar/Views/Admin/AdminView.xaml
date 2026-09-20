@@ -87,8 +87,13 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Secciones -->
-                <ItemsControl Grid.Row="1" ItemsSource="{Binding Secciones}">
+                <!-- Secciones.
+                     El ScrollViewer no es decorativo: el administrador tiene diez y en una
+                     ventana del alto minimo (740) no entran. Sin el, el ItemsControl se
+                     recorta en silencio y las ultimas secciones desaparecen del menu. -->
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding Secciones}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Style="{DynamicResource ItemMenu}">
@@ -108,6 +113,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
+                </ScrollViewer>
 
                 <!-- Pie: usuario y salidas -->
                 <StackPanel Grid.Row="2" Margin="18,0,18,20">

@@ -67,7 +67,7 @@ namespace SistemaGestionBar.Services
         IReadOnlyList<Persona> ObtenerPersonas();
 
         /// <summary>
-        /// Busca una persona por su DNI/CUIT, que es su dato identificatorio: es lo que
+        /// Busca una persona por su DNI, que es su dato identificatorio: es lo que
         /// permite dar de alta un empleado sin volver a cargar los datos de alguien que
         /// ya está en el padrón. Devuelve null si no existe.
         /// </summary>

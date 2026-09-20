@@ -16,114 +16,261 @@
     </UserControl.InputBindings>
 
     <UserControl.Resources>
-        <!-- Paleta y estilos sencillos para un login moderno, limpio y minimalista -->
-        <SolidColorBrush x:Key="PrimaryBrush" Color="#111827" />
-        <SolidColorBrush x:Key="AccentBrush" Color="#2D89EF" />
-        <SolidColorBrush x:Key="SubtleBrush" Color="#6B7280" />
 
-        <Style x:Key="InputBase" TargetType="Control">
-            <Setter Property="Height" Value="44" />
-            <Setter Property="Margin" Value="0,6,0,6" />
-            <Setter Property="Padding" Value="12,8" />
+        <!-- ============================================================
+             El login usa el mismo lenguaje visual que el tablero y el punto
+             de venta: azul #12305C para la marca, acento #1565C0, fondo
+             #F4F6FA y tarjetas blancas con sombra tenida de azul. Antes era
+             una tarjeta gris suelta en el medio y parecia de otra aplicacion.
+             ============================================================ -->
+
+        <SolidColorBrush x:Key="TintaLogin" Color="#2B3445" />
+        <SolidColorBrush x:Key="TintaLoginSuave" Color="#8A93A5" />
+        <SolidColorBrush x:Key="AcentoLogin" Color="#1565C0" />
+
+        <!-- Sin Height fijo: el estilo Outlined de Material mide su propio alto para
+             ubicar el hint, y forzarselo recorta el texto. Se agranda con Padding. -->
+        <Style x:Key="CampoLogin" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+            <Setter Property="FontSize" Value="14.5" />
+            <Setter Property="Padding" Value="14,12" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+            <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
+            <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="10" />
         </Style>
 
-        <Style x:Key="SimpleTextBox" TargetType="TextBox" BasedOn="{StaticResource InputBase}">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#E5E7EB" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-            <Setter Property="FontSize" Value="14" />
+        <Style x:Key="ClaveLogin" TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignOutlinedPasswordBox}">
+            <Setter Property="FontSize" Value="14.5" />
+            <Setter Property="Padding" Value="14,12" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+            <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
+            <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="10" />
         </Style>
 
-        <Style x:Key="SimplePasswordBox" TargetType="PasswordBox" BasedOn="{StaticResource InputBase}">
-            <Setter Property="Background" Value="White" />
-            <Setter Property="BorderBrush" Value="#E5E7EB" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-            <Setter Property="FontSize" Value="14" />
-        </Style>
-
-        <Style x:Key="PrimaryButton" TargetType="Button">
-            <Setter Property="Height" Value="46" />
-            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
-            <Setter Property="Foreground" Value="White" />
+        <Style x:Key="EtiquetaLogin" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11.5" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="14,6" />
-            <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Margin" Value="0,12,0,0" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="8" SnapsToDevicePixels="True">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Foreground" Value="{StaticResource TintaLoginSuave}" />
+            <Setter Property="Margin" Value="2,0,0,7" />
         </Style>
+
+        <Style x:Key="BotonEntrar" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
+            <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="10" />
+            <Setter Property="Height" Value="48" />
+            <Setter Property="FontSize" Value="14.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Background" Value="{StaticResource AcentoLogin}" />
+            <Setter Property="BorderBrush" Value="{StaticResource AcentoLogin}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <!-- Una fila de lo que el sistema hace, en el panel de marca. -->
+        <Style x:Key="TextoCapacidad" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Foreground" Value="#C3D8F5" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="14,0,0,0" />
+        </Style>
+
+        <Style x:Key="ChipCapacidad" TargetType="Border">
+            <Setter Property="Width" Value="38" />
+            <Setter Property="Height" Value="38" />
+            <Setter Property="CornerRadius" Value="11" />
+            <Setter Property="Background" Value="#1E4C86" />
+        </Style>
+
     </UserControl.Resources>
 
-    <Grid Background="#F3F4F6">
-        <Border Width="440" Padding="28" Background="White" CornerRadius="12" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="4" Opacity="0.12" />
-            </Border.Effect>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" MinWidth="380" />
+            <ColumnDefinition Width="560" />
+        </Grid.ColumnDefinitions>
 
-            <StackPanel>
-                <!-- Header -->
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
-                    <Border Width="48" Height="48" Background="{StaticResource AccentBrush}" CornerRadius="10">
-                        <TextBlock Text="B" Foreground="White" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <!-- ============================================================
+             PANEL DE MARCA
+             Ocupa la mitad izquierda para que la pantalla de entrada diga
+             de que sistema se trata, en vez de ser un cuadro de dos campos
+             flotando sobre un fondo gris.
+             ============================================================ -->
+        <Grid Grid.Column="0" ClipToBounds="True">
+            <Grid.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0E2A52" Offset="0" />
+                    <GradientStop Color="#17427C" Offset="1" />
+                </LinearGradientBrush>
+            </Grid.Background>
+
+            <!-- Dos halos que le dan profundidad al plano sin competir con el texto.
+                 Van con degradado radial hasta transparente y no con un relleno liso:
+                 un circulo de color parejo, por poca opacidad que tenga, deja el borde
+                 marcado y se lee como una mancha, no como luz. -->
+            <Ellipse Width="620" Height="620"
+                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-230,-260,0,0">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#2E5FA8FF" Offset="0" />
+                        <GradientStop Color="#005FA8FF" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+
+            <Ellipse Width="520" Height="520"
+                     HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-190,-180">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#245FA8FF" Offset="0" />
+                        <GradientStop Color="#005FA8FF" Offset="1" />
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
+                        MaxWidth="440" Margin="48,0">
+
+                <!-- Marca, igual que el encabezado del menu lateral del tablero -->
+                <StackPanel Orientation="Horizontal">
+                    <Border Background="#1E4C86" CornerRadius="13" Width="52" Height="52">
+                        <materialDesign:PackIcon Kind="GlassCocktail" Width="28" Height="28"
+                                                 Foreground="White"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel Margin="12,0,0,0">
-                        <TextBlock Text="Sistema Gestión Bar" FontWeight="Bold" Foreground="{StaticResource PrimaryBrush}" />
-                        <TextBlock Text="Accede a tu cuenta" FontSize="13" Foreground="{StaticResource SubtleBrush}" />
+                    <StackPanel VerticalAlignment="Center" Margin="14,0,0,0">
+                        <TextBlock Text="Sistema de Gestión de Bar" FontSize="16" FontWeight="Bold"
+                                   Foreground="White" />
+                        <TextBlock Text="Ventas, stock y administración" FontSize="12.5"
+                                   Foreground="#7FA6DA" Margin="0,2,0,0" />
                     </StackPanel>
                 </StackPanel>
 
-                <TextBlock Text="Iniciar sesión" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" Margin="0,6,0,8" />
-                <TextBlock Text="Introduce tus credenciales para continuar" FontSize="13" Foreground="{StaticResource SubtleBrush}" Margin="0,0,0,12" />
+                <Border Height="1" Background="#1E4C86" Margin="0,34,0,0" />
 
-                <!-- Mensaje de estado (ViewModel) -->
-                <TextBlock Text="{Binding Mensaje}" TextWrapping="Wrap" Margin="0,0,0,8" FontSize="13">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Setter Property="Foreground" Value="#10B981" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding HayMensaje}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
-                                    <Setter Property="Foreground" Value="#EF4444" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-
-                <!-- Inputs enlazados al LoginViewModel -->
-                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SimpleTextBox}" ToolTip="Usuario o correo electrónico" />
-                <PasswordBox Style="{StaticResource SimplePasswordBox}" PasswordChar="●" b:PasswordBoxAssist.Enlazar="True" b:PasswordBoxAssist.Password="{Binding Clave, Mode=TwoWay}" />
-
-                <Button Style="{StaticResource PrimaryButton}" Content="Entrar" Command="{Binding IngresarCommand}" />
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">
-                    <TextBlock Text="¿No tienes una cuenta?" Foreground="{StaticResource SubtleBrush}" FontSize="13" />
-                    <TextBlock Text=" Registrarse" Foreground="{StaticResource AccentBrush}" FontSize="13" FontWeight="SemiBold" Cursor="Hand" />
-                </StackPanel>
-
-                <!-- Informational box (kept for usability during design) -->
-                <Border Background="#F4F7FB" CornerRadius="10" Padding="12" Margin="0,18,0,0">
-                    <StackPanel>
-                        <TextBlock Text="Correos de trabajo de prueba" FontSize="12" FontWeight="Bold" Foreground="#7A8699" Margin="0,0,0,4"/>
-                        <TextBlock Text="admin@bar.com · gerente@bar.com" FontSize="12" Foreground="#7A8699"/>
-                        <TextBlock Text="vendedor@bar.com · mesero@bar.com · valentina@bar.com" FontSize="12" Foreground="#7A8699"/>
-                        <TextBlock Text="Contraseña: 12345678" FontSize="12" Foreground="#7A8699" Margin="0,4,0,0"/>
+                <StackPanel Margin="0,34,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,22">
+                        <Border Style="{StaticResource ChipCapacidad}">
+                            <materialDesign:PackIcon Kind="CashRegister" Width="19" Height="19" Foreground="#9FC6FF"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Style="{StaticResource TextoCapacidad}" Width="330"
+                                   Text="Cobrá en el punto de venta y emití la factura" />
                     </StackPanel>
-                </Border>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,22">
+                        <Border Style="{StaticResource ChipCapacidad}">
+                            <materialDesign:PackIcon Kind="PackageVariantClosed" Width="19" Height="19" Foreground="#9FC6FF"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Style="{StaticResource TextoCapacidad}" Width="330"
+                                   Text="Seguí el stock de insumos y las recetas" />
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Border Style="{StaticResource ChipCapacidad}">
+                            <materialDesign:PackIcon Kind="ChartBoxOutline" Width="19" Height="19" Foreground="#9FC6FF"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Style="{StaticResource TextoCapacidad}" Width="330"
+                                   Text="Mirá las ventas del día y llevate el reporte en PDF" />
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
-        </Border>
+        </Grid>
+
+        <!-- ============================================================
+             FORMULARIO
+             ============================================================ -->
+        <Grid Grid.Column="1" Background="#F4F6FA">
+            <Border Width="400" VerticalAlignment="Center" HorizontalAlignment="Center"
+                    Background="White" CornerRadius="16" Padding="34,32">
+                <Border.Effect>
+                    <DropShadowEffect Color="#1565C0" Opacity="0.13" BlurRadius="28"
+                                      ShadowDepth="5" Direction="270" />
+                </Border.Effect>
+
+                <StackPanel>
+                    <TextBlock Text="Iniciar sesión" FontSize="25" FontWeight="Bold"
+                               Foreground="{StaticResource TintaLogin}" />
+
+                    <!-- Barra de estado: verde al entrar, roja si las credenciales no
+                         sirven. Como bloque y no como texto suelto, para que se vea. -->
+                    <Border CornerRadius="10" Padding="13,11" Margin="0,20,0,0">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Setter Property="Background" Value="#E4F3EA" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HayMensaje}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
+                                        <Setter Property="Background" Value="#FBE9E7" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Width="17" Height="17" VerticalAlignment="Top" Margin="0,1,0,0">
+                                <materialDesign:PackIcon.Style>
+                                    <Style TargetType="materialDesign:PackIcon">
+                                        <Setter Property="Kind" Value="CheckCircleOutline" />
+                                        <Setter Property="Foreground" Value="#2E7D32" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
+                                                <Setter Property="Kind" Value="AlertCircleOutline" />
+                                                <Setter Property="Foreground" Value="#C62828" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </materialDesign:PackIcon.Style>
+                            </materialDesign:PackIcon>
+
+                            <TextBlock Text="{Binding Mensaje}" FontSize="13" TextWrapping="Wrap"
+                                       Width="278" Margin="10,0,0,0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#17703F" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
+                                                <Setter Property="Foreground" Value="#A93226" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="CORREO DE TRABAJO" Style="{StaticResource EtiquetaLogin}" Margin="2,24,0,7" />
+                    <TextBox x:Name="CampoCorreo" Style="{StaticResource CampoLogin}"
+                             materialDesign:HintAssist.Hint="nombre@bar.com"
+                             materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                             materialDesign:TextFieldAssist.LeadingIcon="EmailOutline"
+                             Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Text="CONTRASEÑA" Style="{StaticResource EtiquetaLogin}" Margin="2,18,0,7" />
+                    <PasswordBox Style="{StaticResource ClaveLogin}" PasswordChar="●"
+                                 materialDesign:HintAssist.Hint="Tu contraseña"
+                                 materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                                 materialDesign:TextFieldAssist.LeadingIcon="LockOutline"
+                                 b:PasswordBoxAssist.Enlazar="True"
+                                 b:PasswordBoxAssist.Password="{Binding Clave, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <Button Style="{StaticResource BotonEntrar}" Margin="0,24,0,0"
+                            Command="{Binding IngresarCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="LoginVariant" Width="18" Height="18" VerticalAlignment="Center" />
+                            <TextBlock Text="Entrar" Margin="9,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Aca iba el enlace "Registrarse". No esta ni se reemplaza por un
+                         cartel que explique su ausencia: en este sistema nadie se da de
+                         alta solo, las cuentas las crea el administrador (RF-09), y una
+                         pantalla de ingreso no tiene por que contar eso. -->
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

@@ -462,10 +462,29 @@ namespace SistemaGestionBar.ViewModels
                 return;
             }
 
-            _dialogo.Informar("Venta confirmada", resultado.Mensaje);
+            MostrarComprobante(venta.IdVenta);
             VaciarTicket();
             RefrescarIndicadores();
             MostrarMensaje(resultado.Mensaje, esError: false);
+        }
+
+        /// <summary>
+        /// Al confirmar se abre el comprobante de la venta recién registrada, en lugar
+        /// del cartel de "Venta confirmada" que había antes: el vendedor necesita ver
+        /// qué se cobró (renglones, mesa, mesero, forma de pago) y poder imprimirlo, y
+        /// un MessageBox con una línea de texto no muestra nada de eso.
+        ///
+        /// Es la misma ventana que usa Ventas en el tablero, y el comprobante lo arma el
+        /// repositorio desde Venta/Venta_Detalle: no hay una segunda versión del
+        /// comprobante que se pueda desincronizar con aquella.
+        /// </summary>
+        private void MostrarComprobante(int idVenta)
+        {
+            var factura = _repositorio.ObtenerFacturaDeVenta(idVenta);
+            if (factura is null)
+                return;
+
+            _dialogo.MostrarFactura(new FacturaViewModel(factura));
         }
 
         /// <summary>Recalcula disponibilidad, alertas y contador tras cada venta.</summary>

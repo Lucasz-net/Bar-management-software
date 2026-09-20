@@ -1,0 +1,404 @@
+<UserControl x:Class="SistemaGestionBar.Views.Admin.GestionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:GestionViewModel}"
+             d:DesignHeight="700" d:DesignWidth="1180">
+
+    <UserControl.Resources>
+        <Style x:Key="NumeroGrande" TargetType="TextBlock" BasedOn="{StaticResource ValorIndicador}">
+            <Setter Property="FontSize" Value="27" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+        </Style>
+
+        <!-- Chip de la comparacion con ayer. Verde si se factura mas, rojo si menos,
+             gris cuando ayer no hubo ventas y no hay nada con que comparar. -->
+        <Style x:Key="ChipComparacion" TargetType="Border">
+            <Setter Property="CornerRadius" Value="9" />
+            <Setter Property="Padding" Value="9,5" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+            <Setter Property="Background" Value="#EFF1F5" />
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding HayComparacion}" Value="True" />
+                        <Condition Binding="{Binding MejorQueAyer}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource ExitoSuave}" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding HayComparacion}" Value="True" />
+                        <Condition Binding="{Binding MejorQueAyer}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Background" Value="{DynamicResource PeligroSuave}" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TextoComparacion" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="6,0,0,0" />
+            <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding HayComparacion}" Value="True" />
+                        <Condition Binding="{Binding MejorQueAyer}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Foreground" Value="#17703F" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding HayComparacion}" Value="True" />
+                        <Condition Binding="{Binding MejorQueAyer}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Foreground" Value="#A93226" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FlechaComparacion" TargetType="materialDesign:PackIcon">
+            <Setter Property="Width" Value="14" />
+            <Setter Property="Height" Value="14" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Kind" Value="TrendingNeutral" />
+            <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding HayComparacion}" Value="True" />
+                        <Condition Binding="{Binding MejorQueAyer}" Value="True" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Kind" Value="TrendingUp" />
+                    <Setter Property="Foreground" Value="#17703F" />
+                </MultiDataTrigger>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding HayComparacion}" Value="True" />
+                        <Condition Binding="{Binding MejorQueAyer}" Value="False" />
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Kind" Value="TrendingDown" />
+                    <Setter Property="Foreground" Value="#A93226" />
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Tarjeta de ranking: rotulo chico arriba, el nombre grande, el detalle abajo.
+             Se lee de un vistazo, que es para lo que sirve un ranking. -->
+        <Style x:Key="NombreRanking" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="17" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,12,0,0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ============================================================
+             EL DIA
+             Lo primero que quiere saber un gerente al abrir: cuanto se
+             facturo hoy y si eso es mejor o peor que ayer.
+             ============================================================ -->
+        <UniformGrid Grid.Row="0" Rows="1" Margin="-7,0">
+
+            <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
+                    Command="{Binding IrAVentasCommand}" ToolTip="Ver el historial de ventas">
+                <Grid>
+                    <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
+                    <StackPanel>
+                        <Border Style="{DynamicResource ChipIcono}" Background="{DynamicResource ExitoSuave}"
+                                HorizontalAlignment="Left">
+                            <materialDesign:PackIcon Kind="CashMultiple" Width="20" Height="20" Foreground="#17703F"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="{DynamicResource Exito}"
+                                   Text="{Binding FacturadoHoy, StringFormat={}{0:C0}}" />
+                        <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Facturado hoy" />
+
+                        <Border Style="{StaticResource ChipComparacion}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Style="{StaticResource FlechaComparacion}" />
+                                <TextBlock Style="{StaticResource TextoComparacion}"
+                                           Text="{Binding TextoComparacion}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Button>
+
+            <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
+                    Command="{Binding IrAVentasCommand}" ToolTip="Ver el historial de ventas">
+                <Grid>
+                    <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
+                    <StackPanel>
+                        <Border Style="{DynamicResource ChipIcono}" HorizontalAlignment="Left">
+                            <materialDesign:PackIcon Kind="CashRegister" Width="20" Height="20"
+                                                     Foreground="{DynamicResource Acento}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Style="{DynamicResource NumeroGrande}" Text="{Binding VentasHoy}" />
+                        <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ventas hoy" />
+                    </StackPanel>
+                </Grid>
+            </Button>
+
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="7,0">
+                <StackPanel>
+                    <Border Style="{DynamicResource ChipIcono}" Background="#EDE7FA" HorizontalAlignment="Left">
+                        <materialDesign:PackIcon Kind="ReceiptTextOutline" Width="20" Height="20" Foreground="#5B3A9E"
+                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Style="{StaticResource NumeroGrande}" Foreground="#5B3A9E"
+                               Text="{Binding TicketPromedio, StringFormat={}{0:C0}}" />
+                    <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ticket promedio de hoy" />
+                </StackPanel>
+            </Border>
+
+            <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
+                    Command="{Binding IrAInventarioCommand}" ToolTip="Ver el inventario">
+                <Grid>
+                    <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
+                    <StackPanel>
+                        <Border Style="{DynamicResource ChipIcono}" Background="{DynamicResource AvisoSuave}"
+                                HorizontalAlignment="Left">
+                            <materialDesign:PackIcon Kind="PackageUp" Width="20" Height="20"
+                                                     Foreground="{DynamicResource Aviso}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock Style="{StaticResource NumeroGrande}" Foreground="{DynamicResource Aviso}"
+                                   Text="{Binding Alertas.Count}" />
+                        <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ítems para reponer" />
+                    </StackPanel>
+                </Grid>
+            </Button>
+        </UniformGrid>
+
+        <!-- ============================================================
+             LOS RANKINGS
+             Un dia suelto es muy poca muestra, asi que van sobre la semana.
+             ============================================================ -->
+        <StackPanel Grid.Row="1" Margin="0,22,0,0">
+            <StackPanel Orientation="Horizontal" Margin="2,0,0,12">
+                <materialDesign:PackIcon Kind="TrophyOutline" Width="16" Height="16"
+                                         Foreground="{DynamicResource TintaSuave}" VerticalAlignment="Center" />
+                <TextBlock Style="{DynamicResource TituloBloque}" Margin="8,0,0,0"
+                           Text="{Binding TituloDelRanking}" />
+            </StackPanel>
+
+            <UniformGrid Rows="1" Margin="-7,0">
+                <Border Style="{DynamicResource TarjetaIndicador}" Margin="7,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Style="{DynamicResource ChipIconoChico}" Background="#EDE7FA">
+                                <materialDesign:PackIcon Kind="GlassCocktail" Width="17" Height="17" Foreground="#5B3A9E"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="10,0,0,0"
+                                       VerticalAlignment="Center" Text="Lo más vendido" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource NombreRanking}" Text="{Binding ProductoMasVendido}" />
+                        <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,4,0,0"
+                                   Text="{Binding DetalleProductoMasVendido}" />
+                    </StackPanel>
+                </Border>
+
+                <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
+                        Command="{Binding IrAEquipoCommand}" ToolTip="Ver el desempeño del equipo">
+                    <Grid>
+                        <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Style="{DynamicResource ChipIconoChico}">
+                                    <materialDesign:PackIcon Kind="AccountStarOutline" Width="17" Height="17"
+                                                             Foreground="{DynamicResource Acento}"
+                                                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="10,0,0,0"
+                                           VerticalAlignment="Center" Text="Quién vendió más" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource NombreRanking}" Text="{Binding QuienMasVendio}" />
+                            <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,4,0,0"
+                                       Text="{Binding DetalleQuienMasVendio}" />
+                        </StackPanel>
+                    </Grid>
+                </Button>
+
+                <Border Style="{DynamicResource TarjetaIndicador}" Margin="7,0">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Style="{DynamicResource ChipIconoChico}" Background="{DynamicResource ExitoSuave}">
+                                <materialDesign:PackIcon Kind="CreditCardOutline" Width="17" Height="17" Foreground="#17703F"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="10,0,0,0"
+                                       VerticalAlignment="Center" Text="Cómo se paga" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource NombreRanking}" Text="{Binding MetodoMasUsado}" />
+                        <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,4,0,0"
+                                   Text="{Binding DetalleMetodoMasUsado}" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+        </StackPanel>
+
+        <!-- ============================================================
+             REPOSICION
+             ============================================================ -->
+        <Grid Grid.Row="2" Margin="0,22,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="300" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,18,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="{DynamicResource AvisoSuave}">
+                            <materialDesign:PackIcon Kind="AlertOutline" Width="18" Height="18"
+                                                     Foreground="{DynamicResource Aviso}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="Qué falta reponer" Style="{DynamicResource TituloEnLinea}" />
+                            <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="0"
+                                       Text="{Binding TextoAlertas}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,6,0"
+                                      Visibility="{Binding HayAlertas, Converter={StaticResource BoolAVisibilidad}}">
+                            <ItemsControl ItemsSource="{Binding Alertas}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="{DynamicResource AvisoSuave}" CornerRadius="11"
+                                                Padding="13,11" Margin="0,0,0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <materialDesign:PackIcon Grid.Column="0" Kind="AlertCircleOutline"
+                                                                         Width="18" Height="18"
+                                                                         Foreground="{DynamicResource Aviso}"
+                                                                         VerticalAlignment="Center" />
+
+                                                <StackPanel Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Nombre}" FontSize="14" FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource TintaFuerte}" />
+                                                    <TextBlock FontSize="12" Foreground="#96560A" Margin="0,2,0,0">
+                                                        <Run Text="quedan" />
+                                                        <Run Text="{Binding Stock, StringFormat={}{0:0.##}, Mode=OneWay}" FontWeight="SemiBold" />
+                                                        <Run Text="{Binding UnidadMedida, Mode=OneWay}" />
+                                                        <Run Text="· mínimo" />
+                                                        <Run Text="{Binding StockMinimo, StringFormat={}{0:0.##}, Mode=OneWay}" />
+                                                    </TextBlock>
+                                                </StackPanel>
+
+                                                <Button Grid.Column="2" Style="{DynamicResource BotonSecundario}"
+                                                        Height="32" Padding="12,0" Background="White"
+                                                        Foreground="{DynamicResource Aviso}" BorderBrush="#E8C79A"
+                                                        Command="{Binding DataContext.ReponerCommand,
+                                                                          RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.ToolTip>
+                                                        <TextBlock>
+                                                            <Run Text="Reponer en" />
+                                                            <Run Text="{Binding DondeSeRepone, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                    </Button.ToolTip>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <materialDesign:PackIcon Kind="PackageUp" Width="15" Height="15"
+                                                                                 VerticalAlignment="Center" />
+                                                        <TextBlock Text="Reponer" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                                    </StackPanel>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <!-- Sin alertas es una buena noticia: se dice, no se deja una lista vacia. -->
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding HayAlertas}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource ExitoSuave}"
+                                    HorizontalAlignment="Center">
+                                <materialDesign:PackIcon Kind="CheckCircleOutline" Width="28" Height="28"
+                                                         Foreground="#17703F"
+                                                         HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock Text="Todo el inventario está en nivel" Margin="0,14,0,0"
+                                       FontSize="14.5" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TintaFuerte}" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Atajos a donde se sigue trabajando desde acá -->
+            <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" VerticalAlignment="Top">
+                <StackPanel>
+                    <TextBlock Text="SEGUIR EN" Style="{DynamicResource TituloBloque}" Margin="0,0,0,14" />
+
+                    <Button Style="{DynamicResource BotonPanel}" HorizontalAlignment="Stretch" Margin="0,0,0,9"
+                            Command="{Binding IrAVentasCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CashRegister" Width="15" Height="15" VerticalAlignment="Center" />
+                            <TextBlock Text="Historial de ventas" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{DynamicResource BotonPanel}" HorizontalAlignment="Stretch" Margin="0,0,0,9"
+                            Command="{Binding IrAEquipoCommand}"
+                            Visibility="{Binding PuedeVerEquipo, Converter={StaticResource BoolAVisibilidad}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="AccountGroupOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                            <TextBlock Text="Desempeño del equipo" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Style="{DynamicResource BotonPanel}" HorizontalAlignment="Stretch"
+                            Command="{Binding IrAReportesCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="FilePdfBox" Width="15" Height="15" VerticalAlignment="Center" />
+                            <TextBlock Text="Reportes en PDF" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

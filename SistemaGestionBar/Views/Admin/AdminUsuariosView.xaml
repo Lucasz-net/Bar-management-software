@@ -1,4 +1,4 @@
-<UserControl x:Class="SistemaGestionBar.Views.Admin.AdminPersonalView"
+<UserControl x:Class="SistemaGestionBar.Views.Admin.AdminUsuariosView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -7,7 +7,7 @@
              xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=vm:AdminPersonalViewModel}"
+             d:DataContext="{d:DesignInstance Type=vm:AdminUsuariosViewModel}"
              d:DesignHeight="700" d:DesignWidth="1180">
 
     <Grid>
@@ -27,9 +27,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- ==== BARRA DE ACCIONES Y BÚSQUEDA ====
-                 Solo el alta: Editar y Eliminar están al pie de la ficha, en el panel
-                 de la derecha, donde se ve a quién afectan. -->
+            <!-- ==== BARRA DE ACCIONES Y BÚSQUEDA ==== -->
             <Border Grid.Row="0" Style="{DynamicResource PanelAdmin}" Padding="14">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -37,7 +35,6 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Buscador sin marco adentro de la tarjeta, como en el punto de venta -->
                     <Grid Grid.Column="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -47,22 +44,20 @@
                                                  Foreground="{DynamicResource TintaTenue}"
                                                  VerticalAlignment="Center" Margin="6,0,0,0" />
                         <TextBox Grid.Column="1" Style="{DynamicResource BuscadorPlano}"
-                                 materialDesign:HintAssist.Hint="Buscar por nombre, apellido, DNI o correo"
+                                 materialDesign:HintAssist.Hint="Buscar por correo, nombre, DNI o rol"
                                  Text="{Binding Busqueda, UpdateSourceTrigger=PropertyChanged}" />
                     </Grid>
 
                     <Button Grid.Column="1" Style="{DynamicResource BotonPrimario}" Command="{Binding NuevoCommand}">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="AccountPlusOutline" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="Nueva persona" Margin="7,0,0,0" VerticalAlignment="Center" />
+                            <materialDesign:PackIcon Kind="AccountKeyOutline" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock Text="Nueva cuenta" Margin="7,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </Grid>
             </Border>
 
             <!-- ==== FILTROS ==== -->
-            <!-- Los filtros en un WrapPanel y el contador en su propia columna: apilados
-                 en la misma celda, al angostar la ventana se montaban uno sobre otro. -->
             <Grid Grid.Row="1" Margin="0,14,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -70,10 +65,10 @@
                 </Grid.ColumnDefinitions>
 
                 <WrapPanel Grid.Column="0" Orientation="Horizontal">
-                    <ListBox Style="{DynamicResource GrupoChips}"
-                             DisplayMemberPath="Texto"
-                             ItemsSource="{Binding OpcionesVinculo}"
-                             SelectedItem="{Binding Vinculo}" />
+                    <ComboBox Style="{DynamicResource FiltroCombo}" MinWidth="164"
+                              DisplayMemberPath="Texto"
+                              ItemsSource="{Binding OpcionesRol}"
+                              SelectedItem="{Binding RolFiltro}" />
 
                     <Button Style="{DynamicResource BotonSecundario}" Margin="8,0,0,0" Padding="11,0"
                             Command="{Binding LimpiarFiltrosCommand}" ToolTip="Quitar todos los filtros">
@@ -88,11 +83,11 @@
                         <Run Text="de" />
                         <Run Text="{Binding CantidadTotal, Mode=OneWay}" />
                         <Run Text="·" />
-                        <Run Text="{Binding CantidadClientes, Mode=OneWay}" FontWeight="SemiBold" />
-                        <Run Text="clientes" />
+                        <Run Text="{Binding CantidadAdministradores, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="administran" />
                         <Run Text="·" />
-                        <Run Text="{Binding CantidadEmpleados, Mode=OneWay}" FontWeight="SemiBold" />
-                        <Run Text="empleados" />
+                        <Run Text="{Binding CantidadEnSalon, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="en salón" />
                     </TextBlock>
                 </StackPanel>
             </Grid>
@@ -105,30 +100,29 @@
             </Border>
 
             <!-- ==== GRILLA ==== -->
-            <!-- Va en la fila estrella para que arme su propio scroll. -->
             <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="8,6,8,10" Margin="0,14,0,0">
                 <Grid Style="{DynamicResource ZonaBloqueable}">
                     <DataGrid Style="{DynamicResource GrillaAdmin}"
                               ItemsSource="{Binding Vista}"
-                              SelectedItem="{Binding Seleccionada}"
+                              SelectedItem="{Binding Seleccionado}"
                               b:SelectorAssist.DesplazarASeleccion="True"
                               b:SelectorAssist.SeleccionBloqueada="{Binding EnEdicion}">
                         <DataGrid.Columns>
-                            <!-- Identidad: avatar con iniciales + nombre y documento juntos.
-                                 Dos datos que siempre se leen de a pares, en una sola celda. -->
-                            <DataGridTemplateColumn Header="PERSONA" Width="*" MinWidth="230" IsReadOnly="True">
+                            <!-- La cuenta se lee por su credencial: el correo arriba, y
+                                 debajo de quién es, que es el dato que la vuelve humana. -->
+                            <DataGridTemplateColumn Header="CUENTA" Width="*" MinWidth="260" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
                                             <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource AcentoSuave}">
-                                                <materialDesign:PackIcon Kind="AccountOutline" Width="18" Height="18"
+                                                <materialDesign:PackIcon Kind="AccountKeyOutline" Width="18" Height="18"
                                                                          Foreground="{DynamicResource Acento}"
                                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
                                             </Border>
                                             <StackPanel VerticalAlignment="Center" Margin="11,0,0,0">
-                                                <TextBlock Text="{Binding NombreParaListado}" FontSize="14.5"
+                                                <TextBlock Text="{Binding Email}" FontSize="14.5"
                                                            FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}" />
-                                                <TextBlock Text="{Binding DniFormateado}" FontSize="12"
+                                                <TextBlock Text="{Binding NombreCompleto}" FontSize="12"
                                                            Foreground="{DynamicResource TintaSuave}" />
                                             </StackPanel>
                                         </StackPanel>
@@ -136,44 +130,30 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- Correo y teléfono en una sola celda: en dos columnas la
-                                 grilla no entra en el ancho que deja el panel derecho y
-                                 VÍNCULO se iba fuera de pantalla. -->
-                            <DataGridTemplateColumn Header="CONTACTO" Width="*" MinWidth="190" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="DNI" Width="*" MinWidth="140" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Email, TargetNullValue='—'}" FontSize="13.5"
-                                                       Foreground="{DynamicResource TintaFuerte}" />
-                                            <TextBlock Text="{Binding Telefono, TargetNullValue='sin teléfono'}" FontSize="12"
-                                                       Foreground="{DynamicResource TintaSuave}" />
-                                        </StackPanel>
+                                        <TextBlock VerticalAlignment="Center" FontSize="13.5"
+                                                   Foreground="{DynamicResource TintaFuerte}"
+                                                   Text="{Binding Persona.DniFormateado, TargetNullValue='—'}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- El chip EMPLEADO es informativo: dice que esa persona tiene
-                                 cuenta, no se edita acá. La cuenta se gestiona en Usuarios. -->
-                            <DataGridTemplateColumn Header="VÍNCULO" Width="176" MinWidth="176" IsReadOnly="True">
+                            <DataGridTemplateColumn Header="ROL" Width="200" MinWidth="200" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource AcentoSuave}"
-                                                    Visibility="{Binding EsCliente, Converter={StaticResource BoolAVisibilidad}}">
-                                                <TextBlock Style="{DynamicResource TextoChip}" Foreground="{DynamicResource Acento}" Text="CLIENTE" />
-                                            </Border>
-                                            <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource ExitoSuave}"
-                                                    Visibility="{Binding EsEmpleado, Converter={StaticResource BoolAVisibilidad}}">
-                                                <TextBlock Style="{DynamicResource TextoChip}" Foreground="#17703F" Text="EMPLEADO" />
-                                            </Border>
-                                        </StackPanel>
+                                        <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource AcentoSuave}"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Style="{DynamicResource TextoChip}" Foreground="{DynamicResource Acento}"
+                                                       Text="{Binding NombreRol}" />
+                                        </Border>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 
-                    <!-- Estado vacío: qué se ve cuando el filtro no deja nada -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
@@ -188,7 +168,7 @@
                         <materialDesign:PackIcon Kind="AccountSearchOutline" Width="40" Height="40"
                                                  Foreground="{DynamicResource Linea}" HorizontalAlignment="Center" />
                         <TextBlock Style="{DynamicResource TextoVacio}" Margin="0,10,0,0"
-                                   Text="Ninguna persona coincide con el filtro." />
+                                   Text="Ninguna cuenta coincide con el filtro." />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -207,7 +187,7 @@
 
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
                     <Border Style="{DynamicResource ChipIconoChico}">
-                        <materialDesign:PackIcon Kind="CardAccountDetailsOutline" Width="18" Height="18"
+                        <materialDesign:PackIcon Kind="ShieldAccountOutline" Width="18" Height="18"
                                                  Foreground="{DynamicResource Acento}"
                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
@@ -237,95 +217,65 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Border Width="52" Height="52" CornerRadius="26" Background="{DynamicResource AcentoSuave}">
-                                    <materialDesign:PackIcon Kind="AccountOutline" Width="26" Height="26"
+                                    <materialDesign:PackIcon Kind="AccountKeyOutline" Width="26" Height="26"
                                                              Foreground="{DynamicResource Acento}"
                                                              HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center" Margin="13,0,0,0">
-                                    <TextBlock Text="{Binding Seleccionada.NombreCompleto}" FontSize="17" FontWeight="Bold"
+                                    <TextBlock Text="{Binding Seleccionado.NombreCompleto}" FontSize="17" FontWeight="Bold"
                                                Foreground="{DynamicResource TintaFuerte}" TextWrapping="Wrap" MaxWidth="240" />
-                                    <TextBlock Text="{Binding Seleccionada.DniFormateado}" FontSize="13"
+                                    <TextBlock Text="{Binding Seleccionado.Persona.DniFormateado}" FontSize="13"
                                                Foreground="{DynamicResource TintaSuave}" Margin="0,2,0,0" />
                                 </StackPanel>
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
-                                <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource AcentoSuave}"
-                                        Visibility="{Binding Seleccionada.EsCliente, Converter={StaticResource BoolAVisibilidad}}">
-                                    <TextBlock Style="{DynamicResource TextoChip}" Foreground="{DynamicResource Acento}" Text="CLIENTE" />
-                                </Border>
-                                <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource ExitoSuave}"
-                                        Visibility="{Binding Seleccionada.EsEmpleado, Converter={StaticResource BoolAVisibilidad}}">
-                                    <TextBlock Style="{DynamicResource TextoChip}" Foreground="#17703F" Text="EMPLEADO" />
+                                <Border Style="{DynamicResource ChipGrilla}" Background="{DynamicResource AcentoSuave}">
+                                    <TextBlock Style="{DynamicResource TextoChip}" Foreground="{DynamicResource Acento}"
+                                               Text="{Binding Seleccionado.NombreRol}" />
                                 </Border>
                             </StackPanel>
 
-                            <TextBlock Text="CONTACTO" Style="{DynamicResource TituloBloque}" Margin="0,20,0,10" />
+                            <TextBlock Text="ACCESO AL SISTEMA" Style="{DynamicResource TituloBloque}" Margin="0,20,0,10" />
+                            <Border Style="{DynamicResource SubPanel}">
+                                <StackPanel>
+                                    <Grid Margin="0,0,0,9">
+                                        <TextBlock Text="Correo de trabajo" Style="{DynamicResource RotuloDato}" />
+                                        <TextBlock Style="{DynamicResource ValorDato}"
+                                                   Text="{Binding Seleccionado.Email}" />
+                                    </Grid>
+                                    <Grid>
+                                        <TextBlock Text="Rol" Style="{DynamicResource RotuloDato}" />
+                                        <TextBlock Style="{DynamicResource ValorDato}"
+                                                   Text="{Binding Seleccionado.NombreRol}" />
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Datos personales de solo lectura: acá se consultan, se
+                                 corrigen en Personas. -->
+                            <TextBlock Text="DATOS PERSONALES" Style="{DynamicResource TituloBloque}" Margin="0,18,0,10" />
                             <Border Style="{DynamicResource SubPanel}">
                                 <StackPanel>
                                     <Grid Margin="0,0,0,9">
                                         <TextBlock Text="Correo personal" Style="{DynamicResource RotuloDato}" />
                                         <TextBlock Style="{DynamicResource ValorDato}"
-                                                   Text="{Binding Seleccionada.Email, TargetNullValue='—', FallbackValue='—'}" />
+                                                   Text="{Binding Seleccionado.Persona.Email, TargetNullValue='—', FallbackValue='—'}" />
                                     </Grid>
                                     <Grid>
                                         <TextBlock Text="Teléfono" Style="{DynamicResource RotuloDato}" />
                                         <TextBlock Style="{DynamicResource ValorDato}"
-                                                   Text="{Binding Seleccionada.Telefono, TargetNullValue='—', FallbackValue='—'}" />
+                                                   Text="{Binding Seleccionado.Persona.Telefono, TargetNullValue='—', FallbackValue='—'}" />
                                     </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- ==== ACCESO AL SISTEMA: SOLO LECTURA ====
-                                 Se muestra porque es lo primero que uno quiere saber al
-                                 abrir una ficha, pero no se edita acá: el botón lleva a
-                                 Usuarios, que es donde vive la cuenta. -->
-                            <TextBlock Text="ACCESO AL SISTEMA" Style="{DynamicResource TituloBloque}" Margin="0,18,0,10" />
-
-                            <Border Style="{DynamicResource SubPanel}"
-                                    Visibility="{Binding Seleccionada.EsEmpleado, Converter={StaticResource BoolAVisibilidad}}">
-                                <StackPanel>
-                                    <Grid Margin="0,0,0,9">
-                                        <TextBlock Text="Correo de trabajo" Style="{DynamicResource RotuloDato}" />
-                                        <TextBlock Style="{DynamicResource ValorDato}"
-                                                   Text="{Binding Seleccionada.Usuario.Email}" />
-                                    </Grid>
-                                    <Grid>
-                                        <TextBlock Text="Rol" Style="{DynamicResource RotuloDato}" />
-                                        <TextBlock Style="{DynamicResource ValorDato}"
-                                                   Text="{Binding Seleccionada.Usuario.NombreRol}" />
-                                    </Grid>
-                                </StackPanel>
-                            </Border>
-
-                            <!-- Sin cuenta: se dice, no se deja el bloque vacío. -->
-                            <Border>
-                                <Border.Style>
-                                    <Style TargetType="Border" BasedOn="{StaticResource SubPanel}">
-                                        <Setter Property="Visibility" Value="Collapsed" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Seleccionada.EsEmpleado}" Value="False">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="KeyRemove" Width="16" Height="16"
-                                                             Foreground="{DynamicResource TintaSuave}"
-                                                             VerticalAlignment="Top" Margin="0,1,0,0" />
-                                    <TextBlock Style="{DynamicResource TextoAyuda}" Margin="9,0,0,0" Width="272"
-                                               Text="No tiene cuenta para iniciar sesión." />
                                 </StackPanel>
                             </Border>
 
                             <Button Style="{DynamicResource BotonSecundario}" Margin="0,12,0,0"
                                     HorizontalAlignment="Stretch"
-                                    Command="{Binding IrAUsuariosCommand}"
-                                    Visibility="{Binding PuedeGestionarCuentas, Converter={StaticResource BoolAVisibilidad}}">
+                                    Command="{Binding IrAPersonasCommand}">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="AccountKeyOutline" Width="15" Height="15" VerticalAlignment="Center" />
-                                    <TextBlock Text="Gestionar su cuenta en Usuarios" Margin="7,0,0,0" VerticalAlignment="Center" />
+                                    <materialDesign:PackIcon Kind="CardAccountDetailsOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                                    <TextBlock Text="Ver su ficha en Personas" Margin="7,0,0,0" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -350,91 +300,107 @@
                         <materialDesign:PackIcon Kind="GestureTapButton" Width="36" Height="36"
                                                  Foreground="{DynamicResource Linea}" HorizontalAlignment="Center" />
                         <TextBlock Style="{DynamicResource TextoVacio}" Margin="0,12,0,0"
-                                   Text="Elegí una persona de la lista para ver su ficha, editarla o eliminarla." />
+                                   Text="Elegí una cuenta de la lista para ver su ficha, editarla o eliminarla." />
                     </StackPanel>
 
                     <!-- ======== CARA 2: FORMULARIO ======== -->
-                    <!-- Solo datos personales. Rol, correo de trabajo y contraseña no están
-                         acá: son de la cuenta, y la cuenta se arma en la sección Usuarios. -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0"
                                   Visibility="{Binding EnEdicion, Converter={StaticResource BoolAVisibilidad}}">
                         <StackPanel>
 
-                            <TextBlock Text="DATOS PERSONALES" Style="{DynamicResource TituloBloque}" />
+                            <!-- ==== TITULAR ====
+                                 Primero quién, después la credencial: sin persona no hay
+                                 cuenta que crear. El DNI la trae del padrón. -->
+                            <TextBlock Text="TITULAR DE LA CUENTA" Style="{DynamicResource TituloBloque}" />
 
                             <TextBlock Text="DNI" Style="{DynamicResource EtiquetaAdmin}" />
-                            <!-- Se teclea sin puntos: el behavior directamente no los deja
-                                 escribir, y al pegar "40.123.456" los saca solo. Los puntos
-                                 se ven al mostrar el dato, no al cargarlo.
-                                 El contador de Material queda apagado: el campo ya no admite
-                                 más que los 8 números, así que "8 / 8" no informa nada.
-                                 El margen del texto de ayuda deja lugar al mensaje de error,
-                                 que Material dibuja encima sin ocupar espacio propio. -->
+                            <!-- Se teclea sin puntos, igual que en Personas: el behavior no
+                                 los deja escribir y al pegar los saca solo. El contador de
+                                 Material queda apagado: el campo ya no admite más que los
+                                 8 números, así que "8 / 8" no informa nada. -->
                             <TextBox Style="{DynamicResource CampoAdmin}" MaxLength="8"
+                                     IsEnabled="{Binding EsAlta}"
                                      b:CampoNumerico.SoloDigitos="True"
                                      materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
                                      materialDesign:HintAssist.Hint="Ej: 40123456"
                                      Text="{Binding Dni, UpdateSourceTrigger=PropertyChanged, Delay=350}" />
-                            <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,7,0,0">
+
+                            <!-- Editando no se cambia de titular: eso sería dar de baja una
+                                 cuenta y de alta otra, y las ventas ya apuntan a esta.
+                                 El margen deja lugar al mensaje de error, que Material
+                                 dibuja encima sin ocupar espacio propio. -->
+                            <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,7,0,0"
+                                       Visibility="{Binding EsAlta, Converter={StaticResource BoolAVisibilidad}}">
                                 <materialDesign:PackIcon Kind="MagnifyScan" Width="12" Height="12" VerticalAlignment="Center" />
-                                <Run Text="8 números, sin puntos. Identifica a la persona: si ya está en el padrón, se cargan sus datos solos." />
+                                <Run Text="8 números, sin puntos. La persona tiene que estar cargada en el padrón." />
                             </TextBlock>
 
-                            <Grid Margin="0,14,0,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0" Margin="0,0,6,0">
-                                    <TextBlock Text="NOMBRE" Style="{DynamicResource EtiquetaAdmin}" />
-                                    <TextBox Style="{DynamicResource CampoAngosto}"
-                                             Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Margin="6,0,0,0">
-                                    <TextBlock Text="APELLIDO" Style="{DynamicResource EtiquetaAdmin}" />
-                                    <TextBox Style="{DynamicResource CampoAngosto}"
-                                             Text="{Binding Apellido, UpdateSourceTrigger=PropertyChanged}" />
-                                </StackPanel>
-                            </Grid>
-
-                            <TextBlock Text="TELÉFONO" Style="{DynamicResource EtiquetaAdmin}" />
-                            <TextBox Style="{DynamicResource CampoAdmin}"
-                                     materialDesign:HintAssist.Hint="Ej: 11 5555-4444"
-                                     Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <TextBlock Text="CORREO PERSONAL" Style="{DynamicResource EtiquetaAdmin}" />
-                            <TextBox Style="{DynamicResource CampoAdmin}"
-                                     materialDesign:HintAssist.Hint="nombre@correo.com"
-                                     Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
-
-                            <!-- ==== CLIENTE ====
-                                 Ser cliente sigue siendo un casillero de la ficha y no una
-                                 cuenta: no da acceso a nada, solo lo habilita en el POS. -->
-                            <Border Style="{DynamicResource SubPanel}" Margin="0,6,0,0">
-                                <StackPanel>
-                                    <CheckBox FontSize="14" FontWeight="SemiBold"
-                                              Foreground="{DynamicResource TintaFuerte}"
-                                              IsChecked="{Binding EsCliente}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <materialDesign:PackIcon Kind="AccountHeartOutline" Width="16" Height="16"
-                                                                     Foreground="{DynamicResource Acento}" VerticalAlignment="Center" />
-                                            <TextBlock Text="Es cliente del bar" Margin="8,0,0,0" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </CheckBox>
-                                    <TextBlock Style="{DynamicResource TextoAyuda}"
-                                               Text="Aparece en el combo de clientes del punto de venta." />
-                                </StackPanel>
-                            </Border>
-
-                            <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0">
+                            <!-- Persona encontrada: se muestra, no se edita. -->
+                            <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0"
+                                    Visibility="{Binding HayPersona, Converter={StaticResource BoolAVisibilidad}}">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="InformationOutline" Width="16" Height="16"
-                                                             Foreground="{DynamicResource TintaSuave}"
-                                                             VerticalAlignment="Top" Margin="0,1,0,0" />
-                                    <TextBlock Style="{DynamicResource TextoAyuda}" Margin="9,0,0,0" Width="262"
-                                               Text="Para que entre al sistema hay que darle una cuenta en la sección Usuarios: ahí se le asigna el correo de inicio de sesión y el rol." />
+                                    <Border Width="38" Height="38" CornerRadius="19" Background="{DynamicResource AcentoSuave}">
+                                        <materialDesign:PackIcon Kind="AccountCheckOutline" Width="19" Height="19"
+                                                                 Foreground="{DynamicResource Acento}"
+                                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center" Margin="11,0,0,0" Width="238">
+                                        <TextBlock Text="{Binding NombrePersona}" FontSize="14.5" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TintaFuerte}" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding ContactoPersona}" FontSize="12"
+                                                   Foreground="{DynamicResource TintaSuave}" TextWrapping="Wrap" />
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
+
+                            <!-- DNI completo que el padrón no tiene: no se inventa la
+                                 persona acá, se ofrece el salto a Personas. -->
+                            <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0"
+                                    Background="{DynamicResource AvisoSuave}"
+                                    Visibility="{Binding DniSinResultado, Converter={StaticResource BoolAVisibilidad}}">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="AccountQuestionOutline" Width="16" Height="16"
+                                                                 Foreground="{DynamicResource Aviso}"
+                                                                 VerticalAlignment="Top" Margin="0,1,0,0" />
+                                        <TextBlock Style="{DynamicResource TextoAyuda}" Margin="9,0,0,0" Width="250"
+                                                   Text="Ese DNI no está en el padrón. Cargá primero los datos personales y volvé a crear la cuenta." />
+                                    </StackPanel>
+                                    <Button Style="{DynamicResource BotonSecundario}" Margin="0,10,0,0"
+                                            HorizontalAlignment="Stretch"
+                                            Command="{Binding IrAPersonasCommand}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="AccountPlusOutline" Width="15" Height="15" VerticalAlignment="Center" />
+                                            <TextBlock Text="Ir a Personas" Margin="7,0,0,0" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- ==== CREDENCIALES ==== -->
+                            <TextBlock Text="ACCESO AL SISTEMA" Style="{DynamicResource TituloBloque}" Margin="0,18,0,0" />
+
+                            <TextBlock Text="CORREO DE TRABAJO" Style="{DynamicResource EtiquetaAdmin}" />
+                            <TextBox Style="{DynamicResource CampoAdmin}"
+                                     materialDesign:HintAssist.Hint="nombre@bar.com"
+                                     Text="{Binding EmailTrabajo, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,0,0,14"
+                                       Text="Es la credencial de inicio de sesión, distinta del correo personal." />
+
+                            <TextBlock Text="ROL" Style="{DynamicResource EtiquetaAdmin}" />
+                            <ComboBox Style="{DynamicResource ComboAdmin}"
+                                      DisplayMemberPath="NombreRol"
+                                      ItemsSource="{Binding Roles}"
+                                      SelectedItem="{Binding RolSeleccionado}" />
+                            <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,0,0,14"
+                                       Text="Vendedor y Mesero tienen las mismas atribuciones: el rol dice el puesto y es lo que se registra al vender en una mesa." />
+
+                            <TextBlock Text="CONTRASEÑA" Style="{DynamicResource EtiquetaAdmin}" />
+                            <PasswordBox Style="{DynamicResource ClaveAdmin}"
+                                         b:PasswordBoxAssist.Enlazar="True"
+                                         b:PasswordBoxAssist.Password="{Binding ClaveNueva, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,0,0,0"
+                                       Text="{Binding AyudaClave}" />
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>

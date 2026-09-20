@@ -26,6 +26,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
@@ -81,8 +82,42 @@
                     </StackPanel>
                 </Grid>
 
+                <!-- Datos del pedido: cómo se pagó y a dónde fue. Van en su propia fila
+                     porque es lo que el vendedor mira al confirmar la venta, y en la fila
+                     de arriba (cliente / atendió / N°) no entraban sin apretujarse. -->
+                <Grid Grid.Row="3" Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="FORMA DE PAGO" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding Factura.MetodoPagoNombre, TargetNullValue='—'}"
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="CONSUMO" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
+                        <TextBlock Text="{Binding Factura.DestinoTexto}"
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!-- La barra y el "para llevar" no llevan mesero: ahí el bloque no se
+                         muestra, en vez de mostrar un guión que no significa nada. -->
+                    <StackPanel Grid.Column="2"
+                                Visibility="{Binding Factura.TieneMesero, Converter={StaticResource BoolAVisibilidad}}">
+                        <TextBlock Text="MESERO" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2"
+                                   HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding Factura.MeseroNombre}"
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445"
+                                   HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Grid>
+
                 <!-- Renglones -->
-                <DataGrid Grid.Row="3" Style="{DynamicResource GrillaAdmin}"
+                <DataGrid Grid.Row="4" Style="{DynamicResource GrillaAdmin}"
                           ItemsSource="{Binding Factura.Lineas}" RowHeight="34">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Producto" Binding="{Binding NombreProducto}" Width="*" />
@@ -93,7 +128,7 @@
                 </DataGrid>
 
                 <!-- Total -->
-                <Border Grid.Row="4" Background="#F7F9FC" CornerRadius="10" Padding="16,12" Margin="0,16,0,0">
+                <Border Grid.Row="5" Background="#F7F9FC" CornerRadius="10" Padding="16,12" Margin="0,16,0,0">
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="14" Foreground="#2B3445" />

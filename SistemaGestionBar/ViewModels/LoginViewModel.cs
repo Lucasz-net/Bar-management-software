@@ -20,17 +20,38 @@ namespace SistemaGestionBar.ViewModels
         }
 
         private string _email = string.Empty;
+
+        /// <summary>El CORREO DE TRABAJO, que es el nombre de usuario (RF-09).</summary>
         public string Email
         {
             get => _email;
-            set => SetProperty(ref _email, value);
+            set
+            {
+                if (SetProperty(ref _email, value))
+                    OlvidarElIntentoAnterior();
+            }
         }
 
         private string _clave = string.Empty;
         public string Clave
         {
             get => _clave;
-            set => SetProperty(ref _clave, value);
+            set
+            {
+                if (SetProperty(ref _clave, value))
+                    OlvidarElIntentoAnterior();
+            }
+        }
+
+        /// <summary>
+        /// Al empezar a corregir se borra el cartel rojo del intento anterior. Dejarlo
+        /// puesto mientras se reescribe la contraseña es decirle al usuario que está
+        /// equivocado justo mientras se corrige.
+        /// </summary>
+        private void OlvidarElIntentoAnterior()
+        {
+            if (MensajeEsError && HayMensaje)
+                Mensaje = string.Empty;
         }
 
         private string _mensaje = string.Empty;
@@ -70,9 +91,12 @@ namespace SistemaGestionBar.ViewModels
 
             if (usuario is null)
             {
-                MensajeEsError = true;
-                Mensaje = "Usuario o contraseña incorrectos.";
+                // La clave se borra ANTES de poner el cartel: hacerlo después dispararía
+                // OlvidarElIntentoAnterior y el mensaje no llegaría a verse nunca.
                 Clave = string.Empty;
+
+                MensajeEsError = true;
+                Mensaje = "Correo o contraseña incorrectos.";
                 return;
             }
 

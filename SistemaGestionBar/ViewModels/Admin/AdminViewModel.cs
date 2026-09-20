@@ -24,19 +24,48 @@ namespace SistemaGestionBar.ViewModels.Admin
             // RF-09: el rol decide qué secciones existen. No se ocultan en la vista,
             // directamente no se construyen: lo que no está no se puede alcanzar.
             //
-            // Usuarios y Parámetros son configuración del sistema, no gestión del negocio,
-            // así que quedan fuera del alcance del gerente.
+            // <b>El corte entre los dos tableros.</b> El gerente OPERA EL BAR; el
+            // administrador ADMINISTRA EL SISTEMA. Todo lo que hace al negocio —la carta,
+            // los precios, el stock, las mesas, los medios de pago, el padrón, las ventas,
+            // los reportes— es del gerente, porque es quien hace funcionar el bar todos
+            // los días. Lo único que queda del lado del administrador es QUIÉN ENTRA AL
+            // SISTEMA Y CON QUÉ ROL, y ese límite se sostiene solo: si el gerente pudiera
+            // crear cuentas, se daría una de administrador y el esquema entero se cae.
+            //
+            // El administrador no pierde nada por esto: tiene todas las secciones.
             bool esAdministrador = UsuarioActual.EsAdministrador;
 
             Secciones = new ObservableCollection<SeccionAdminViewModel>();
-            Secciones.Add(new AdminResumenViewModel(repositorio, dialogo));
+
+            // Resumen contesta "qué hay cargado en el sistema" (cuántos productos, cuántos
+            // insumos, cuántas cuentas). Es configuración, no negocio, así que es del
+            // administrador. Gestión contesta la pregunta que cambia todos los días
+            // —cuánto se facturó, si fue más que ayer, qué se vendió, quién vendió— y es
+            // la pantalla con la que entra el gerente.
+            if (esAdministrador)
+                Secciones.Add(new AdminResumenViewModel(repositorio, dialogo));
+
+            Secciones.Add(new GestionViewModel(repositorio, dialogo));
+
             Secciones.Add(new AdminProductosViewModel(repositorio, dialogo));
             Secciones.Add(new AdminInventarioViewModel(repositorio, dialogo));
 
-            // Personas y cuentas de acceso van juntas: son dos casilleros de la misma
-            // ficha, y separarlas obligaba a ir y volver entre pantallas.
+            // El padrón y las cuentas son dos pantallas distintas porque son dos cosas
+            // distintas: Personas guarda QUIÉN es alguien (una sola ficha por DNI, sea
+            // cliente, empleado o las dos cosas) y Usuarios guarda si esa persona ENTRA
+            // al sistema, con qué correo y con qué rol.
+            //
+            // Esa separación es lo que permite darle Personas al gerente: puede cargar un
+            // cliente o corregir un teléfono sin poder darle acceso a nadie. Mientras las
+            // dos cosas vivían en la misma pantalla, dársela era darle el sistema entero.
+            Secciones.Add(new AdminPersonalViewModel(repositorio, dialogo));
+
             if (esAdministrador)
-                Secciones.Add(new AdminPersonalViewModel(repositorio, dialogo));
+                Secciones.Add(new AdminUsuariosViewModel(repositorio, dialogo));
+
+            // Equipo es el control de empleados del gerente, y es de solo lectura: dice
+            // cuánto vendió cada uno, no quién entra. Por eso lo pueden ver los dos.
+            Secciones.Add(new EquipoViewModel(repositorio, dialogo));
 
             Secciones.Add(new AdminVentasViewModel(repositorio, dialogo));
 
@@ -45,8 +74,11 @@ namespace SistemaGestionBar.ViewModels.Admin
             // guarda en el disco del usuario—, así que no hay riesgo en dárselo.
             Secciones.Add(new AdminReportesViewModel(repositorio, dialogo, UsuarioActual));
 
-            if (esAdministrador)
-                Secciones.Add(new AdminParametrosViewModel(repositorio, dialogo));
+            // Parámetros son las mesas, los medios de pago y las categorías de la carta:
+            // la disposición del salón y cómo cobra el bar. Eso es decisión de gerencia,
+            // no del que administra las cuentas: un administrador de sistema no sabe
+            // cuántas mesas hay. Hasta el 2026-09-15 estaba del lado equivocado.
+            Secciones.Add(new AdminParametrosViewModel(repositorio, dialogo));
 
             // Las secciones no se conocen entre sí: piden "llevame a Productos" y este
             // router resuelve si esa sección existe para el rol actual. Además se les

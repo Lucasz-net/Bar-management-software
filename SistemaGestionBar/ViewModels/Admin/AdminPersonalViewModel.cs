@@ -8,38 +8,39 @@ using SistemaGestionBar.Services;
 namespace SistemaGestionBar.ViewModels.Admin
 {
     /// <summary>
-    /// Personas y cuentas de acceso en una sola pantalla (RF-10 y RF-12).
+    /// Padrón de personas (RF-10 y RF-12). Acá se carga y se corrige <b>quién es</b>
+    /// alguien: DNI, nombre, apellido, teléfono y correo personal.
     ///
-    /// El sistema tiene un solo padrón de personas. Sobre esa misma persona se activan
-    /// dos cosas independientes: ser <b>cliente</b> del bar y tener <b>cuenta</b> para
-    /// entrar al sistema. Por eso es una sección y no dos: son dos casilleros de la misma
-    /// ficha, y separarlos obligaba a ir y volver entre pantallas para dar de alta a un
-    /// empleado que además es cliente.
+    /// <b>Qué NO se hace acá.</b> Nada de credenciales. El correo de trabajo, el rol y la
+    /// contraseña viven en la sección <see cref="AdminUsuariosViewModel">Usuarios</see>,
+    /// que arma la cuenta sobre una persona que este padrón ya tiene. Estaban juntos y el
+    /// formulario mentía: para dar de alta a un cliente había que pasar por delante de un
+    /// bloque de credenciales que no le correspondía.
     ///
-    /// El <b>DNI/CUIT es el dato identificatorio</b>: al escribirlo en un alta, si esa
-    /// persona ya está en el padrón se traen sus datos en vez de duplicarla.
+    /// Lo único que sigue siendo de las dos pantallas es el <b>DNI</b>: es el dato
+    /// identificatorio, y al escribirlo en un alta trae a la persona que ya lo tenga en
+    /// vez de duplicarla.
     /// </summary>
     public class AdminPersonalViewModel : SeccionAdminViewModel
     {
         public AdminPersonalViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
-            : base(repositorio, dialogo, DestinoAdmin.Personas, "Personas", "AccountGroupOutline",
-                   "Padrón de clientes y empleados, y las cuentas de acceso al sistema")
+            : base(repositorio, dialogo, DestinoAdmin.Personas, "Personas", "CardAccountDetailsOutline",
+                   "Padrón de datos personales de clientes y empleados")
         {
             Personas = new ObservableCollection<Persona>();
-            Roles = new ObservableCollection<Rol>();
-            OpcionesRol = new ObservableCollection<OpcionFiltro<Rol?>>();
 
             NuevoCommand = new RelayCommand(Nuevo);
             EditarCommand = new RelayCommand(Editar, () => Seleccionada is not null && !EnEdicion);
             GuardarCommand = new RelayCommand(Guardar, () => EnEdicion);
             CancelarCommand = new RelayCommand(Cancelar, () => EnEdicion);
             EliminarCommand = new RelayCommand(Eliminar, () => Seleccionada is not null && !EnEdicion);
+            IrAUsuariosCommand = new RelayCommand(() => IrA(DestinoAdmin.Usuarios, Seleccionada),
+                                                  () => PuedeIrA(DestinoAdmin.Usuarios));
 
             Recargar();
         }
 
         public ObservableCollection<Persona> Personas { get; }
-        public ObservableCollection<Rol> Roles { get; }
 
         // ---------------------------------------------------------------
         // Filtros
@@ -63,24 +64,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
         }
 
-        /// <summary>Roles para el combo de filtro, con "Todos" adelante.</summary>
-        public ObservableCollection<OpcionFiltro<Rol?>> OpcionesRol { get; }
-
-        private OpcionFiltro<Rol?>? _rolFiltro;
-        public OpcionFiltro<Rol?>? RolFiltro
-        {
-            get => _rolFiltro;
-            set
-            {
-                if (SetProperty(ref _rolFiltro, value))
-                    RefrescarVista();
-            }
-        }
-
         public override bool HayFiltroAplicado =>
-            HayBusqueda
-            || (Vinculo is not null && Vinculo.Valor != VinculoPersona.Todas)
-            || (RolFiltro is not null && RolFiltro.Valor is not null);
+            HayBusqueda || (Vinculo is not null && Vinculo.Valor != VinculoPersona.Todas);
 
         protected override bool Coincide(object item)
         {
@@ -99,26 +84,20 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (!pasaVinculo)
                 return false;
 
-            if (RolFiltro?.Valor is Rol rol && persona.Usuario?.IdRol != rol.IdRol)
-                return false;
-
             if (!HayBusqueda)
                 return true;
 
             return Contiene(persona.Nombre, Termino)
                 || Contiene(persona.Apellido, Termino)
-                || Contiene(persona.DniCuit, Termino)
+                || ContieneDocumento(persona.DniCuit, Termino)
                 || Contiene(persona.Email, Termino)
-                || Contiene(persona.Telefono, Termino)
-                || Contiene(persona.Usuario?.Email, Termino)
-                || Contiene(persona.Usuario?.NombreRol, Termino);
+                || Contiene(persona.Telefono, Termino);
         }
 
         protected override void LimpiarFiltros()
         {
             base.LimpiarFiltros();
             Vinculo = OpcionesVinculo[0];
-            RolFiltro = OpcionesRol.FirstOrDefault();
         }
 
         // ---------------------------------------------------------------
@@ -208,18 +187,22 @@ namespace SistemaGestionBar.ViewModels.Admin
         // ---------------------------------------------------------------
         // Datos personales
         // ---------------------------------------------------------------
-        private string _dniCuit = string.Empty;
+        private string _dni = string.Empty;
 
         /// <summary>
-        /// Dato identificatorio. En un alta, escribirlo completo trae del padrón a la
-        /// persona que ya lo tenga: es lo que evita cargar dos veces a la misma persona.
+        /// Dato identificatorio, con los 8 números pelados. En un alta, escribirlo completo
+        /// trae del padrón a la persona que ya lo tenga: es lo que evita cargar dos veces a
+        /// la misma persona.
+        ///
+        /// Para mostrarlo en la grilla o en la ficha va <see cref="Persona.DniFormateado"/>,
+        /// que es el que le pone los puntos.
         /// </summary>
-        public string DniCuit
+        public string Dni
         {
-            get => _dniCuit;
+            get => _dni;
             set
             {
-                if (SetCampo(ref _dniCuit, value))
+                if (SetCampo(ref _dni, value))
                     BuscarEnElPadron();
             }
         }
@@ -241,59 +224,30 @@ namespace SistemaGestionBar.ViewModels.Admin
         /// <summary>RF-05: tildarlo es lo que habilita a la persona en el punto de venta.</summary>
         public bool EsCliente { get => _esCliente; set => SetProperty(ref _esCliente, value); }
 
-        // ---------------------------------------------------------------
-        // Acceso al sistema
-        // ---------------------------------------------------------------
-        private bool _tieneCuenta;
-
-        /// <summary>
-        /// Destildarlo da de baja el acceso, pero la persona sigue en el padrón:
-        /// un empleado que se va puede seguir siendo cliente del bar.
-        /// </summary>
-        public bool TieneCuenta
-        {
-            get => _tieneCuenta;
-            set
-            {
-                if (SetProperty(ref _tieneCuenta, value))
-                {
-                    OnPropertyChanged(nameof(AyudaCuenta));
-                    Revalidar();
-                }
-            }
-        }
-
-        private string _emailTrabajo = string.Empty;
-
-        /// <summary>Correo del bar. Es el nombre de usuario con el que se inicia sesión (RF-09).</summary>
-        public string EmailTrabajo { get => _emailTrabajo; set => SetCampo(ref _emailTrabajo, value); }
-
-        private Rol? _rolSeleccionado;
-        public Rol? RolSeleccionado { get => _rolSeleccionado; set => SetCampo(ref _rolSeleccionado, value); }
-
-        private string _claveNueva = string.Empty;
-        public string ClaveNueva { get => _claveNueva; set => SetCampo(ref _claveNueva, value); }
-
-        /// <summary>La cuenta que se está editando, o null si la persona no tiene.</summary>
-        private Usuario? CuentaActual => _esAlta ? null : Seleccionada?.Usuario;
-
-        public string AyudaCuenta => CuentaActual is null
-            ? "Mínimo 8 caracteres."
-            : "Dejar vacío para conservar la contraseña actual.";
-
         public ICommand NuevoCommand { get; }
         public ICommand EditarCommand { get; }
         public ICommand GuardarCommand { get; }
         public ICommand CancelarCommand { get; }
         public ICommand EliminarCommand { get; }
 
+        /// <summary>
+        /// Atajo a la otra mitad: desde la ficha se salta a Usuarios llevando la persona,
+        /// que es lo que se quiere hacer justo después de dar de alta a un empleado.
+        /// </summary>
+        public ICommand IrAUsuariosCommand { get; }
+
+        public bool PuedeGestionarCuentas => PuedeIrA(DestinoAdmin.Usuarios);
+
+        protected override void AlCambiarLosDestinos() =>
+            OnPropertyChanged(nameof(PuedeGestionarCuentas));
+
         // ---------------------------------------------------------------
         // Validación
         // ---------------------------------------------------------------
         protected override void DeclararReglas()
         {
-            Requerido(DniCuit, nameof(DniCuit), "El DNI/CUIT");
-            FormatoDocumento(DniCuit, nameof(DniCuit));
+            Requerido(Dni, nameof(Dni), "El DNI");
+            FormatoDni(Dni, nameof(Dni));
 
             Requerido(Nombre, nameof(Nombre), "El nombre");
             LargoMaximo(Nombre, nameof(Nombre), "El nombre", 60);
@@ -306,44 +260,25 @@ namespace SistemaGestionBar.ViewModels.Admin
             FormatoCorreo(Email, nameof(Email));
             NoRepetido(Email, nameof(Email), OtrasPersonas().Select(p => p.Email),
                        "Ya hay otra persona con ese correo.");
-
-            if (!TieneCuenta)
-                return;
-
-            Requerido(EmailTrabajo, nameof(EmailTrabajo), "El correo de trabajo");
-            FormatoCorreo(EmailTrabajo, nameof(EmailTrabajo));
-            NoRepetido(EmailTrabajo, nameof(EmailTrabajo), OtrasCuentas().Select(u => u.Email),
-                       "Ya hay otra cuenta con ese correo.");
-
-            RequeridoElegir(RolSeleccionado, nameof(RolSeleccionado), "el rol");
-
-            if (CuentaActual is null)
-                Requerido(ClaveNueva, nameof(ClaveNueva), "La contraseña");
-
-            LargoMinimo(ClaveNueva, nameof(ClaveNueva), "La contraseña", 8);
         }
 
         private IEnumerable<Persona> OtrasPersonas() =>
             Personas.Where(p => p.IdPersona != Seleccionada?.IdPersona);
 
-        private IEnumerable<Usuario> OtrasCuentas() =>
-            Personas.Where(p => p.Usuario is not null && p.IdPersona != Seleccionada?.IdPersona)
-                    .Select(p => p.Usuario!);
-
         // ---------------------------------------------------------------
         // Búsqueda en el padrón por documento
         // ---------------------------------------------------------------
         /// <summary>
-        /// Solo en un alta: si el documento tecleado ya está en el padrón, se traen los
-        /// datos de esa persona y el alta se convierte en una edición. Así no quedan dos
-        /// filas para el mismo DNI cuando un cliente conocido entra a trabajar al bar.
+        /// Solo en un alta: si el DNI tecleado ya está en el padrón, se traen los datos de
+        /// esa persona y el alta se convierte en una edición. Así no quedan dos filas para
+        /// el mismo DNI cuando un cliente conocido entra a trabajar al bar.
         /// </summary>
         private void BuscarEnElPadron()
         {
             if (!_esAlta || !EnEdicion)
                 return;
 
-            var encontrada = Repositorio.BuscarPersonaPorDocumento(DniCuit);
+            var encontrada = Repositorio.BuscarPersonaPorDocumento(Dni);
             if (encontrada is null)
                 return;
 
@@ -370,19 +305,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             foreach (var persona in Repositorio.ObtenerPersonas())
                 Personas.Add(persona);
 
-            Roles.Clear();
-            foreach (var rol in Repositorio.ObtenerRoles())
-                Roles.Add(rol);
-
-            if (OpcionesRol.Count == 0)
-            {
-                OpcionesRol.Add(new OpcionFiltro<Rol?>("Todos los roles", null));
-                foreach (var rol in Roles)
-                    OpcionesRol.Add(new OpcionFiltro<Rol?>(rol.NombreRol, rol));
-                _rolFiltro = OpcionesRol[0];
-                OnPropertyChanged(nameof(RolFiltro));
-            }
-
             ConfigurarFiltro(Personas);
             _vinculo ??= OpcionesVinculo[0];
             RefrescarVista();
@@ -390,26 +312,40 @@ namespace SistemaGestionBar.ViewModels.Admin
             EstablecerSeleccion(Personas.FirstOrDefault(p => p.IdPersona == idPrevio) ?? Personas.FirstOrDefault());
         }
 
+        /// <summary>Llega acá el salto desde Usuarios: señala en el padrón a esa persona.</summary>
+        public override void Enfocar(object? foco)
+        {
+            int? id = foco switch
+            {
+                Persona persona => persona.IdPersona,
+                Usuario usuario => usuario.IdPersona,
+                int idPersona => idPersona,
+                _ => null
+            };
+
+            if (id is null)
+                return;
+
+            var fila = Personas.FirstOrDefault(p => p.IdPersona == id);
+            if (fila is not null)
+                EstablecerSeleccion(fila);
+        }
+
         private void CargarEnEditor(Persona? persona)
         {
-            _dniCuit = persona?.DniCuit ?? string.Empty;
+            // Normalizado, no crudo: una ficha vieja guardada con puntos tiene que abrirse
+            // en el formulario como se carga hoy, con los números pelados.
+            _dni = Documento.Normalizar(persona?.DniCuit);
             _nombre = persona?.Nombre ?? string.Empty;
             _apellido = persona?.Apellido ?? string.Empty;
             _telefono = persona?.Telefono ?? string.Empty;
             _email = persona?.Email ?? string.Empty;
             _esCliente = persona?.EsCliente ?? false;
 
-            var cuenta = persona?.Usuario;
-            _tieneCuenta = cuenta is not null;
-            _emailTrabajo = cuenta?.Email ?? string.Empty;
-            _rolSeleccionado = cuenta is null ? null : Roles.FirstOrDefault(r => r.IdRol == cuenta.IdRol);
-            _claveNueva = string.Empty;
-
             foreach (var propiedad in new[]
                      {
-                         nameof(DniCuit), nameof(Nombre), nameof(Apellido), nameof(Telefono),
-                         nameof(Email), nameof(EsCliente), nameof(TieneCuenta), nameof(EmailTrabajo),
-                         nameof(RolSeleccionado), nameof(ClaveNueva), nameof(TituloEditor), nameof(AyudaCuenta)
+                         nameof(Dni), nameof(Nombre), nameof(Apellido), nameof(Telefono),
+                         nameof(Email), nameof(EsCliente), nameof(TituloEditor)
                      })
             {
                 OnPropertyChanged(propiedad);
@@ -472,7 +408,7 @@ namespace SistemaGestionBar.ViewModels.Admin
                 return;
             }
 
-            persona.DniCuit = DniCuit.Trim();
+            persona.DniCuit = Documento.Normalizar(Dni);
             persona.Nombre = Nombre.Trim();
             persona.Apellido = Apellido.Trim();
             persona.Telefono = Telefono.Trim();
@@ -481,37 +417,11 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (!Aplicar(Repositorio.GuardarPersona(persona, EsCliente)))
                 return;
 
-            var resultadoCuenta = SincronizarCuenta(persona);
-
             EnEdicion = false;
             _esAlta = false;
             OnPropertyChanged(nameof(EsAlta));
             Recargar();
             EstablecerSeleccion(Personas.FirstOrDefault(p => p.IdPersona == persona.IdPersona));
-
-            if (resultadoCuenta is not null)
-                Aplicar(resultadoCuenta);
-        }
-
-        /// <summary>
-        /// Alinea la cuenta con el tilde del formulario: la crea, la actualiza o la da de
-        /// baja. Devuelve null si no hubo nada que hacer, para no pisar el mensaje del alta.
-        /// </summary>
-        private ResultadoOperacion? SincronizarCuenta(Persona persona)
-        {
-            var cuenta = persona.Usuario;
-
-            if (TieneCuenta)
-            {
-                var aGuardar = cuenta ?? new Usuario();
-                aGuardar.IdPersona = persona.IdPersona;
-                aGuardar.IdRol = RolSeleccionado?.IdRol ?? 0;
-                aGuardar.Email = EmailTrabajo.Trim();
-
-                return Repositorio.GuardarUsuario(aGuardar, ClaveNueva);
-            }
-
-            return cuenta is null ? null : Repositorio.EliminarUsuario(cuenta.IdUsuario);
         }
 
         private void Eliminar()
@@ -519,16 +429,17 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (Seleccionada is null)
                 return;
 
-            string? aviso = Seleccionada.EsEmpleado
-                ? "Tiene cuenta de acceso al sistema: se da de baja junto con su ficha."
-                : null;
-
-            if (!ConfirmarEliminacion("la persona", Seleccionada.NombreCompleto, aviso))
+            // La cuenta NO se borra en cascada desde acá: dar de baja un acceso es una
+            // decisión de la sección Usuarios y se toma mirando esa pantalla. Si la
+            // persona tiene cuenta, el repositorio rechaza el borrado y lo dice.
+            if (Seleccionada.EsEmpleado)
+            {
+                Fallar($"{Seleccionada.NombreCompleto} tiene una cuenta de acceso. " +
+                       "Eliminá primero la cuenta en la sección Usuarios.");
                 return;
+            }
 
-            // La cuenta se va primero: el padrón no deja borrar a alguien que tiene acceso.
-            if (Seleccionada.Usuario is not null &&
-                !Aplicar(Repositorio.EliminarUsuario(Seleccionada.Usuario.IdUsuario)))
+            if (!ConfirmarEliminacion("la persona", Seleccionada.NombreCompleto))
                 return;
 
             if (Aplicar(Repositorio.EliminarPersona(Seleccionada.IdPersona)))

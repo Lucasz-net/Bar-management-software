@@ -322,6 +322,9 @@ namespace SistemaGestionBar.Data
             db.Ventas.AsNoTracking()
               .Include(v => v.Cliente).ThenInclude(c => c.Persona)
               .Include(v => v.Cajero).ThenInclude(u => u.Persona)
+              .Include(v => v.Mesero).ThenInclude(u => u!.Persona)
+              .Include(v => v.MetodoPago)
+              .Include(v => v.Ubicacion)
               .Include(v => v.Detalles).ThenInclude(d => d.Producto)
               .Where(v => v.EstadoVenta == EstadoVenta.Confirmada);
 
@@ -341,6 +344,10 @@ namespace SistemaGestionBar.Data
                 Importe = venta.Total,
                 ClienteNombre = venta.Cliente?.NombreMostrado,
                 CajeroNombre = venta.Cajero?.NombreCompleto,
+                MetodoPagoNombre = venta.MetodoPago?.NombreMetodo,
+                Modalidad = venta.ModalidadConsumo,
+                UbicacionNombre = venta.Ubicacion?.NombreUbicacion,
+                MeseroNombre = venta.Mesero?.NombreCompleto,
                 Venta = venta
             };
 

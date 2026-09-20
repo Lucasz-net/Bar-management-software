@@ -31,10 +31,35 @@ namespace SistemaGestionBar.Models
         /// <summary>Quién cobró, igual que el nombre del cliente.</summary>
         public string? CajeroNombre { get; set; }
 
+        /// <summary>Cómo se pagó. Copiado igual que los nombres de arriba.</summary>
+        public string? MetodoPagoNombre { get; set; }
+
+        /// <summary>En el local o para llevar: define qué muestra <see cref="DestinoTexto"/>.</summary>
+        public ModalidadConsumo Modalidad { get; set; } = ModalidadConsumo.Local;
+
+        /// <summary>Mesa o barra. Null cuando la venta es para llevar.</summary>
+        public string? UbicacionNombre { get; set; }
+
+        /// <summary>Quién tomó el pedido. Null en barra y para llevar (ver Ubicacion.RequiereMesero).</summary>
+        public string? MeseroNombre { get; set; }
+
         public List<FacturaLinea> Lineas { get; set; } = new();
 
         // Navegación
         public Venta? Venta { get; set; }
+
+        /// <summary>
+        /// Dónde se consumió el pedido, en una sola línea: la mesa o la barra si fue en
+        /// el local, y "Para llevar" si no. Son dos datos que se excluyen entre sí, así
+        /// que en el comprobante ocupan un solo campo.
+        /// </summary>
+        public string DestinoTexto =>
+            Modalidad == ModalidadConsumo.ParaLlevar
+                ? "Para llevar"
+                : UbicacionNombre ?? "En el local";
+
+        /// <summary>Oculta el bloque del mesero en las ventas que no lo llevan.</summary>
+        public bool TieneMesero => !string.IsNullOrWhiteSpace(MeseroNombre);
 
         /// <summary>Suma de los renglones. Tiene que coincidir con <see cref="Importe"/>.</summary>
         public decimal TotalCalculado => Lineas.Sum(l => l.Subtotal);

@@ -76,7 +76,7 @@ namespace SistemaGestionBar.Data
         }
 
         private static string NormalizarDocumento(string? documento) =>
-            new((documento ?? string.Empty).Where(char.IsDigit).ToArray());
+            Documento.Normalizar(documento);
 
         public IReadOnlyList<Usuario> ObtenerUsuarios()
         {
@@ -334,13 +334,20 @@ namespace SistemaGestionBar.Data
             if (string.IsNullOrWhiteSpace(persona.Apellido))
                 return ResultadoOperacion.Error("El apellido es obligatorio.");
 
-            if (string.IsNullOrWhiteSpace(persona.DniCuit))
-                return ResultadoOperacion.Error("El DNI/CUIT es obligatorio: identifica a la persona.");
+            // El DNI se guarda pelado, venga como venga: la unicidad de la columna no sirve
+            // de nada si la misma persona puede entrar como "38987654" y como "38.987.654".
+            string dni = Documento.Normalizar(persona.DniCuit);
 
-            var conMismoDocumento = BuscarPersonaPorDocumento(persona.DniCuit);
+            if (dni.Length == 0)
+                return ResultadoOperacion.Error("El DNI es obligatorio: identifica a la persona.");
+
+            if (dni.Length != Documento.Digitos)
+                return ResultadoOperacion.Error($"El DNI tiene que tener {Documento.Digitos} números.");
+
+            var conMismoDocumento = BuscarPersonaPorDocumento(dni);
             if (conMismoDocumento is not null && conMismoDocumento.IdPersona != persona.IdPersona)
                 return ResultadoOperacion.Error(
-                    $"El DNI/CUIT {persona.DniCuit.Trim()} ya es de {conMismoDocumento.NombreCompleto}.");
+                    $"El DNI {Documento.Formatear(dni)} ya es de {conMismoDocumento.NombreCompleto}.");
 
             using var db = _fabrica.Crear();
 
@@ -369,7 +376,7 @@ namespace SistemaGestionBar.Data
 
             fila.Nombre = persona.Nombre.Trim();
             fila.Apellido = persona.Apellido.Trim();
-            fila.DniCuit = persona.DniCuit.Trim();
+            fila.DniCuit = dni;
             fila.Telefono = string.IsNullOrWhiteSpace(persona.Telefono) ? null : persona.Telefono.Trim();
             fila.Email = correo;
 
