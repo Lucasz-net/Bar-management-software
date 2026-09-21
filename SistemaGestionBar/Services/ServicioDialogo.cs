@@ -30,6 +30,29 @@ namespace SistemaGestionBar.Services
             ventana.ShowDialog();
         }
 
+        /// <summary>
+        /// El ViewModel no conoce WPF, así que no puede cerrar su propia ventana: avisa con
+        /// <c>CierreSolicitado</c> cuando el ajuste se guardó y el cierre lo hace acá, que es
+        /// la única clase que sabe qué es una Window. Cancelar cierra por IsCancel y deja
+        /// <c>SeAplico</c> en false.
+        /// </summary>
+        public bool AjustarStock(AjusteDeStockViewModel ajuste)
+        {
+            var ventana = new AjusteStockWindow
+            {
+                DataContext = ajuste,
+                Owner = VentanaActiva()
+            };
+
+            void Cerrar(object? origen, EventArgs e) => ventana.Close();
+
+            ajuste.CierreSolicitado += Cerrar;
+            ventana.ShowDialog();
+            ajuste.CierreSolicitado -= Cerrar;
+
+            return ajuste.SeAplico;
+        }
+
         public void Informar(string titulo, string mensaje) =>
             MessageBox.Show(VentanaActiva(), mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
 

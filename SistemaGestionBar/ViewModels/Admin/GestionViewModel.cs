@@ -195,17 +195,10 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(PuedeVerEquipo));
 
         /// <summary>
-        /// Igual que en el resumen del administrador: reponer no cambia el stock acá, lleva
-        /// a la pantalla donde ese ítem se edita. Poner un número a ojo desde una alerta
-        /// sería saltearse la validación del ABM.
+        /// Igual que en el resumen del administrador: lleva a la sección del ítem, que le
+        /// abre la ventanita de ajuste de stock. El destino lo resuelve la clase base.
         /// </summary>
-        private void Reponer(AlertaStock alerta)
-        {
-            if (alerta is null)
-                return;
-
-            IrA(alerta.EsInsumo ? DestinoAdmin.Inventario : DestinoAdmin.Productos, alerta);
-        }
+        private void Reponer(AlertaStock alerta) => IrAReponer(alerta);
 
         // ---------------------------------------------------------------
         // Cálculo

@@ -323,6 +323,64 @@ namespace SistemaGestionBar.Data
             return ResultadoOperacion.Ok($"Insumo \"{ingrediente.Nombre}\" eliminado.");
         }
 
+        /// <summary>
+        /// Mueve el stock de una fila y nada más. Ver <see cref="IRepositorioBar.AjustarStock"/>
+        /// para el porqué de que esto no sea un GuardarProducto.
+        ///
+        /// Se valida ANTES de escribir y se devuelve un mensaje que dice el número, no un
+        /// "no se pudo" pelado: quien está cargando una entrega necesita saber contra qué
+        /// stock chocó para corregir la cantidad.
+        /// </summary>
+        public ResultadoOperacion AjustarStock(bool esInsumo, int id, decimal cantidad)
+        {
+            if (cantidad == 0)
+                return ResultadoOperacion.Error("Indicá cuánto entra o cuánto sale.");
+
+            using var db = _fabrica.Crear();
+
+            if (esInsumo)
+            {
+                var insumo = db.Ingredientes.FirstOrDefault(i => i.IdIngrediente == id);
+                if (insumo is null)
+                    return ResultadoOperacion.Error("El insumo ya no existe. Recargá la pantalla.");
+
+                if (insumo.Stock + cantidad < 0)
+                    return ResultadoOperacion.Error(
+                        $"No se puede descontar {Math.Abs(cantidad):0.##}: " +
+                        $"hay {insumo.Stock:0.##} {insumo.UnidadMedida} de \"{insumo.Nombre}\".");
+
+                insumo.Stock += cantidad;
+
+                // La auditoría (RF-11) la estampa SaveChanges: queda registrado quién movió
+                // el stock y cuándo, sin que este método tenga que acordarse.
+                db.SaveChanges();
+
+                return ResultadoOperacion.Ok(
+                    $"\"{insumo.Nombre}\": {(cantidad > 0 ? "+" : "")}{cantidad:0.##} {insumo.UnidadMedida}. " +
+                    $"Quedan {insumo.Stock:0.##}.");
+            }
+
+            var producto = db.Productos.FirstOrDefault(p => p.IdProducto == id);
+            if (producto is null)
+                return ResultadoOperacion.Error("El producto ya no existe. Recargá la pantalla.");
+
+            // El stock de Producto es entero: son unidades, no hay media botella.
+            if (cantidad != decimal.Truncate(cantidad))
+                return ResultadoOperacion.Error(
+                    $"\"{producto.Nombre}\" se cuenta por unidades: la cantidad tiene que ser un número entero.");
+
+            if (producto.Stock + cantidad < 0)
+                return ResultadoOperacion.Error(
+                    $"No se puede descontar {Math.Abs(cantidad):0.##}: " +
+                    $"hay {producto.Stock} de \"{producto.Nombre}\".");
+
+            producto.Stock += (int)cantidad;
+            db.SaveChanges();
+
+            return ResultadoOperacion.Ok(
+                $"\"{producto.Nombre}\": {(cantidad > 0 ? "+" : "")}{cantidad:0.##}. " +
+                $"Quedan {producto.Stock}.");
+        }
         // ---------------------------------------------------------------
         // Persona: el padrón (RF-10)
         // ---------------------------------------------------------------

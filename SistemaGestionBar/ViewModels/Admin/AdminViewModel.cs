@@ -32,8 +32,13 @@ namespace SistemaGestionBar.ViewModels.Admin
             // SISTEMA Y CON QUÉ ROL, y ese límite se sostiene solo: si el gerente pudiera
             // crear cuentas, se daría una de administrador y el esquema entero se cae.
             //
-            // El administrador no pierde nada por esto: tiene todas las secciones.
+            // Desde el 2026-09-21 el corte también va para el otro lado: Gestión y Equipo
+            // son EXCLUSIVAS DEL GERENTE. Son las dos pantallas de conducción del negocio
+            // —cómo viene el día, cómo rinde cada empleado— y el administrador no conduce
+            // el bar: administra el sistema. Mientras las tenía, su tablero era el del
+            // gerente más Usuarios, y el corte dejaba de leerse como dos roles distintos.
             bool esAdministrador = UsuarioActual.EsAdministrador;
+            bool esGerente = UsuarioActual.EsGerente;
 
             Secciones = new ObservableCollection<SeccionAdminViewModel>();
 
@@ -45,7 +50,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (esAdministrador)
                 Secciones.Add(new AdminResumenViewModel(repositorio, dialogo));
 
-            Secciones.Add(new GestionViewModel(repositorio, dialogo));
+            if (esGerente)
+                Secciones.Add(new GestionViewModel(repositorio, dialogo));
 
             Secciones.Add(new AdminProductosViewModel(repositorio, dialogo));
             Secciones.Add(new AdminInventarioViewModel(repositorio, dialogo));
@@ -63,9 +69,12 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (esAdministrador)
                 Secciones.Add(new AdminUsuariosViewModel(repositorio, dialogo));
 
-            // Equipo es el control de empleados del gerente, y es de solo lectura: dice
-            // cuánto vendió cada uno, no quién entra. Por eso lo pueden ver los dos.
-            Secciones.Add(new EquipoViewModel(repositorio, dialogo));
+            // Equipo es el control de empleados del gerente: dice cuánto vendió cada uno,
+            // no quién entra al sistema. Es de solo lectura, así que no es peligrosa —pero
+            // es la herramienta con la que el gerente conduce a su equipo, y quién rinde
+            // más no es asunto de quien administra las cuentas.
+            if (esGerente)
+                Secciones.Add(new EquipoViewModel(repositorio, dialogo));
 
             Secciones.Add(new AdminVentasViewModel(repositorio, dialogo));
 

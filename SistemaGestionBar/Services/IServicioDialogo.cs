@@ -15,6 +15,13 @@ namespace SistemaGestionBar.Services
 
         void MostrarFactura(ViewModels.FacturaViewModel factura);
 
+        /// <summary>
+        /// RF-08: abre la ventanita que modifica el stock de un ítem, y solo el stock.
+        /// Devuelve true si el ajuste llegó a guardarse, para que la pantalla que la abrió
+        /// recargue su lista y muestre el resultado.
+        /// </summary>
+        bool AjustarStock(ViewModels.AjusteDeStockViewModel ajuste);
+
         void Informar(string titulo, string mensaje);
 
         bool Confirmar(string titulo, string mensaje);

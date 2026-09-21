@@ -280,6 +280,23 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         protected bool PuedeIrA(DestinoAdmin destino) => _destinos.Contains(destino);
 
+        /// <summary>
+        /// Adónde lleva el botón Reponer de una alerta de stock: a la sección donde vive ese
+        /// ítem —Inventario si es un insumo, Productos si no—, que al recibirlo abre la
+        /// ventanita de ajuste de stock.
+        ///
+        /// Está acá y no en cada pantalla para que las dos que muestran alertas —el Resumen
+        /// del administrador y Gestión del gerente— salten al mismo lugar: si una hiciera una
+        /// cosa y la otra otra, el mismo botón se comportaría distinto según quién mire.
+        /// </summary>
+        protected void IrAReponer(AlertaStock alerta)
+        {
+            if (alerta is null)
+                return;
+
+            IrA(alerta.EsInsumo ? DestinoAdmin.Inventario : DestinoAdmin.Productos, alerta);
+        }
+
         /// <summary>Gancho para refrescar los atajos que dependen del rol.</summary>
         protected virtual void AlCambiarLosDestinos() { }
 
@@ -314,15 +331,16 @@ namespace SistemaGestionBar.ViewModels.Admin
         /// <summary>Estado del sistema: qué hay cargado. Solo el administrador.</summary>
         Resumen,
 
-        /// <summary>Cómo viene el negocio hoy. Es la pantalla de entrada del gerente.</summary>
+        /// <summary>Cómo viene el negocio hoy. Solo el gerente: es su pantalla de entrada.</summary>
         Gestion,
 
         Productos,
         Inventario,
+
         Personas,
         Usuarios,
 
-        /// <summary>Cuánto vendió cada uno. Solo lectura: las cuentas se tocan en Usuarios.</summary>
+        /// <summary>Cuánto vendió cada uno. Solo el gerente, y de solo lectura: las cuentas se tocan en Usuarios.</summary>
         Equipo,
 
         Ventas,

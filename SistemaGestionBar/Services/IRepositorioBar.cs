@@ -96,6 +96,26 @@ namespace SistemaGestionBar.Services
         ResultadoOperacion EliminarIngrediente(int idIngrediente);
 
         /// <summary>
+        /// Mueve el stock de un producto o un insumo, y nada más (RF-08). Es lo que guarda
+        /// la ventanita de ajuste de stock.
+        ///
+        /// <b>Por qué no alcanza con GuardarProducto / GuardarIngrediente.</b> Esos dos
+        /// guardan la ficha entera: piden nombre, unidad, precio y categoría, y validan que
+        /// el nombre no esté repetido. Para anotar que llegaron 24 botellas eso es pedir de
+        /// más y arriesgar de más —se puede tocar un precio sin querer, y una ficha con un
+        /// dato viejo mal cargado impide guardar el movimiento de stock, que no tiene nada
+        /// que ver—. Este método toca <b>solo la columna de stock</b>.
+        ///
+        /// <b><paramref name="cantidad"/> es un delta con signo, no el total nuevo.</b> El
+        /// stock llega como movimiento ("+24", "-2 por rotura"), y hacer la cuenta a mano
+        /// para escribir el total es justo donde se cometen los errores. Además dos personas
+        /// reponiendo a la vez no se pisan: dos deltas se suman, dos totales se sobrescriben.
+        ///
+        /// Un ajuste que dejaría el stock en negativo se rechaza y no escribe nada.
+        /// </summary>
+        ResultadoOperacion AjustarStock(bool esInsumo, int id, decimal cantidad);
+
+        /// <summary>
         /// Alta o edición del padrón de personas (RF-10). <paramref name="esCliente"/> crea
         /// o quita la fila de Cliente: es lo que habilita a la persona en el punto de venta.
         /// </summary>

@@ -40,6 +40,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             GuardarCommand = new RelayCommand(Guardar, () => EnEdicion);
             CancelarCommand = new RelayCommand(Cancelar, () => EnEdicion);
             EliminarCommand = new RelayCommand(Eliminar, () => Seleccionado is not null && !EnEdicion);
+            AjustarStockCommand = new RelayCommand(AjustarStock,
+                                                  () => Seleccionado is not null && !EnEdicion && !Seleccionado.TieneReceta);
             AgregarIngredienteCommand = new RelayCommand(AgregarIngrediente, () => EnEdicion && Ingredientes.Any());
             QuitarIngredienteCommand = new RelayCommand<LineaRecetaViewModel>(QuitarIngrediente);
 
@@ -338,6 +340,7 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand GuardarCommand { get; }
         public ICommand CancelarCommand { get; }
         public ICommand EliminarCommand { get; }
+        public ICommand AjustarStockCommand { get; }
         public ICommand AgregarIngredienteCommand { get; }
         public ICommand QuitarIngredienteCommand { get; }
 
@@ -424,8 +427,37 @@ namespace SistemaGestionBar.ViewModels.Admin
                 return;
 
             EstablecerSeleccion(producto);
-            Editar();
-            Informar($"Actualizá el stock de \"{producto.Nombre}\" y guardá.");
+
+            // Hasta el 2026-09-21 esto abría el editor completo de la ficha: para anotar que
+            // llegaron 24 botellas había que ver precio, categoría, descripción, foto y
+            // receta, y encima escribir el TOTAL nuevo, calculando 6+24 de cabeza. Ahora se
+            // abre la ventanita, que solo pide cuánto entró y muestra la cuenta hecha.
+            AjustarStock();
+        }
+
+        /// <summary>
+        /// Abre la ventanita de ajuste de stock del producto elegido (RF-08).
+        ///
+        /// Un producto con receta no pasa por acá —el comando está deshabilitado— porque no
+        /// tiene stock propio: su disponibilidad sale de los insumos, así que reponerlo es
+        /// reponer el insumo, en la sección Inventario.
+        /// </summary>
+        private void AjustarStock()
+        {
+            if (Seleccionado is null || Seleccionado.TieneReceta)
+                return;
+
+            LimpiarMensaje();
+
+            var ajuste = AjusteDeStockViewModel.DeProducto(Repositorio, Seleccionado);
+
+            if (!Dialogo.AjustarStock(ajuste))
+                return;
+
+            // Recargar vuelve a leer de la base y conserva la selección por id: lo que queda
+            // en pantalla es lo que se guardó, no lo que calculó la ventana.
+            Recargar();
+            Informar(ajuste.MensajeDelGuardado);
         }
 
         private void CargarEnEditor(Producto? producto)

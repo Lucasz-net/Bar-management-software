@@ -25,6 +25,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             GuardarCommand = new RelayCommand(Guardar, () => EnEdicion);
             CancelarCommand = new RelayCommand(Cancelar, () => EnEdicion);
             EliminarCommand = new RelayCommand(Eliminar, () => Seleccionado is not null && !EnEdicion);
+            AjustarStockCommand = new RelayCommand(AjustarStock, () => Seleccionado is not null && !EnEdicion);
 
             Recargar();
         }
@@ -176,6 +177,7 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand GuardarCommand { get; }
         public ICommand CancelarCommand { get; }
         public ICommand EliminarCommand { get; }
+        public ICommand AjustarStockCommand { get; }
 
         // ---------------------------------------------------------------
         // Validación
@@ -216,8 +218,12 @@ namespace SistemaGestionBar.ViewModels.Admin
         }
 
         /// <summary>
-        /// Llega acá cuando el resumen manda a reponer un insumo: se lo selecciona y se
-        /// abre el formulario listo para cargar el stock nuevo.
+        /// Llega acá cuando una alerta manda a reponer un insumo: se lo selecciona y se abre
+        /// la ventanita de ajuste de stock.
+        ///
+        /// Hasta el 2026-09-21 abría el formulario completo del ABM, con nombre y unidad de
+        /// medida al lado, y pedía el TOTAL nuevo: había que calcular de cabeza cuánto quedaba
+        /// después de la entrega. Ahora solo se carga lo que entró.
         /// </summary>
         public override void Enfocar(object? foco)
         {
@@ -229,8 +235,26 @@ namespace SistemaGestionBar.ViewModels.Admin
                 return;
 
             EstablecerSeleccion(ingrediente);
-            Editar();
-            Informar($"Cargá el stock repuesto de \"{ingrediente.Nombre}\" y guardá.");
+            AjustarStock();
+        }
+
+        /// <summary>Abre la ventanita de ajuste de stock del insumo elegido (RF-08).</summary>
+        private void AjustarStock()
+        {
+            if (Seleccionado is null)
+                return;
+
+            LimpiarMensaje();
+
+            var ajuste = AjusteDeStockViewModel.DeInsumo(Repositorio, Seleccionado);
+
+            if (!Dialogo.AjustarStock(ajuste))
+                return;
+
+            // Recargar vuelve a leer de la base y conserva la selección por id: lo que queda
+            // en pantalla es lo que se guardó, no lo que calculó la ventana.
+            Recargar();
+            Informar(ajuste.MensajeDelGuardado);
         }
 
         private void CargarEnEditor(Ingrediente? ingrediente)
