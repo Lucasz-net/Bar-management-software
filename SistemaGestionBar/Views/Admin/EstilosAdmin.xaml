@@ -222,6 +222,12 @@
         <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="10" />
         <Setter Property="materialDesign:ValidationAssist.UsePopup" Value="False" />
         <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11.5" />
+        <!-- Los campos ahora llevan MaxLength —el largo que aguanta su columna— y Material
+             responde a eso dibujando un contador "45 / 200" debajo del campo. Queda apagado
+             a proposito: ese contador aparece en la MISMA franja que el mensaje de error, la
+             de los 22 px reservados arriba, y los dos juntos no entran. El largo ya lo cuida
+             el propio campo, que no deja escribir de mas. -->
+        <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
     </Style>
 
     <!-- Campo dentro de una fila de la receta: ahí no hay lugar para el mensaje y la

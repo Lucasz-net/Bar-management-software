@@ -6,6 +6,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             xmlns:modelos="clr-namespace:SistemaGestionBar.Models"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminPersonalViewModel}"
              d:DesignHeight="700" d:DesignWidth="1180">
@@ -370,7 +371,7 @@
                                  más que los 8 números, así que "8 / 8" no informa nada.
                                  El margen del texto de ayuda deja lugar al mensaje de error,
                                  que Material dibuja encima sin ocupar espacio propio. -->
-                            <TextBox Style="{DynamicResource CampoAdmin}" MaxLength="8"
+                            <TextBox Style="{DynamicResource CampoAdmin}" MaxLength="{x:Static modelos:Documento.Digitos}"
                                      b:CampoNumerico.SoloDigitos="True"
                                      materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
                                      materialDesign:HintAssist.Hint="Ej: 40123456"
@@ -388,22 +389,26 @@
                                 <StackPanel Grid.Column="0" Margin="0,0,6,0">
                                     <TextBlock Text="NOMBRE" Style="{DynamicResource EtiquetaAdmin}" />
                                     <TextBox Style="{DynamicResource CampoAngosto}"
+                                             MaxLength="{x:Static modelos:Limites.NombrePersona}"
                                              Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Margin="6,0,0,0">
                                     <TextBlock Text="APELLIDO" Style="{DynamicResource EtiquetaAdmin}" />
                                     <TextBox Style="{DynamicResource CampoAngosto}"
+                                             MaxLength="{x:Static modelos:Limites.ApellidoPersona}"
                                              Text="{Binding Apellido, UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
                             </Grid>
 
                             <TextBlock Text="TELÉFONO" Style="{DynamicResource EtiquetaAdmin}" />
                             <TextBox Style="{DynamicResource CampoAdmin}"
+                                     MaxLength="{x:Static modelos:Limites.Telefono}"
                                      materialDesign:HintAssist.Hint="Ej: 11 5555-4444"
                                      Text="{Binding Telefono, UpdateSourceTrigger=PropertyChanged}" />
 
                             <TextBlock Text="CORREO PERSONAL" Style="{DynamicResource EtiquetaAdmin}" />
                             <TextBox Style="{DynamicResource CampoAdmin}"
+                                     MaxLength="{x:Static modelos:Limites.Email}"
                                      materialDesign:HintAssist.Hint="nombre@correo.com"
                                      Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" />
 

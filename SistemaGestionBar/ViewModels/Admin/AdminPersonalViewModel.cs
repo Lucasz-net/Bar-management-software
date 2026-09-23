@@ -250,14 +250,16 @@ namespace SistemaGestionBar.ViewModels.Admin
             FormatoDni(Dni, nameof(Dni));
 
             Requerido(Nombre, nameof(Nombre), "El nombre");
-            LargoMaximo(Nombre, nameof(Nombre), "El nombre", 60);
+            LargoMaximo(Nombre, nameof(Nombre), "El nombre", Limites.NombrePersona);
 
             Requerido(Apellido, nameof(Apellido), "El apellido");
-            LargoMaximo(Apellido, nameof(Apellido), "El apellido", 60);
+            LargoMaximo(Apellido, nameof(Apellido), "El apellido", Limites.ApellidoPersona);
 
             FormatoTelefono(Telefono, nameof(Telefono));
+            LargoMaximo(Telefono, nameof(Telefono), "El teléfono", Limites.Telefono);
 
             FormatoCorreo(Email, nameof(Email));
+            LargoMaximo(Email, nameof(Email), "El correo", Limites.Email);
             NoRepetido(Email, nameof(Email), OtrasPersonas().Select(p => p.Email),
                        "Ya hay otra persona con ese correo.");
         }

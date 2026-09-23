@@ -254,6 +254,30 @@ namespace SistemaGestionBar.ViewModels
         }
 
         /// <summary>
+        /// Techo de un número, que sale de lo que aguanta la columna
+        /// (ver <see cref="Models.Limites"/>).
+        ///
+        /// <b>No es una formalidad.</b> Un precio más grande que <c>decimal(12,2)</c> no se
+        /// guarda mal: MySQL lo rechaza con un "Out of range value for column 'precio'" que
+        /// nadie atrapa, y la aplicación se cierra. Avisarlo mientras se escribe es lo que
+        /// convierte ese cierre en un cartel rojo debajo del campo.
+        ///
+        /// <b>El mensaje es corto a propósito.</b> Estos techos se muestran en campos que van
+        /// en una fila de tres columnas (precio, stock, mínimo), donde el mensaje de error
+        /// tiene un tercio del ancho y el estilo <c>CampoAngosto</c> le reserva dos renglones.
+        /// "El precio no puede superar 9.999.999.999,99." se parte en tres y el tercero cae
+        /// encima de lo que sigue. "El precio: máximo 9.999.999.999,99." entra en dos.
+        /// </summary>
+        /// <param name="formato">"N2" para dinero, "N3" para cantidades: el máximo se
+        /// muestra con la misma cantidad de decimales que admite la columna.</param>
+        protected void NoSupera(decimal valor, string propiedad, string etiqueta, decimal maximo,
+                                string formato = "N2")
+        {
+            if (valor > maximo)
+                Agregar(propiedad, $"{etiqueta}: máximo {maximo.ToString(formato)}.");
+        }
+
+        /// <summary>
         /// RF-13 adelantado a la pantalla: el duplicado lo rechaza igual el repositorio,
         /// pero avisarlo mientras se escribe evita completar el formulario para nada.
         /// </summary>

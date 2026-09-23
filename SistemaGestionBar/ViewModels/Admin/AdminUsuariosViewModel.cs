@@ -271,6 +271,7 @@ namespace SistemaGestionBar.ViewModels.Admin
 
             Requerido(EmailTrabajo, nameof(EmailTrabajo), "El correo de trabajo");
             FormatoCorreo(EmailTrabajo, nameof(EmailTrabajo));
+            LargoMaximo(EmailTrabajo, nameof(EmailTrabajo), "El correo de trabajo", Limites.Email);
             NoRepetido(EmailTrabajo, nameof(EmailTrabajo), OtrasCuentas().Select(u => u.Email),
                        "Ya hay otra cuenta con ese correo.");
 

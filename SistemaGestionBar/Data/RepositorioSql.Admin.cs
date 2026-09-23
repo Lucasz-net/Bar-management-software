@@ -78,6 +78,33 @@ namespace SistemaGestionBar.Data
         private static string NormalizarDocumento(string? documento) =>
             Documento.Normalizar(documento);
 
+        /// <summary>
+        /// Comprueba que ningún texto pase del largo de su columna, y devuelve el error del
+        /// primero que se pase (o <c>null</c> si están todos bien).
+        ///
+        /// <b>Por qué acá y no solo en el formulario.</b> Es la misma razón por la que el
+        /// nombre repetido también se comprueba acá: la pantalla avisa, el repositorio hace
+        /// cumplir. Y en el caso de los largos hay un motivo más urgente: las tres tablas
+        /// paramétricas se editan en una grilla, sin formulario que valide, así que sin esto
+        /// un nombre demasiado largo llega derecho a MySQL, que lo rechaza con un
+        /// <c>Data too long for column</c> que nadie atrapa y cierra la aplicación.
+        ///
+        /// Los largos salen todos de <see cref="Limites"/>, que es el mismo lugar del que
+        /// los toma el mapeo que creó las columnas.
+        /// </summary>
+        private static ResultadoOperacion? ControlarLargos(
+            params (string? Valor, string Etiqueta, int Maximo)[] campos)
+        {
+            foreach (var campo in campos)
+            {
+                if ((campo.Valor?.Trim().Length ?? 0) > campo.Maximo)
+                    return ResultadoOperacion.Error(
+                        $"{campo.Etiqueta} no puede superar los {campo.Maximo} caracteres.");
+            }
+
+            return null;
+        }
+
         public IReadOnlyList<Usuario> ObtenerUsuarios()
         {
             using var db = _fabrica.Crear();
@@ -115,8 +142,19 @@ namespace SistemaGestionBar.Data
             if (producto.Precio <= 0)
                 return ResultadoOperacion.Error("El precio debe ser mayor a cero.");
 
+            if (producto.Precio > Limites.Dinero)
+                return ResultadoOperacion.Error($"El precio no puede superar {Limites.Dinero:N2}.");
+
             if (producto.Stock < 0 || producto.StockMinimo < 0)
                 return ResultadoOperacion.Error("El stock no puede ser negativo.");
+
+            var largo = ControlarLargos(
+                (producto.Nombre, "El nombre del producto", Limites.NombreProducto),
+                (producto.Descripcion, "La descripción", Limites.DescripcionProducto),
+                (producto.RutaImagen, "La ruta de la imagen", Limites.RutaImagen));
+
+            if (largo is not null)
+                return largo;
 
             string nombre = producto.Nombre.Trim();
 
@@ -259,6 +297,16 @@ namespace SistemaGestionBar.Data
             if (ingrediente.Stock < 0 || ingrediente.StockMinimo < 0)
                 return ResultadoOperacion.Error("El stock no puede ser negativo.");
 
+            if (ingrediente.Stock > Limites.Cantidad || ingrediente.StockMinimo > Limites.Cantidad)
+                return ResultadoOperacion.Error($"El stock no puede superar {Limites.Cantidad:N3}.");
+
+            var largo = ControlarLargos(
+                (ingrediente.Nombre, "El nombre del insumo", Limites.NombreInsumo),
+                (ingrediente.UnidadMedida, "La unidad de medida", Limites.UnidadMedida));
+
+            if (largo is not null)
+                return largo;
+
             string nombre = ingrediente.Nombre.Trim();
 
             using var db = _fabrica.Crear();
@@ -349,6 +397,11 @@ namespace SistemaGestionBar.Data
                         $"No se puede descontar {Math.Abs(cantidad):0.##}: " +
                         $"hay {insumo.Stock:0.##} {insumo.UnidadMedida} de \"{insumo.Nombre}\".");
 
+                if (insumo.Stock + cantidad > Limites.Cantidad)
+                    return ResultadoOperacion.Error(
+                        $"No entra tanto: el stock de \"{insumo.Nombre}\" no puede superar " +
+                        $"{Limites.Cantidad:N3} {insumo.UnidadMedida}.");
+
                 insumo.Stock += cantidad;
 
                 // La auditoría (RF-11) la estampa SaveChanges: queda registrado quién movió
@@ -374,6 +427,13 @@ namespace SistemaGestionBar.Data
                     $"No se puede descontar {Math.Abs(cantidad):0.##}: " +
                     $"hay {producto.Stock} de \"{producto.Nombre}\".");
 
+            // La cuenta se hace en decimal a propósito: hacerla en int daría la vuelta y
+            // dejaría el stock negativo, y el casteo de abajo tiraría OverflowException.
+            if (producto.Stock + cantidad > Limites.StockDeProducto)
+                return ResultadoOperacion.Error(
+                    $"No entra tanto: el stock de \"{producto.Nombre}\" no puede superar " +
+                    $"{Limites.StockDeProducto:N0} unidades.");
+
             producto.Stock += (int)cantidad;
             db.SaveChanges();
 
@@ -391,6 +451,15 @@ namespace SistemaGestionBar.Data
 
             if (string.IsNullOrWhiteSpace(persona.Apellido))
                 return ResultadoOperacion.Error("El apellido es obligatorio.");
+
+            var largo = ControlarLargos(
+                (persona.Nombre, "El nombre", Limites.NombrePersona),
+                (persona.Apellido, "El apellido", Limites.ApellidoPersona),
+                (persona.Telefono, "El teléfono", Limites.Telefono),
+                (persona.Email, "El correo", Limites.Email));
+
+            if (largo is not null)
+                return largo;
 
             // El DNI se guarda pelado, venga como venga: la unicidad de la columna no sirve
             // de nada si la misma persona puede entrar como "38987654" y como "38.987.654".
@@ -522,6 +591,10 @@ namespace SistemaGestionBar.Data
             if (string.IsNullOrWhiteSpace(usuario.Email))
                 return ResultadoOperacion.Error("El correo de trabajo es obligatorio: es la credencial de acceso.");
 
+            var largo = ControlarLargos((usuario.Email, "El correo de trabajo", Limites.Email));
+            if (largo is not null)
+                return largo;
+
             string correo = usuario.Email.Trim();
 
             using var db = _fabrica.Crear();
@@ -638,6 +711,12 @@ namespace SistemaGestionBar.Data
             if (string.IsNullOrWhiteSpace(categoria.NombreCategoria))
                 return ResultadoOperacion.Error("El nombre de la categoría es obligatorio.");
 
+            var largo = ControlarLargos(
+                (categoria.NombreCategoria, "El nombre de la categoría", Limites.NombreParametrico));
+
+            if (largo is not null)
+                return largo;
+
             string nombre = categoria.NombreCategoria.Trim();
 
             using var db = _fabrica.Crear();
@@ -696,6 +775,12 @@ namespace SistemaGestionBar.Data
         {
             if (string.IsNullOrWhiteSpace(metodoPago.NombreMetodo))
                 return ResultadoOperacion.Error("El nombre del método de pago es obligatorio.");
+
+            var largo = ControlarLargos(
+                (metodoPago.NombreMetodo, "El nombre del método de pago", Limites.NombreParametrico));
+
+            if (largo is not null)
+                return largo;
 
             string nombre = metodoPago.NombreMetodo.Trim();
 
@@ -761,6 +846,12 @@ namespace SistemaGestionBar.Data
 
             if (ubicacion.Capacidad <= 0)
                 return ResultadoOperacion.Error("La capacidad debe ser mayor a cero.");
+
+            var largo = ControlarLargos(
+                (ubicacion.NombreUbicacion, "El nombre de la ubicación", Limites.NombreParametrico));
+
+            if (largo is not null)
+                return largo;
 
             string nombre = ubicacion.NombreUbicacion.Trim();
 

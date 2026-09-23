@@ -6,6 +6,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             xmlns:modelos="clr-namespace:SistemaGestionBar.Models"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminInventarioViewModel}"
              d:DesignHeight="700" d:DesignWidth="1180">
@@ -360,11 +361,13 @@
                         <StackPanel>
                             <TextBlock Text="NOMBRE" Style="{DynamicResource EtiquetaAdmin}" />
                             <TextBox Style="{DynamicResource CampoAdmin}"
+                                     MaxLength="{x:Static modelos:Limites.NombreInsumo}"
                                      materialDesign:HintAssist.Hint="Ej: Ron blanco"
                                      Text="{Binding Nombre, UpdateSourceTrigger=PropertyChanged}" />
 
                             <TextBlock Text="UNIDAD DE MEDIDA" Style="{DynamicResource EtiquetaAdmin}" />
                             <TextBox Style="{DynamicResource CampoAdmin}"
+                                     MaxLength="{x:Static modelos:Limites.UnidadMedida}"
                                      materialDesign:HintAssist.Hint="ml, g, hojas, cubos..."
                                      Text="{Binding UnidadMedida, UpdateSourceTrigger=PropertyChanged}" />
 

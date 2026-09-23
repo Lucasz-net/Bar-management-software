@@ -350,15 +350,17 @@ namespace SistemaGestionBar.ViewModels.Admin
         protected override void DeclararReglas()
         {
             Requerido(Nombre, nameof(Nombre), "El nombre del producto");
-            LargoMaximo(Nombre, nameof(Nombre), "El nombre", 80);
+            LargoMaximo(Nombre, nameof(Nombre), "El nombre", Limites.NombreProducto);
             NoRepetido(Nombre, nameof(Nombre),
                        Productos.Where(p => _esAlta || p.IdProducto != Seleccionado?.IdProducto)
                                 .Select(p => p.Nombre),
                        "Ya existe un producto con ese nombre.");
 
-            LargoMaximo(Descripcion, nameof(Descripcion), "La descripción", 200);
+            LargoMaximo(Descripcion, nameof(Descripcion), "La descripción", Limites.DescripcionProducto);
+            LargoMaximo(RutaImagen, nameof(RutaImagen), "La ruta de la imagen", Limites.RutaImagen);
 
             MayorACero(Precio, nameof(Precio), "El precio");
+            NoSupera(Precio, nameof(Precio), "El precio", Limites.Dinero);
             NoNegativo(Stock, nameof(Stock), "El stock");
             NoNegativo(StockMinimo, nameof(StockMinimo), "El stock mínimo");
 
@@ -372,6 +374,11 @@ namespace SistemaGestionBar.ViewModels.Admin
             foreach (var linea in Composicion.Where(l => l.Cantidad <= 0))
                 Agregar(nameof(Composicion),
                         $"La cantidad de \"{linea.Ingrediente.Nombre}\" debe ser mayor a cero.");
+
+            foreach (var linea in Composicion.Where(l => l.Cantidad > Limites.Cantidad))
+                Agregar(nameof(Composicion),
+                        $"La cantidad de \"{linea.Ingrediente.Nombre}\" no puede superar " +
+                        $"{Limites.Cantidad:N3}.");
         }
 
         public sealed override void Recargar()

@@ -128,10 +128,10 @@ namespace SistemaGestionBar.Data
                 persona.ToTable("persona");
                 persona.HasKey(p => p.IdPersona);
                 persona.Property(p => p.IdPersona).HasColumnName("id_persona");
-                persona.Property(p => p.Nombre).HasColumnName("nombre").HasMaxLength(60).IsRequired();
-                persona.Property(p => p.Apellido).HasColumnName("apellido").HasMaxLength(60).IsRequired();
-                persona.Property(p => p.Telefono).HasColumnName("telefono").HasMaxLength(30);
-                persona.Property(p => p.Email).HasColumnName("email").HasMaxLength(120);
+                persona.Property(p => p.Nombre).HasColumnName("nombre").HasMaxLength(Limites.NombrePersona).IsRequired();
+                persona.Property(p => p.Apellido).HasColumnName("apellido").HasMaxLength(Limites.ApellidoPersona).IsRequired();
+                persona.Property(p => p.Telefono).HasColumnName("telefono").HasMaxLength(Limites.Telefono);
+                persona.Property(p => p.Email).HasColumnName("email").HasMaxLength(Limites.Email);
 
                 // El DNI es la clave de negocio de la persona: obligatorio y único. Es lo
                 // que impide que el mismo cliente entre dos veces al padrón cuando además
@@ -151,7 +151,7 @@ namespace SistemaGestionBar.Data
                 rol.ToTable("rol");
                 rol.HasKey(r => r.IdRol);
                 rol.Property(r => r.IdRol).HasColumnName("id_rol");
-                rol.Property(r => r.NombreRol).HasColumnName("nombre_rol").HasMaxLength(40).IsRequired();
+                rol.Property(r => r.NombreRol).HasColumnName("nombre_rol").HasMaxLength(Limites.NombreRol).IsRequired();
                 rol.HasIndex(r => r.NombreRol).IsUnique();
             });
 
@@ -165,11 +165,11 @@ namespace SistemaGestionBar.Data
 
                 // El correo de trabajo es la credencial de login (RF-09): único, o la
                 // autenticación quedaría ambigua.
-                usuario.Property(u => u.Email).HasColumnName("email").HasMaxLength(120).IsRequired();
+                usuario.Property(u => u.Email).HasColumnName("email").HasMaxLength(Limites.Email).IsRequired();
                 usuario.HasIndex(u => u.Email).IsUnique();
 
                 // Hash PBKDF2 + salt en base64, nunca la clave en claro.
-                usuario.Property(u => u.Clave).HasColumnName("clave").HasMaxLength(200).IsRequired();
+                usuario.Property(u => u.Clave).HasColumnName("clave").HasMaxLength(Limites.ClaveHasheada).IsRequired();
 
                 // Una persona tiene a lo sumo UNA cuenta.
                 usuario.HasOne(u => u.Persona)
@@ -219,7 +219,7 @@ namespace SistemaGestionBar.Data
                 categoria.ToTable("categoria");
                 categoria.HasKey(c => c.IdCategoria);
                 categoria.Property(c => c.IdCategoria).HasColumnName("id_categoria");
-                categoria.Property(c => c.NombreCategoria).HasColumnName("nombre_categoria").HasMaxLength(40).IsRequired();
+                categoria.Property(c => c.NombreCategoria).HasColumnName("nombre_categoria").HasMaxLength(Limites.NombreParametrico).IsRequired();
                 categoria.HasIndex(c => c.NombreCategoria).IsUnique();
             });
 
@@ -229,8 +229,8 @@ namespace SistemaGestionBar.Data
                 producto.HasKey(p => p.IdProducto);
                 producto.Property(p => p.IdProducto).HasColumnName("id_producto");
                 producto.Property(p => p.IdCategoria).HasColumnName("id_categoria");
-                producto.Property(p => p.Nombre).HasColumnName("nombre").HasMaxLength(80).IsRequired();
-                producto.Property(p => p.Descripcion).HasColumnName("descripcion").HasMaxLength(200);
+                producto.Property(p => p.Nombre).HasColumnName("nombre").HasMaxLength(Limites.NombreProducto).IsRequired();
+                producto.Property(p => p.Descripcion).HasColumnName("descripcion").HasMaxLength(Limites.DescripcionProducto);
                 producto.Property(p => p.Precio).HasColumnName("precio").HasColumnType(Dinero);
                 producto.Property(p => p.Stock).HasColumnName("stock");
 
@@ -239,7 +239,7 @@ namespace SistemaGestionBar.Data
 
                 // EXTENSIÓN AL DER: se guarda la RUTA de la foto, no el binario. Meter
                 // imágenes como VARBINARY infla la base y hace lento cada SELECT.
-                producto.Property(p => p.RutaImagen).HasColumnName("ruta_imagen").HasMaxLength(260);
+                producto.Property(p => p.RutaImagen).HasColumnName("ruta_imagen").HasMaxLength(Limites.RutaImagen);
 
                 producto.HasIndex(p => p.Nombre).IsUnique();
 
@@ -257,8 +257,8 @@ namespace SistemaGestionBar.Data
                 ingrediente.ToTable("ingrediente");
                 ingrediente.HasKey(i => i.IdIngrediente);
                 ingrediente.Property(i => i.IdIngrediente).HasColumnName("id_ingrediente");
-                ingrediente.Property(i => i.Nombre).HasColumnName("nombre").HasMaxLength(60).IsRequired();
-                ingrediente.Property(i => i.UnidadMedida).HasColumnName("unidad_medida").HasMaxLength(15).IsRequired();
+                ingrediente.Property(i => i.Nombre).HasColumnName("nombre").HasMaxLength(Limites.NombreInsumo).IsRequired();
+                ingrediente.Property(i => i.UnidadMedida).HasColumnName("unidad_medida").HasMaxLength(Limites.UnidadMedida).IsRequired();
                 ingrediente.Property(i => i.Stock).HasColumnName("stock").HasColumnType(Cantidad);
                 ingrediente.Property(i => i.StockMinimo).HasColumnName("stock_minimo").HasColumnType(Cantidad);
 
@@ -321,7 +321,7 @@ namespace SistemaGestionBar.Data
                 metodo.ToTable("metodo_pago");
                 metodo.HasKey(m => m.IdMetodoPago);
                 metodo.Property(m => m.IdMetodoPago).HasColumnName("id_metodo_pago");
-                metodo.Property(m => m.NombreMetodo).HasColumnName("nombre_metodo").HasMaxLength(40).IsRequired();
+                metodo.Property(m => m.NombreMetodo).HasColumnName("nombre_metodo").HasMaxLength(Limites.NombreParametrico).IsRequired();
                 metodo.HasIndex(m => m.NombreMetodo).IsUnique();
             });
 
@@ -330,7 +330,7 @@ namespace SistemaGestionBar.Data
                 ubicacion.ToTable("ubicacion");
                 ubicacion.HasKey(u => u.IdUbicacion);
                 ubicacion.Property(u => u.IdUbicacion).HasColumnName("id_ubicacion");
-                ubicacion.Property(u => u.NombreUbicacion).HasColumnName("nombre_ubicacion").HasMaxLength(40).IsRequired();
+                ubicacion.Property(u => u.NombreUbicacion).HasColumnName("nombre_ubicacion").HasMaxLength(Limites.NombreParametrico).IsRequired();
                 ubicacion.Property(u => u.Capacidad).HasColumnName("capacidad");
 
                 // EXTENSIÓN AL DER: Mesa o Barra. En la barra atiende el barman, así que

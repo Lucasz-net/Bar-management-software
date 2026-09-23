@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             xmlns:modelos="clr-namespace:SistemaGestionBar.Models"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminParametrosViewModel}"
              d:DesignHeight="700" d:DesignWidth="1180">
@@ -14,6 +15,22 @@
              título y bajada. Definido una vez porque las tres tarjetas son iguales. -->
         <Style x:Key="TituloTarjeta" TargetType="TextBlock" BasedOn="{StaticResource TituloEnLinea}">
             <Setter Property="FontSize" Value="15" />
+        </Style>
+
+        <!-- La casilla que aparece al editar el nombre en cualquiera de las tres grillas.
+             Estas tres tablas se editan acá adentro y no en un formulario, así que no hay
+             validación por campo que las cuide: el tope de largo tiene que estar en la
+             casilla misma. Sin él se escribe un nombre de 60 caracteres, entra en una
+             columna de 40 y MySQL lo rechaza con un error que cierra la aplicación.
+
+             Sin BasedOn a propósito: los dos setters de abajo son exactamente los que trae
+             el estilo de edición por defecto de DataGridTextColumn, que es sellado y no se
+             puede heredar desde XAML. Basarlo en un estilo Material metería un campo
+             outlined dentro de una celda de 50 px de alto. -->
+        <Style x:Key="CeldaDeNombre" TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MaxLength" Value="{x:Static modelos:Limites.NombreParametrico}" />
         </Style>
     </UserControl.Resources>
 
@@ -61,6 +78,7 @@
                               ItemsSource="{Binding Categorias}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="NOMBRE" Width="*"
+                                                EditingElementStyle="{StaticResource CeldaDeNombre}"
                                                 Binding="{Binding NombreCategoria, UpdateSourceTrigger=PropertyChanged}" />
                             <DataGridTemplateColumn Width="86" MinWidth="86" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -119,6 +137,7 @@
                               ItemsSource="{Binding MetodosPago}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="NOMBRE" Width="*"
+                                                EditingElementStyle="{StaticResource CeldaDeNombre}"
                                                 Binding="{Binding NombreMetodo, UpdateSourceTrigger=PropertyChanged}" />
                             <DataGridTemplateColumn Width="86" MinWidth="86" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
@@ -177,6 +196,7 @@
                               ItemsSource="{Binding Ubicaciones}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="NOMBRE" Width="*"
+                                                EditingElementStyle="{StaticResource CeldaDeNombre}"
                                                 Binding="{Binding NombreUbicacion, UpdateSourceTrigger=PropertyChanged}" />
                             <DataGridTextColumn Header="CAPACIDAD" Width="104" MinWidth="104"
                                                 Binding="{Binding Capacidad, UpdateSourceTrigger=PropertyChanged}" />

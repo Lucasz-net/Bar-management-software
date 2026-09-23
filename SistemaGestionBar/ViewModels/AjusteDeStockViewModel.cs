@@ -129,8 +129,15 @@ namespace SistemaGestionBar.ViewModels
         /// <summary>Cómo queda el stock si se guarda. Es el punto de toda la ventana.</summary>
         public decimal StockResultante => Stock + _cantidad;
 
+        /// <summary>
+        /// Lo más grande que puede quedar el stock, que es lo que aguanta su columna: los
+        /// insumos son <c>decimal(12,3)</c> y los productos, unidades enteras en un <c>int</c>.
+        /// </summary>
+        private decimal Techo => EsInsumo ? Limites.Cantidad : Limites.StockDeProducto;
+
         public string? Problema => _problemaDelTexto
-            ?? (StockResultante < 0 ? $"No hay tanto: quedan {Stock:0.##} {UnidadMedida}." : null);
+            ?? (StockResultante < 0 ? $"No hay tanto: quedan {Stock:0.##} {UnidadMedida}." : null)
+            ?? (StockResultante > Techo ? $"No entra tanto: el máximo es {Techo:N0}." : null);
 
         public bool EstaBien => Problema is null;
 

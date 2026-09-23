@@ -6,6 +6,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:b="clr-namespace:SistemaGestionBar.Behaviors"
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
+             xmlns:modelos="clr-namespace:SistemaGestionBar.Models"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminUsuariosViewModel}"
              d:DesignHeight="700" d:DesignWidth="1180">
@@ -318,7 +319,7 @@
                                  los deja escribir y al pegar los saca solo. El contador de
                                  Material queda apagado: el campo ya no admite más que los
                                  8 números, así que "8 / 8" no informa nada. -->
-                            <TextBox Style="{DynamicResource CampoAdmin}" MaxLength="8"
+                            <TextBox Style="{DynamicResource CampoAdmin}" MaxLength="{x:Static modelos:Documento.Digitos}"
                                      IsEnabled="{Binding EsAlta}"
                                      b:CampoNumerico.SoloDigitos="True"
                                      materialDesign:TextFieldAssist.CharacterCounterVisibility="Collapsed"
@@ -382,6 +383,7 @@
 
                             <TextBlock Text="CORREO DE TRABAJO" Style="{DynamicResource EtiquetaAdmin}" />
                             <TextBox Style="{DynamicResource CampoAdmin}"
+                                     MaxLength="{x:Static modelos:Limites.Email}"
                                      materialDesign:HintAssist.Hint="nombre@bar.com"
                                      Text="{Binding EmailTrabajo, UpdateSourceTrigger=PropertyChanged}" />
                             <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,0,0,14"

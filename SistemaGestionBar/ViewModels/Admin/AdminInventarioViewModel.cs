@@ -185,17 +185,19 @@ namespace SistemaGestionBar.ViewModels.Admin
         protected override void DeclararReglas()
         {
             Requerido(Nombre, nameof(Nombre), "El nombre del insumo");
-            LargoMaximo(Nombre, nameof(Nombre), "El nombre", 60);
+            LargoMaximo(Nombre, nameof(Nombre), "El nombre", Limites.NombreInsumo);
             NoRepetido(Nombre, nameof(Nombre),
                        Ingredientes.Where(i => _esAlta || i.IdIngrediente != Seleccionado?.IdIngrediente)
                                    .Select(i => i.Nombre),
                        "Ya existe un insumo con ese nombre.");
 
             Requerido(UnidadMedida, nameof(UnidadMedida), "La unidad de medida");
-            LargoMaximo(UnidadMedida, nameof(UnidadMedida), "La unidad", 15);
+            LargoMaximo(UnidadMedida, nameof(UnidadMedida), "La unidad", Limites.UnidadMedida);
 
             NoNegativo(Stock, nameof(Stock), "El stock");
+            NoSupera(Stock, nameof(Stock), "El stock", Limites.Cantidad, "N3");
             NoNegativo(StockMinimo, nameof(StockMinimo), "El stock mínimo");
+            NoSupera(StockMinimo, nameof(StockMinimo), "El stock mínimo", Limites.Cantidad, "N3");
         }
 
         // ---------------------------------------------------------------
