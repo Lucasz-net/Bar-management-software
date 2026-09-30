@@ -101,4 +101,4 @@ Todos entran con la clave `12345678`:
 ## Colaboradores
 
 - **Lucas Escobar** ([@Lucasz-net](https://github.com/Lucasz-net))
-- **Nicolás Kern**
+- **Nicolás Kern**  ([@Nicolasbitmil](https://github.com/Nicolasbitmil))
