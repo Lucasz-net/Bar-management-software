@@ -53,6 +53,23 @@ namespace SistemaGestionBar.Services
             return ajuste.SeAplico;
         }
 
+        public bool PedirAutorizacionSupervisor(AutorizacionViewModel autorizacion)
+        {
+            var ventana = new AutorizacionWindow
+            {
+                DataContext = autorizacion,
+                Owner = VentanaActiva()
+            };
+
+            void Cerrar(object? origen, EventArgs e) => ventana.Close();
+
+            autorizacion.CierreSolicitado += Cerrar;
+            ventana.ShowDialog();
+            autorizacion.CierreSolicitado -= Cerrar;
+
+            return autorizacion.EstaAutorizado;
+        }
+
         public void Informar(string titulo, string mensaje) =>
             MessageBox.Show(VentanaActiva(), mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
 
@@ -71,6 +88,19 @@ namespace SistemaGestionBar.Services
                 AddExtension = true,
                 OverwritePrompt = true,
                 InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+
+            return cuadro.ShowDialog(VentanaActiva()) == true ? cuadro.FileName : null;
+        }
+
+        public string? ElegirArchivoSql(string directorioInicial)
+        {
+            var cuadro = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Seleccionar Backup a Restaurar",
+                DefaultExt = ".sql",
+                Filter = "Archivos SQL (*.sql)|*.sql",
+                InitialDirectory = directorioInicial
             };
 
             return cuadro.ShowDialog(VentanaActiva()) == true ? cuadro.FileName : null;

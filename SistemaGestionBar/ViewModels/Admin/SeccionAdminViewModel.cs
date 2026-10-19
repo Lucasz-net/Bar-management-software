@@ -345,7 +345,10 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         Ventas,
         Reportes,
-        Parametros
+        Parametros,
+
+        /// <summary>Copias de seguridad de la base de datos (RF-Adicional). Gerente y Admin.</summary>
+        Backups
     }
 
     /// <summary>

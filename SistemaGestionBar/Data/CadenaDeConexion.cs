@@ -47,6 +47,38 @@ namespace SistemaGestionBar.Data
         }
 
         /// <summary>
+        /// Parsea la cadena local para extraer sus componentes individuales.
+        /// Se usa principalmente para ejecutar mysqldump.exe y mysql.exe en tareas de Backup.
+        /// </summary>
+        public static (string Server, string Port, string Database, string User, string Password) Parsear()
+        {
+            string cadena = Leer();
+            var partes = cadena.Split(';', StringSplitOptions.RemoveEmptyEntries);
+
+            string server = "127.0.0.1", port = "3306", database = "", user = "", password = "";
+
+            foreach (var parte in partes)
+            {
+                var kv = parte.Split('=', 2);
+                if (kv.Length != 2) continue;
+
+                var key = kv[0].Trim().ToLowerInvariant();
+                var val = kv[1].Trim();
+
+                switch (key)
+                {
+                    case "server": server = val; break;
+                    case "port": port = val; break;
+                    case "database": database = val; break;
+                    case "user": case "uid": user = val; break;
+                    case "password": case "pwd": password = val; break;
+                }
+            }
+
+            return (server, port, database, user, password);
+        }
+
+        /// <summary>
         /// Primero busca el archivo junto al ejecutable, que es donde lo deja el build
         /// (el .csproj lo copia a la carpeta de salida). Si no está ahí —por ejemplo
         /// cuando alguien acaba de crearlo y todavía no recompiló— sube hasta la carpeta

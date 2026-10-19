@@ -40,7 +40,7 @@ namespace SistemaGestionBar.Data
         }
 
         // ---------------------------------------------------------------
-        // Autenticación (RF-09)
+        // Autenticación (RF-09) y Autorización
         // ---------------------------------------------------------------
         public Usuario? Autenticar(string email, string clave)
         {
@@ -60,6 +60,22 @@ namespace SistemaGestionBar.Data
                 return null;
 
             return SeguridadHelper.VerificarClave(clave, usuario.Clave) ? usuario : null;
+        }
+
+        public ResultadoOperacion AutorizarSupervisor(string email, string clave)
+        {
+            var usuario = Autenticar(email, clave);
+
+            if (usuario is null)
+                return ResultadoOperacion.Error("Credenciales incorrectas.");
+
+            if (usuario.Rol.NombreRol != RolesSistema.Administrador &&
+                usuario.Rol.NombreRol != RolesSistema.Gerente)
+            {
+                return ResultadoOperacion.Error($"La cuenta de {usuario.Persona.NombreCompleto} no tiene permisos de supervisor.");
+            }
+
+            return ResultadoOperacion.Ok($"Autorizado por {usuario.Persona.NombreCompleto}.");
         }
 
         // ---------------------------------------------------------------

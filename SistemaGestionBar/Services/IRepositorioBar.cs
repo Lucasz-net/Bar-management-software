@@ -19,6 +19,12 @@ namespace SistemaGestionBar.Services
         /// </summary>
         Usuario? Autenticar(string email, string clave);
 
+        /// <summary>
+        /// Verifica si las credenciales ingresadas pertenecen a un Administrador o Gerente.
+        /// Se usa en el Punto de Venta para autorizar acciones críticas (como restaurar un backup).
+        /// </summary>
+        ResultadoOperacion AutorizarSupervisor(string email, string clave);
+
         IReadOnlyList<Categoria> ObtenerCategorias();
         IReadOnlyList<Producto> ObtenerProductos();
         IReadOnlyList<MetodoPago> ObtenerMetodosPago();

@@ -76,6 +76,10 @@
             <DataTemplate DataType="{x:Type vmAdmin:AdminParametrosViewModel}">
                 <viewsAdmin:AdminParametrosView />
             </DataTemplate>
+            <!-- NAVEGACIÓN AL TABLERO DE BACKUPS -->
+            <DataTemplate DataType="{x:Type vmAdmin:AdminBackupsViewModel}">
+                <viewsAdmin:AdminBackupsView />
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

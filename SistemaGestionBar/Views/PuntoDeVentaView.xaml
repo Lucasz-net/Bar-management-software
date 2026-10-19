@@ -211,6 +211,24 @@
 
                     <!-- Usuario + cerrar sesion (RF-09) -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+
+                        <!-- NUEVOS BOTONES DE BACKUP -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
+                            <Button ToolTip="Crear copia de seguridad"
+                                    Command="{Binding CrearBackupCommand}"
+                                    Style="{DynamicResource MaterialDesignIconButton}"
+                                    Foreground="#8A93A5" Margin="0,0,4,0" Width="36" Height="36">
+                                <materialDesign:PackIcon Kind="DatabaseArrowUpOutline" Width="20" Height="20" />
+                            </Button>
+                            <Button ToolTip="Restaurar base de datos (Requiere autorización de gerente)"
+                                    Command="{Binding RestaurarBackupCommand}"
+                                    Style="{DynamicResource MaterialDesignIconButton}"
+                                    Foreground="#8A93A5" Width="36" Height="36">
+                                <materialDesign:PackIcon Kind="DatabaseArrowDownOutline" Width="20" Height="20" />
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Pefil de usuario original -->
                         <Border Background="#1565C0" CornerRadius="18" Width="36" Height="36">
                             <TextBlock Text="{Binding InicialesUsuario}"
                                        Foreground="White"
@@ -223,6 +241,7 @@
                             <TextBlock Text="{Binding NombreUsuario}" FontSize="14" FontWeight="SemiBold" Foreground="#2B3445" />
                             <TextBlock Text="{Binding RolUsuario}" FontSize="12" Foreground="#8A93A5" />
                         </StackPanel>
+
                         <!-- Volver al tablero: solo para el administrador (RF-09) -->
                         <Button materialDesign:ButtonAssist.CornerRadius="16"
                                 Command="{Binding VolverAlTableroCommand}"

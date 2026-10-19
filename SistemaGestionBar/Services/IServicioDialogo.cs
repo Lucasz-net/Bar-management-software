@@ -22,6 +22,13 @@ namespace SistemaGestionBar.Services
         /// </summary>
         bool AjustarStock(ViewModels.AjusteDeStockViewModel ajuste);
 
+        /// <summary>
+        /// Abre el modal de Autorización de Supervisor (Admin/Gerente) para acciones 
+        /// críticas en el Punto de Venta (como restaurar un Backup).
+        /// Devuelve true si la validación en base de datos es exitosa.
+        /// </summary>
+        bool PedirAutorizacionSupervisor(AutorizacionViewModel autorizacion);
+
         void Informar(string titulo, string mensaje);
 
         bool Confirmar(string titulo, string mensaje);
@@ -34,6 +41,11 @@ namespace SistemaGestionBar.Services
         /// WPF, y el ViewModel no debe conocer WPF.
         /// </summary>
         string? ElegirDondeGuardarPdf(string nombreSugerido);
+
+        /// <summary>
+        /// Abre el explorador de archivos para elegir un script .sql para Restaurar.
+        /// </summary>
+        string? ElegirArchivoSql(string directorioInicial);
 
         /// <summary>Abre un archivo con el programa que el sistema tenga asociado.</summary>
         void AbrirArchivo(string ruta);
