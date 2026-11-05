@@ -7,8 +7,6 @@ using System.Linq;
 using System.Windows.Data;
 using System.Windows.Input;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
-using SistemaGestionBar.Data;
 using SistemaGestionBar.Models;
 using SistemaGestionBar.Services;
 
@@ -65,8 +63,7 @@ namespace SistemaGestionBar.ViewModels
             VolverAlTableroCommand = new RelayCommand(() => TableroSolicitado?.Invoke(this, EventArgs.Empty));
 
             // Nuevos comandos de respaldo
-            CrearBackupCommand = new RelayCommand(EjecutarCrearBackup);
-            RestaurarBackupCommand = new RelayCommand(EjecutarRestaurarBackup);
+            CrearBackupCommand = new RelayCommand(EjecutarCrearBackup, () => PuedeCrearBackup);
 
             RefrescarIndicadores();
         }
@@ -429,7 +426,8 @@ namespace SistemaGestionBar.ViewModels
         public ICommand CerrarSesionCommand { get; }
         public ICommand VolverAlTableroCommand { get; }
         public ICommand CrearBackupCommand { get; }
-        public ICommand RestaurarBackupCommand { get; }
+        // Restaurar vive solo en Administración (con doble autorización); desde la caja solo se puede respaldar.
+        public bool PuedeCrearBackup => UsuarioActual.AccedeAlTablero;
 
         private void VerReceta(ProductoCatalogoViewModel producto)
         {
@@ -517,60 +515,25 @@ namespace SistemaGestionBar.ViewModels
         // ---------------------------------------------------------------
         private async void EjecutarCrearBackup()
         {
-            var db = CadenaDeConexion.Parsear();
+            var confirmacion = new ConfirmarContrasenaViewModel(_repositorio,
+                "Ingresá tu contraseña para crear una copia de seguridad.");
+            if (!_dialogo.PedirConfirmacionDeContrasena(confirmacion))
+                return;
+
+            string? motivo = _dialogo.PedirMotivoDeBackup();
+            if (motivo is null)
+                return;
+
             var servicioBackup = new ServicioBackupSql();
 
             _dialogo.Informar("Backup en progreso", "Creando copia de seguridad. Por favor, no cierre el sistema...");
 
-            var resultado = await servicioBackup.CrearBackupManualAsync(db.Server, db.Port, db.Database, db.User, db.Password);
+            var resultado = await servicioBackup.CrearBackupManualAsync(motivo, UsuarioActual.NombreCompleto);
 
             if (resultado.Exito)
                 _dialogo.Informar("Éxito", resultado.Mensaje);
             else
                 _dialogo.Informar("Error", resultado.Mensaje);
-        }
-
-        private async void EjecutarRestaurarBackup()
-        {
-            // 1. Pedir Autorización al Gerente/Admin
-            var vmAutorizacion = new AutorizacionViewModel(_repositorio);
-            bool autorizado = _dialogo.PedirAutorizacionSupervisor(vmAutorizacion);
-
-            if (!autorizado) return;
-
-            // 2. Elegir el archivo .sql
-            var servicioBackup = new ServicioBackupSql();
-            string directorio = servicioBackup.ObtenerDirectorioBackups();
-            string? archivoSeleccionado = _dialogo.ElegirArchivoSql(directorio);
-
-            if (string.IsNullOrWhiteSpace(archivoSeleccionado)) return;
-
-            // 3. Advertencia crítica (Regla de negocio)
-            bool seguro = _dialogo.Confirmar("Peligro de pérdida de datos",
-                "¿Estás ABSOLUTAMENTE SEGURO de restaurar este backup?\n\nEsto reemplazará la base de datos actual y se perderán las ventas que no estén respaldadas. El sistema se cerrará tras finalizar.");
-
-            if (!seguro) return;
-
-            // 4. Restaurar
-            var db = CadenaDeConexion.Parsear();
-
-            _dialogo.Informar("Restauración en progreso", "Restaurando la base de datos. Esto puede demorar unos segundos...");
-
-            // CRÍTICO: Limpiamos los pools de EF Core y el driver para que MySQL no rechace la restauración por BD bloqueada
-            MySqlConnection.ClearAllPools();
-
-            var resultado = await servicioBackup.RestaurarBackupAsync(archivoSeleccionado, db.Server, db.Port, db.Database, db.User, db.Password);
-
-            if (resultado.Exito)
-            {
-                _dialogo.Informar("Restauración Completada", resultado.Mensaje);
-                // Forzamos el cierre del sistema para que no queden datos viejos cacheados en memoria
-                System.Windows.Application.Current.Shutdown();
-            }
-            else
-            {
-                _dialogo.Informar("Error", resultado.Mensaje);
-            }
         }
     }
 }

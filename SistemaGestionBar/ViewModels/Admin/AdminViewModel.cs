@@ -48,7 +48,7 @@ namespace SistemaGestionBar.ViewModels.Admin
 
             // Nueva sección de copias de seguridad. Accesible para los dos roles supervisores.
             if (esAdministrador || esGerente)
-                Secciones.Add(new AdminBackupsViewModel(repositorio, dialogo));
+                Secciones.Add(new AdminBackupsViewModel(repositorio, dialogo, UsuarioActual));
 
             var destinos = Secciones.Select(s => s.Destino).ToList();
             foreach (var seccion in Secciones)

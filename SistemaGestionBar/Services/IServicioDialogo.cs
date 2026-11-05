@@ -29,6 +29,13 @@ namespace SistemaGestionBar.Services
         /// </summary>
         bool PedirAutorizacionSupervisor(AutorizacionViewModel autorizacion);
 
+        bool PedirConfirmacionDeContrasena(ConfirmarContrasenaViewModel confirmacion);
+
+        bool PedirAutorizacionDoble(AutorizacionDobleViewModel autorizacion);
+
+        /// <summary>Devuelve el motivo escrito, o null si se canceló.</summary>
+        string? PedirMotivoDeBackup();
+
         void Informar(string titulo, string mensaje);
 
         bool Confirmar(string titulo, string mensaje);

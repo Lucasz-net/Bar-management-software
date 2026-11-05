@@ -25,6 +25,11 @@ namespace SistemaGestionBar.Services
         /// </summary>
         ResultadoOperacion AutorizarSupervisor(string email, string clave);
 
+        ResultadoOperacion ConfirmarContrasenaPropia(string clave);
+
+        /// <summary>Valida cuenta y contraseña, y que la cuenta tenga exactamente el rol pedido.</summary>
+        ResultadoOperacion AutorizarRol(string email, string clave, string rol);
+
         IReadOnlyList<Categoria> ObtenerCategorias();
         IReadOnlyList<Producto> ObtenerProductos();
         IReadOnlyList<MetodoPago> ObtenerMetodosPago();

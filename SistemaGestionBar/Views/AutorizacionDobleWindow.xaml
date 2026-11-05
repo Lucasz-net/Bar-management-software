@@ -1,0 +1,68 @@
+﻿<Window x:Class="SistemaGestionBar.Views.AutorizacionDobleWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Autorización requerida"
+        Width="440" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ResizeMode="NoResize">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="EstilosModal.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Style="{DynamicResource HojaModal}">
+        <StackPanel Margin="24">
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <materialDesign:PackIcon Kind="ShieldLockOutline" Width="28" Height="28"
+                                         Foreground="{DynamicResource Peligro}" VerticalAlignment="Center" />
+                <TextBlock Text="Doble autorización" Style="{DynamicResource TituloModal}" Margin="12,0,0,0" />
+            </StackPanel>
+
+            
+
+            <TextBlock Text="ADMINISTRADOR" Style="{DynamicResource TituloBloque}" />
+            <TextBox Text="{Binding EmailAdministrador, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{DynamicResource CampoAdmin}" Margin="0,0,0,10"
+                     materialDesign:HintAssist.Hint="Correo del administrador" />
+            <PasswordBox x:Name="claveAdmin" materialDesign:HintAssist.Hint="Contraseña del administrador"
+                         Style="{DynamicResource ClaveAdmin}"
+                         Margin="0,0,0,10" />
+
+            <TextBlock Text="GERENTE" Style="{DynamicResource TituloBloque}" />
+            <TextBox Text="{Binding EmailGerente, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{DynamicResource CampoAdmin}" Margin="0,0,0,10"
+                     materialDesign:HintAssist.Hint="Correo del gerente" />
+            <PasswordBox x:Name="claveGerente" materialDesign:HintAssist.Hint="Contraseña del gerente"
+                         Style="{DynamicResource ClaveAdmin}"
+                         Margin="0,0,0,6" />
+
+            <TextBlock Text="{Binding MensajeError}" Foreground="{DynamicResource Peligro}" FontSize="13"
+                       TextWrapping="Wrap" Margin="0,0,0,14">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding MensajeError}" Value="">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancelar" Command="{Binding CancelarCommand}"
+                        Style="{DynamicResource BotonSecundario}" Margin="0,0,10,0" />
+                <Button Content="Autorizar" Click="AlAutorizar"
+                        Style="{DynamicResource BotonPrimario}" MinWidth="120" IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

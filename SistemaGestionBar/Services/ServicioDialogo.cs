@@ -70,6 +70,39 @@ namespace SistemaGestionBar.Services
             return autorizacion.EstaAutorizado;
         }
 
+        public bool PedirConfirmacionDeContrasena(ConfirmarContrasenaViewModel confirmacion)
+        {
+            MostrarCerrable(new ConfirmarContrasenaWindow(), confirmacion);
+            return confirmacion.EstaConfirmado;
+        }
+
+        public bool PedirAutorizacionDoble(AutorizacionDobleViewModel autorizacion)
+        {
+            MostrarCerrable(new AutorizacionDobleWindow(), autorizacion);
+            return autorizacion.EstaAutorizado;
+        }
+
+        public string? PedirMotivoDeBackup()
+        {
+            var motivo = new MotivoBackupViewModel();
+            MostrarCerrable(new MotivoBackupWindow(), motivo);
+            return motivo.EstaConfirmado ? motivo.MotivoLimpio : null;
+        }
+
+        // El ViewModel avisa con CierreSolicitado; el cierre lo hace esta clase, la única que conoce Window.
+        private static void MostrarCerrable<TVentana, TViewModel>(TVentana ventana, TViewModel viewModel)
+            where TVentana : Window
+            where TViewModel : ViewModels.ICierrable
+        {
+            void Cerrar(object? origen, EventArgs e) => ventana.Close();
+
+            viewModel.CierreSolicitado += Cerrar;
+            ventana.DataContext = viewModel;
+            ventana.Owner = VentanaActiva();
+            ventana.ShowDialog();
+            viewModel.CierreSolicitado -= Cerrar;
+        }
+
         public void Informar(string titulo, string mensaje) =>
             MessageBox.Show(VentanaActiva(), mensaje, titulo, MessageBoxButton.OK, MessageBoxImage.Information);
 

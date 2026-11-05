@@ -216,15 +216,18 @@
                         <StackPanel Orientation="Horizontal" Margin="0,0,16,0" VerticalAlignment="Center">
                             <Button ToolTip="Crear copia de seguridad"
                                     Command="{Binding CrearBackupCommand}"
-                                    Style="{DynamicResource MaterialDesignIconButton}"
-                                    Foreground="#8A93A5" Margin="0,0,4,0" Width="36" Height="36">
-                                <materialDesign:PackIcon Kind="DatabaseArrowUpOutline" Width="20" Height="20" />
-                            </Button>
-                            <Button ToolTip="Restaurar base de datos (Requiere autorización de gerente)"
-                                    Command="{Binding RestaurarBackupCommand}"
-                                    Style="{DynamicResource MaterialDesignIconButton}"
                                     Foreground="#8A93A5" Width="36" Height="36">
-                                <materialDesign:PackIcon Kind="DatabaseArrowDownOutline" Width="20" Height="20" />
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding PuedeCrearBackup}" Value="True">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                                <materialDesign:PackIcon Kind="DatabaseArrowUpOutline" Width="20" Height="20" />
                             </Button>
                         </StackPanel>
 

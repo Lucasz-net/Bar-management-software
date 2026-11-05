@@ -78,6 +78,31 @@ namespace SistemaGestionBar.Data
             return ResultadoOperacion.Ok($"Autorizado por {usuario.Persona.NombreCompleto}.");
         }
 
+        public ResultadoOperacion AutorizarRol(string email, string clave, string rol)
+        {
+            var usuario = Autenticar(email, clave);
+
+            if (usuario is null)
+                return ResultadoOperacion.Error("Credenciales incorrectas.");
+
+            if (usuario.Rol.NombreRol != rol)
+                return ResultadoOperacion.Error($"La cuenta de {usuario.Persona.NombreCompleto} no es de {rol.ToLowerInvariant()}.");
+
+            return ResultadoOperacion.Ok($"Autorizado por {usuario.Persona.NombreCompleto}.");
+        }
+
+        public ResultadoOperacion ConfirmarContrasenaPropia(string clave)
+        {
+            if (_sesion.Usuario is null)
+                return ResultadoOperacion.Error("No hay una sesión activa.");
+
+            var usuario = Autenticar(_sesion.Usuario.Email, clave);
+
+            return usuario is null
+                ? ResultadoOperacion.Error("Contraseña incorrecta.")
+                : ResultadoOperacion.Ok();
+        }
+
         // ---------------------------------------------------------------
         // Consultas del punto de venta
         // ---------------------------------------------------------------

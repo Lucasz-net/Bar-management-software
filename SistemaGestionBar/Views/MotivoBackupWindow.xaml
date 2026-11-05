@@ -1,0 +1,46 @@
+<Window x:Class="SistemaGestionBar.Views.MotivoBackupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Motivo del respaldo"
+        Width="420" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ResizeMode="NoResize">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="EstilosModal.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+    <Border Style="{DynamicResource HojaModal}">
+        <StackPanel Margin="26">
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                <materialDesign:PackIcon Kind="DatabaseArrowUpOutline" Width="26" Height="26"
+                                         Foreground="{DynamicResource Acento}" VerticalAlignment="Center" />
+                <TextBlock Text="Motivo del respaldo" Style="{DynamicResource TituloModal}" Margin="12,0,0,0" />
+            </StackPanel>
+
+
+            <TextBox x:Name="txtMotivo"
+                     Text="{Binding Motivo, UpdateSourceTrigger=PropertyChanged}"
+                     MaxLength="120" TextWrapping="Wrap" AcceptsReturn="False"
+                     Style="{DynamicResource CampoAdmin}" Margin="0,0,0,4"
+                     materialDesign:HintAssist.Hint="Motivo" />
+
+            <TextBlock Text="{Binding Contador}" Style="{DynamicResource TextoAyuda}"
+                       HorizontalAlignment="Right" Margin="0,0,0,18" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Cancelar" Command="{Binding CancelarCommand}"
+                        Style="{DynamicResource BotonSecundario}" Margin="0,0,10,0" />
+                <Button Content="Crear respaldo" Command="{Binding ConfirmarCommand}"
+                        Style="{DynamicResource BotonPrimario}" MinWidth="130" IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
