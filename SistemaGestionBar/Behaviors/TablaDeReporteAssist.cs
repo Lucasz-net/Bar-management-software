@@ -5,18 +5,6 @@ using SistemaGestionBar.Reportes;
 
 namespace SistemaGestionBar.Behaviors
 {
-    /// <summary>
-    /// Dibuja la vista previa de un <see cref="BloqueTabla"/> dentro de un ContentControl.
-    ///
-    /// <b>Por qué no es XAML.</b> Las columnas de un reporte no se conocen hasta que el
-    /// reporte se arma: el de ventas tiene seis y el de insumos, otras seis distintas. Un
-    /// DataGrid con columnas declaradas en el XAML no puede representar eso, y el único
-    /// modo de que las celdas queden alineadas en columnas es construir la grilla con los
-    /// anchos que trae el bloque. Eso es lo que hace esta clase.
-    ///
-    /// Sigue siendo MVVM: el ViewModel no conoce WPF —entrega el bloque y nada más— y la
-    /// vista no tiene code-behind. Es el mismo patrón que <see cref="SelectorAssist"/>.
-    /// </summary>
     public static class TablaDeReporteAssist
     {
         public static readonly DependencyProperty BloqueProperty =
@@ -55,18 +43,15 @@ namespace SistemaGestionBar.Behaviors
                     Width = new GridLength(columna.Peso, GridUnitType.Star)
                 });
 
-            // Una fila por renglón, más la del encabezado.
             for (int i = 0; i <= bloque.Filas.Count; i++)
                 grilla.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            // ---- Encabezado ----
             grilla.Children.Add(Franja(0, bloque.Columnas.Count, Brushes.Transparent, linea, 0, 1));
 
             for (int c = 0; c < bloque.Columnas.Count; c++)
                 grilla.Children.Add(Celda(bloque.Columnas[c].Encabezado.ToUpperInvariant(), 0, c,
                                           bloque.Columnas[c].ALaDerecha, tenue, negrita: true, tamaño: 11.5));
 
-            // ---- Filas ----
             for (int f = 0; f < bloque.Filas.Count; f++)
             {
                 var fila = bloque.Filas[f];
@@ -89,7 +74,6 @@ namespace SistemaGestionBar.Behaviors
             return grilla;
         }
 
-        /// <summary>El fondo y la línea divisoria de una fila, por debajo de sus celdas.</summary>
         private static UIElement Franja(int fila, int columnas, Brush fondo, Brush linea, int arriba, int abajo)
         {
             var borde = new Border
@@ -127,10 +111,6 @@ namespace SistemaGestionBar.Behaviors
             return bloque;
         }
 
-        /// <summary>
-        /// Los colores salen del diccionario de estilos y no de literales: si mañana cambia
-        /// la paleta del tablero, la vista previa cambia con ella.
-        /// </summary>
         private static Brush Pincel(FrameworkElement contexto, string clave, Color reserva) =>
             contexto.TryFindResource(clave) as Brush ?? new SolidColorBrush(reserva);
     }

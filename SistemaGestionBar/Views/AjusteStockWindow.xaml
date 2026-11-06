@@ -14,22 +14,12 @@
         ResizeMode="NoResize"
         Background="White">
 
-    <!-- ============================================================
-         AJUSTE DE STOCK
-
-         Toca una sola columna, así que muestra una sola cosa: cuánto entra o cuánto sale.
-         Nada de nombre, precio, categoría ni foto — para eso está el editor de la ficha.
-
-         La cuenta grande del medio ("6 → 30") es la razón de existir de la ventana: el ABM
-         pedía el total nuevo y había que calcularla de cabeza.
-         ============================================================ -->
     <Border Padding="26">
         <StackPanel>
 
-            <!-- ==== QUÉ SE ESTÁ TOCANDO ==== -->
             <StackPanel Orientation="Horizontal">
-                <Border Background="#F1ECFD" CornerRadius="12" Width="44" Height="44">
-                    <materialDesign:PackIcon Width="22" Height="22" Foreground="#7B5BD6"
+                <Border Background="#F5EAFB" CornerRadius="12" Width="44" Height="44">
+                    <materialDesign:PackIcon Width="22" Height="22" Foreground="#AF52DE"
                                              HorizontalAlignment="Center" VerticalAlignment="Center">
                         <materialDesign:PackIcon.Style>
                             <Style TargetType="materialDesign:PackIcon">
@@ -46,8 +36,8 @@
 
                 <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
                     <TextBlock Text="{Binding Nombre}" FontSize="19" FontWeight="Bold"
-                               Foreground="#2B3445" TextWrapping="Wrap" Width="310" />
-                    <TextBlock FontSize="13" Foreground="#8A93A5">
+                               Foreground="#1D1D1F" TextWrapping="Wrap" Width="310" />
+                    <TextBlock FontSize="13" Foreground="#6E6E73">
                         <Run Text="{Binding Tipo, Mode=OneWay}" />
                         <Run Text="·" />
                         <Run Text="{Binding UnidadMedida, Mode=OneWay}" />
@@ -55,14 +45,13 @@
                 </StackPanel>
             </StackPanel>
 
-            <!-- ==== CÓMO ESTÁ ==== -->
             <Border CornerRadius="12" Padding="16,13" Margin="0,18,0,0">
                 <Border.Style>
                     <Style TargetType="Border">
-                        <Setter Property="Background" Value="#EAF7EF" />
+                        <Setter Property="Background" Value="#E8F8EC" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding StockBajo}" Value="True">
-                                <Setter Property="Background" Value="#FDF4E3" />
+                                <Setter Property="Background" Value="#FFF4E0" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -78,16 +67,16 @@
                         <TextBlock FontSize="11.5" FontWeight="Bold" Text="{Binding TextoEstado}">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Foreground" Value="#17703F" />
+                                    <Setter Property="Foreground" Value="#248A3D" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding StockBajo}" Value="True">
-                                            <Setter Property="Foreground" Value="#B0791B" />
+                                            <Setter Property="Foreground" Value="#B25000" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </TextBlock.Style>
                         </TextBlock>
-                        <TextBlock FontSize="12.5" Foreground="#5A6577" Margin="0,3,0,0">
+                        <TextBlock FontSize="12.5" Foreground="#515154" Margin="0,3,0,0">
                             <Run Text="Mínimo:" />
                             <Run Text="{Binding StockMinimo, StringFormat={}{0:0.##}, Mode=OneWay}" />
                             <Run Text="{Binding UnidadMedida, Mode=OneWay}" />
@@ -95,18 +84,17 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#2B3445"
+                        <TextBlock FontSize="24" FontWeight="Bold" Foreground="#1D1D1F"
                                    HorizontalAlignment="Right"
                                    Text="{Binding Stock, StringFormat={}{0:0.##}, Mode=OneWay}" />
-                        <TextBlock Text="hay ahora" FontSize="11.5" Foreground="#8A93A5"
+                        <TextBlock Text="hay ahora" FontSize="11.5" Foreground="#6E6E73"
                                    HorizontalAlignment="Right" />
                     </StackPanel>
                 </Grid>
             </Border>
 
-            <!-- ==== CUÁNTO ENTRA O CUÁNTO SALE ==== -->
             <TextBlock Text="CUÁNTO ENTRA O CUÁNTO SALE" FontSize="12" FontWeight="Bold"
-                       Foreground="#8A93A5" Margin="0,22,0,10" />
+                       Foreground="#6E6E73" Margin="0,22,0,10" />
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -119,21 +107,12 @@
                 <Button Grid.Column="0" Style="{DynamicResource MaterialDesignOutlinedButton}"
                         Width="46" Height="46" Padding="0" Cursor="Hand"
                         materialDesign:ButtonAssist.CornerRadius="14"
-                        BorderBrush="#CFD7E3" Foreground="#5A6577"
+                        BorderBrush="#D2D2D7" Foreground="#515154"
                         Command="{Binding SumarCommand}" CommandParameter="-1"
                         ToolTip="Restar uno">
                     <materialDesign:PackIcon Kind="Minus" Width="20" Height="20" />
                 </Button>
 
-                <!-- La casilla es lo único que hay para tipear en toda la ventana, así que
-                     se lleva el foco al abrir. -->
-                <!-- Se apoya en CampoEnLinea, el estilo de campo del tablero, en vez de armar
-                     uno a mano sobre MaterialDesignOutlinedTextBox. No es solo por
-                     consistencia: el outlined de Material reserva lugar arriba para la
-                     etiqueta flotante, y fijarle Height al control empuja el texto fuera del
-                     área visible. La casilla quedaba en blanco aunque el valor estuviera
-                     cargado —la cuenta de abajo lo mostraba y la casilla no—. CampoEnLinea ya
-                     trae IsFloating="False", que es lo que evita eso. -->
                 <TextBox Grid.Column="1" Margin="10,0" TextAlignment="Center"
                          VerticalContentAlignment="Center"
                          FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}"
@@ -145,13 +124,13 @@
                             <Setter Property="FontWeight" Value="Bold" />
                             <Setter Property="Padding" Value="8,9" />
                             <Setter Property="MinHeight" Value="46" />
-                            <Setter Property="Foreground" Value="#2B3445" />
+                            <Setter Property="Foreground" Value="#1D1D1F" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding HayCantidad}" Value="True">
-                                    <Setter Property="Foreground" Value="#1E8E4E" />
+                                    <Setter Property="Foreground" Value="#34C759" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding HayProblema}" Value="True">
-                                    <Setter Property="Foreground" Value="#C0392B" />
+                                    <Setter Property="Foreground" Value="#FF3B30" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
@@ -161,19 +140,17 @@
                 <Button Grid.Column="2" Style="{DynamicResource MaterialDesignOutlinedButton}"
                         Width="46" Height="46" Padding="0" Cursor="Hand"
                         materialDesign:ButtonAssist.CornerRadius="14"
-                        BorderBrush="#CFD7E3" Foreground="#5A6577"
+                        BorderBrush="#D2D2D7" Foreground="#515154"
                         Command="{Binding SumarCommand}" CommandParameter="1"
                         ToolTip="Sumar uno">
                     <materialDesign:PackIcon Kind="Plus" Width="20" Height="20" />
                 </Button>
 
-                <!-- Solo aparece cuando el ítem está bajo el mínimo: si no, no hay nada
-                     sensato que proponer. -->
                 <Button Grid.Column="3" Margin="10,0,0,0"
                         Style="{DynamicResource MaterialDesignOutlinedButton}"
                         Width="46" Height="46" Padding="0" Cursor="Hand"
                         materialDesign:ButtonAssist.CornerRadius="14"
-                        BorderBrush="#D9CDF7" Foreground="#7B5BD6"
+                        BorderBrush="#E9D4F7" Foreground="#AF52DE"
                         Command="{Binding SugerirCommand}"
                         ToolTip="Proponer la cantidad que falta para salir del mínimo"
                         Visibility="{Binding StockBajo, Converter={StaticResource BoolAVisibilidad}}">
@@ -181,48 +158,45 @@
                 </Button>
             </Grid>
 
-            <TextBlock FontSize="12" Foreground="#8A93A5" Margin="0,10,0,0" TextWrapping="Wrap"
+            <TextBlock FontSize="12" Foreground="#6E6E73" Margin="0,10,0,0" TextWrapping="Wrap"
                        Text="Positivo entra (llegó mercadería), negativo sale (rotura, merma, consumo interno)." />
 
-            <!-- ==== LA CUENTA HECHA ==== -->
-            <Border Background="#F7F9FC" CornerRadius="12" Padding="16,14" Margin="0,16,0,0"
+            <Border Background="#F7F7F9" CornerRadius="12" Padding="16,14" Margin="0,16,0,0"
                     Visibility="{Binding HayCantidad, Converter={StaticResource BoolAVisibilidad}}">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock FontSize="19" Foreground="#8A93A5" VerticalAlignment="Center"
+                    <TextBlock FontSize="19" Foreground="#6E6E73" VerticalAlignment="Center"
                                Text="{Binding Stock, StringFormat={}{0:0.##}, Mode=OneWay}" />
                     <materialDesign:PackIcon Kind="ArrowRight" Width="22" Height="22" Margin="12,0"
-                                             Foreground="#8A93A5" VerticalAlignment="Center" />
-                    <TextBlock FontSize="26" FontWeight="Bold" Foreground="#7B5BD6"
+                                             Foreground="#6E6E73" VerticalAlignment="Center" />
+                    <TextBlock FontSize="26" FontWeight="Bold" Foreground="#AF52DE"
                                VerticalAlignment="Center"
                                Text="{Binding StockResultante, StringFormat={}{0:0.##}, Mode=OneWay}" />
-                    <TextBlock FontSize="13" Foreground="#8A93A5" Margin="8,0,0,0"
+                    <TextBlock FontSize="13" Foreground="#6E6E73" Margin="8,0,0,0"
                                VerticalAlignment="Bottom" Padding="0,0,0,4"
                                Text="{Binding UnidadMedida, Mode=OneWay}" />
                 </StackPanel>
             </Border>
 
-            <!-- ==== LO QUE SALIÓ MAL ==== -->
-            <Border Background="#FCEDEB" CornerRadius="10" Padding="13,10" Margin="0,14,0,0"
+            <Border Background="#FFEBEA" CornerRadius="10" Padding="13,10" Margin="0,14,0,0"
                     Visibility="{Binding HayProblema, Converter={StaticResource BoolAVisibilidad}}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="AlertCircleOutline" Width="17" Height="17"
-                                             Foreground="#A93226" VerticalAlignment="Top" Margin="0,1,9,0" />
-                    <TextBlock Text="{Binding Problema}" FontSize="13" Foreground="#A93226"
+                                             Foreground="#D70015" VerticalAlignment="Top" Margin="0,1,9,0" />
+                    <TextBlock Text="{Binding Problema}" FontSize="13" Foreground="#D70015"
                                TextWrapping="Wrap" Width="310" />
                 </StackPanel>
             </Border>
 
-            <Border Background="#FCEDEB" CornerRadius="10" Padding="13,10" Margin="0,14,0,0"
+            <Border Background="#FFEBEA" CornerRadius="10" Padding="13,10" Margin="0,14,0,0"
                     Visibility="{Binding HayMensaje, Converter={StaticResource BoolAVisibilidad}}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="CloseCircleOutline" Width="17" Height="17"
-                                             Foreground="#A93226" VerticalAlignment="Top" Margin="0,1,9,0" />
-                    <TextBlock Text="{Binding Mensaje}" FontSize="13" Foreground="#A93226"
+                                             Foreground="#D70015" VerticalAlignment="Top" Margin="0,1,9,0" />
+                    <TextBlock Text="{Binding Mensaje}" FontSize="13" Foreground="#D70015"
                                TextWrapping="Wrap" Width="310" />
                 </StackPanel>
             </Border>
 
-            <!-- ==== PIE ==== -->
             <Grid Margin="0,24,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -233,13 +207,13 @@
                         Style="{DynamicResource MaterialDesignOutlinedButton}"
                         materialDesign:ButtonAssist.CornerRadius="16"
                         Height="44" FontSize="13" Padding="20,0" Cursor="Hand"
-                        BorderBrush="#CFD7E3" Foreground="#5A6577" />
+                        BorderBrush="#D2D2D7" Foreground="#515154" />
 
                 <Button Grid.Column="1" Margin="10,0,0,0" IsDefault="True"
                         Style="{DynamicResource MaterialDesignRaisedButton}"
                         materialDesign:ButtonAssist.CornerRadius="16"
                         Height="44" FontSize="14" FontWeight="Bold"
-                        Background="#1E8E4E" BorderBrush="#1E8E4E" Foreground="White"
+                        Background="#34C759" BorderBrush="#34C759" Foreground="White"
                         Cursor="Hand" Command="{Binding GuardarCommand}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ContentSaveOutline" Width="17" Height="17"

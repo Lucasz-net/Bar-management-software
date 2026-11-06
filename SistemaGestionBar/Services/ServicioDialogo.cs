@@ -7,66 +7,21 @@ using SistemaGestionBar.Views;
 
 namespace SistemaGestionBar.Services
 {
-    /// <summary>Implementación WPF de IServicioDialogo. Es la única clase que abre ventanas.</summary>
     public class ServicioDialogo : IServicioDialogo
     {
-        public void MostrarReceta(RecetaViewModel receta)
-        {
-            var ventana = new RecetaWindow
-            {
-                DataContext = receta,
-                Owner = VentanaActiva()
-            };
-            ventana.ShowDialog();
-        }
+        public void MostrarReceta(RecetaViewModel receta) => Mostrar(new RecetaWindow(), receta);
 
-        public void MostrarFactura(ViewModels.FacturaViewModel factura)
-        {
-            var ventana = new Views.FacturaWindow
-            {
-                DataContext = factura,
-                Owner = VentanaActiva()
-            };
-            ventana.ShowDialog();
-        }
+        public void MostrarFactura(FacturaViewModel factura) => Mostrar(new FacturaWindow(), factura);
 
-        /// <summary>
-        /// El ViewModel no conoce WPF, así que no puede cerrar su propia ventana: avisa con
-        /// <c>CierreSolicitado</c> cuando el ajuste se guardó y el cierre lo hace acá, que es
-        /// la única clase que sabe qué es una Window. Cancelar cierra por IsCancel y deja
-        /// <c>SeAplico</c> en false.
-        /// </summary>
         public bool AjustarStock(AjusteDeStockViewModel ajuste)
         {
-            var ventana = new AjusteStockWindow
-            {
-                DataContext = ajuste,
-                Owner = VentanaActiva()
-            };
-
-            void Cerrar(object? origen, EventArgs e) => ventana.Close();
-
-            ajuste.CierreSolicitado += Cerrar;
-            ventana.ShowDialog();
-            ajuste.CierreSolicitado -= Cerrar;
-
+            MostrarCerrable(new AjusteStockWindow(), ajuste);
             return ajuste.SeAplico;
         }
 
         public bool PedirAutorizacionSupervisor(AutorizacionViewModel autorizacion)
         {
-            var ventana = new AutorizacionWindow
-            {
-                DataContext = autorizacion,
-                Owner = VentanaActiva()
-            };
-
-            void Cerrar(object? origen, EventArgs e) => ventana.Close();
-
-            autorizacion.CierreSolicitado += Cerrar;
-            ventana.ShowDialog();
-            autorizacion.CierreSolicitado -= Cerrar;
-
+            MostrarCerrable(new AutorizacionWindow(), autorizacion);
             return autorizacion.EstaAutorizado;
         }
 
@@ -89,18 +44,21 @@ namespace SistemaGestionBar.Services
             return motivo.EstaConfirmado ? motivo.MotivoLimpio : null;
         }
 
-        // El ViewModel avisa con CierreSolicitado; el cierre lo hace esta clase, la única que conoce Window.
-        private static void MostrarCerrable<TVentana, TViewModel>(TVentana ventana, TViewModel viewModel)
-            where TVentana : Window
-            where TViewModel : ViewModels.ICierrable
+        public (DateTime Desde, DateTime Hasta)? ElegirRangoDeFechas(DateTime? desde, DateTime? hasta)
         {
-            void Cerrar(object? origen, EventArgs e) => ventana.Close();
+            var rango = new RangoFechasViewModel(desde, hasta);
+            MostrarCerrable(new RangoFechasWindow(), rango);
 
-            viewModel.CierreSolicitado += Cerrar;
-            ventana.DataContext = viewModel;
-            ventana.Owner = VentanaActiva();
-            ventana.ShowDialog();
-            viewModel.CierreSolicitado -= Cerrar;
+            return rango.SeAplico && rango.Desde is DateTime d && rango.Hasta is DateTime h
+                ? (d, h)
+                : null;
+        }
+
+        public (bool SeAplico, string? Ruta) ElegirImagenDeProducto(string? rutaActual)
+        {
+            var eleccion = new ElegirImagenViewModel(rutaActual);
+            MostrarCerrable(new ElegirImagenWindow(), eleccion);
+            return (eleccion.SeAplico, eleccion.Elegida);
         }
 
         public void Informar(string titulo, string mensaje) =>
@@ -139,12 +97,26 @@ namespace SistemaGestionBar.Services
             return cuadro.ShowDialog(VentanaActiva()) == true ? cuadro.FileName : null;
         }
 
-        /// <summary>
-        /// UseShellExecute es obligatorio: sin eso Windows intenta ejecutar el PDF como si
-        /// fuera un programa en vez de abrirlo con el lector asociado.
-        /// </summary>
         public void AbrirArchivo(string ruta) =>
             Process.Start(new ProcessStartInfo(ruta) { UseShellExecute = true });
+
+        private static void Mostrar(Window ventana, object viewModel)
+        {
+            ventana.DataContext = viewModel;
+            ventana.Owner = VentanaActiva();
+            ventana.ShowDialog();
+        }
+
+        private static void MostrarCerrable<TVentana, TViewModel>(TVentana ventana, TViewModel viewModel)
+            where TVentana : Window
+            where TViewModel : ICierrable
+        {
+            void Cerrar(object? origen, EventArgs e) => ventana.Close();
+
+            viewModel.CierreSolicitado += Cerrar;
+            Mostrar(ventana, viewModel);
+            viewModel.CierreSolicitado -= Cerrar;
+        }
 
         private static Window VentanaActiva() =>
             Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)

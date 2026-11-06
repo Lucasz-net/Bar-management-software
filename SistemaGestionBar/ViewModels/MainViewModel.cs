@@ -5,14 +5,6 @@ using SistemaGestionBar.ViewModels.Admin;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// El "router" de la aplicación. MainWindow es solo un cascarón con un ContentControl
-    /// bindeado a VistaActual; acá se decide qué ViewModel ocupa esa ranura y App.xaml
-    /// define, con DataTemplates, qué UserControl dibuja cada uno.
-    ///
-    /// Analogía web: VistaActual es la ruta activa y los DataTemplates son el mapa
-    /// ruta -> componente. Por eso navegamos apuntando a ViewModels y no a Views.
-    /// </summary>
     public class MainViewModel : ViewModelBase
     {
         private readonly IRepositorioBar _repositorio;
@@ -23,11 +15,6 @@ namespace SistemaGestionBar.ViewModels
         {
         }
 
-        /// <summary>
-        /// El arranque real de la aplicación: se conecta a MySQL, aplica las migraciones
-        /// que falten y siembra los datos si la base está vacía. Recién entonces se
-        /// construye el repositorio que van a usar todas las pantallas.
-        /// </summary>
         private MainViewModel(SesionActual sesion) : this(Conectar(sesion), new ServicioDialogo(), sesion)
         {
         }
@@ -35,7 +22,6 @@ namespace SistemaGestionBar.ViewModels
         private static IRepositorioBar Conectar(SesionActual sesion)
         {
             var fabrica = new FabricaDeContexto(sesion);
-            SembradorDeDatos.Preparar(fabrica);
             return new RepositorioSql(fabrica, sesion);
         }
 
@@ -63,7 +49,6 @@ namespace SistemaGestionBar.ViewModels
             {
                 _sesion.Usuario = usuario;
 
-                // RF-09: el rol decide con qué pantalla arranca cada uno.
                 if (usuario.AccedeAlTablero)
                     MostrarTablero();
                 else
@@ -85,8 +70,6 @@ namespace SistemaGestionBar.ViewModels
         {
             var puntoDeVenta = new PuntoDeVentaViewModel(_repositorio, _dialogo, usuario);
 
-            // Dos salidas distintas y explícitas: cerrar sesión siempre sale al login,
-            // y el administrador tiene además un botón propio para volver a su tablero.
             puntoDeVenta.CierreSesionSolicitado += (_, _) => MostrarLogin();
             puntoDeVenta.TableroSolicitado += (_, _) => MostrarTablero();
 

@@ -3,10 +3,6 @@ using System.Windows.Input;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// ICommand genérico. Es lo que se bindea al Command de un Button:
-    /// el equivalente WPF de pasarle un handler por props a un botón.
-    /// </summary>
     public class RelayCommand : ICommand
     {
         private readonly Action<object?> _ejecutar;
@@ -27,10 +23,6 @@ namespace SistemaGestionBar.ViewModels
 
         public void Execute(object? parameter) => _ejecutar(parameter);
 
-        /// <summary>
-        /// CommandManager reevalúa CanExecute solo ante cualquier interacción del usuario:
-        /// alcanza para habilitar/deshabilitar botones sin notificar a mano.
-        /// </summary>
         public event EventHandler? CanExecuteChanged
         {
             add => CommandManager.RequerySuggested += value;
@@ -38,7 +30,6 @@ namespace SistemaGestionBar.ViewModels
         }
     }
 
-    /// <summary>Variante tipada, para cuando el CommandParameter es un ViewModel concreto.</summary>
     public class RelayCommand<T> : ICommand
     {
         private readonly Action<T> _ejecutar;

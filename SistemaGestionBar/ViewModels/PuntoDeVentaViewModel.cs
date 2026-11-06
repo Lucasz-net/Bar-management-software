@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,13 +12,7 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// Pantalla principal de ventas (RF-01 a RF-07).
-    /// Reemplaza al Dashboard con code-behind: acá vive todo el estado y la lógica,
-    /// y el XAML solo se bindea. Analogía web: este es el componente contenedor con
-    /// el estado; PuntoDeVentaView.xaml es su plantilla.
-    /// </summary>
-    public class PuntoDeVentaViewModel : ViewModelBase
+    public class PuntoDeVentaViewModel : ViewModelConMensaje
     {
         private readonly IRepositorioBar _repositorio;
         private readonly IServicioDialogo _dialogo;
@@ -33,7 +27,6 @@ namespace SistemaGestionBar.ViewModels
                 _repositorio.ObtenerProductos()
                             .Select(p => new ProductoCatalogoViewModel(p, _repositorio.CalcularDisponibilidad(p))));
 
-            // La "vista" de la colección es la que se filtra. La colección original queda intacta.
             VistaProductos = CollectionViewSource.GetDefaultView(Productos);
             VistaProductos.Filter = FiltrarProducto;
 
@@ -47,7 +40,6 @@ namespace SistemaGestionBar.ViewModels
             Meseros = new ObservableCollection<Usuario>(_repositorio.ObtenerPersonalDeAtencion());
             AlertasStock = new ObservableCollection<AlertaStock>();
 
-            // Valores por defecto: Consumidor Final (RF-05) y efectivo (RF-06).
             _clienteSeleccionado = Clientes.FirstOrDefault();
             _metodoPagoSeleccionado = MetodosPago.FirstOrDefault();
             _meseroSeleccionado = Meseros.FirstOrDefault(m => m.IdUsuario == UsuarioActual.IdUsuario) ?? Meseros.FirstOrDefault();
@@ -62,25 +54,15 @@ namespace SistemaGestionBar.ViewModels
             CerrarSesionCommand = new RelayCommand(() => CierreSesionSolicitado?.Invoke(this, EventArgs.Empty));
             VolverAlTableroCommand = new RelayCommand(() => TableroSolicitado?.Invoke(this, EventArgs.Empty));
 
-            // Nuevos comandos de respaldo
             CrearBackupCommand = new RelayCommand(EjecutarCrearBackup, () => PuedeCrearBackup);
 
             RefrescarIndicadores();
         }
 
-        /// <summary>Lo escucha MainViewModel para volver al login (RF-09).</summary>
         public event EventHandler? CierreSesionSolicitado;
 
-        /// <summary>
-        /// Vuelta al tablero de administración. Es una acción distinta de cerrar sesión:
-        /// antes el mismo botón hacía las dos cosas según el rol, y desde el punto de venta
-        /// no había forma de saber que uno volvía al tablero en lugar de salir del sistema.
-        /// </summary>
         public event EventHandler? TableroSolicitado;
 
-        // ---------------------------------------------------------------
-        // Encabezado
-        // ---------------------------------------------------------------
         public Usuario UsuarioActual { get; }
 
         public string NombreUsuario => UsuarioActual.NombreCompleto;
@@ -90,7 +72,6 @@ namespace SistemaGestionBar.ViewModels
                                        .Take(2)
                                        .Select(p => char.ToUpperInvariant(p[0])));
 
-        /// <summary>Ej: "Domingo, 06 de septiembre". Solo se capitaliza la primera letra.</summary>
         public string FechaActual
         {
             get
@@ -113,9 +94,6 @@ namespace SistemaGestionBar.ViewModels
 
         public string TextoVentasDelDia => VentasDelDia == 1 ? "1 venta hoy" : $"{VentasDelDia} ventas hoy";
 
-        // ---------------------------------------------------------------
-        // Catálogo
-        // ---------------------------------------------------------------
         public ObservableCollection<ProductoCatalogoViewModel> Productos { get; }
 
         public ICollectionView VistaProductos { get; }
@@ -175,12 +153,8 @@ namespace SistemaGestionBar.ViewModels
             VistaProductos.Refresh();
         }
 
-        // ---------------------------------------------------------------
-        // Ticket (Venta + Venta_Detalle)
-        // ---------------------------------------------------------------
         public ObservableCollection<LineaTicketViewModel> Ticket { get; }
 
-        /// <summary>RF-01: total dinámico, sumatoria de los subtotales del ticket.</summary>
         public decimal Total => Ticket.Sum(l => l.Subtotal);
 
         public int CantidadUnidades => Ticket.Sum(l => l.Cantidad);
@@ -194,7 +168,7 @@ namespace SistemaGestionBar.ViewModels
 
             if (enTicket >= producto.Disponibilidad)
             {
-                MostrarMensaje($"Solo quedan {producto.Disponibilidad} unidades de {producto.Nombre}.", esError: true);
+                Fallar($"Solo quedan {producto.Disponibilidad} unidades de {producto.Nombre}.");
                 return;
             }
 
@@ -248,7 +222,7 @@ namespace SistemaGestionBar.ViewModels
                 return;
 
             VaciarTicket();
-            MostrarMensaje("Pedido cancelado.", esError: false);
+            Informar("Pedido cancelado.");
         }
 
         private void VaciarTicket()
@@ -269,26 +243,15 @@ namespace SistemaGestionBar.ViewModels
             OnPropertyChanged(nameof(CantidadUnidades));
             OnPropertyChanged(nameof(TicketVacio));
 
-            // Los botones Confirmar/Cancelar dependen de si hay renglones: sin esto
-            // CommandManager solo reevalua CanExecute ante interaccion del usuario y
-            // los botones pueden quedar deshabilitados de mas.
             CommandManager.InvalidateRequerySuggested();
         }
 
-        // ---------------------------------------------------------------
-        // Modalidad, ubicación, cliente, pago (RF-02, RF-03, RF-05, RF-06)
-        // ---------------------------------------------------------------
         public ObservableCollection<Cliente> Clientes { get; }
         public ObservableCollection<MetodoPago> MetodosPago { get; }
         public ObservableCollection<Ubicacion> Ubicaciones { get; }
-        /// <summary>
-        /// RF-02. Personal de salón que puede figurar como mesero de la venta:
-        /// vendedores y meseros, porque las dos cuentas hacen el mismo trabajo.
-        /// </summary>
         public ObservableCollection<Usuario> Meseros { get; }
 
         private bool _esConsumoLocal = true;
-        /// <summary>RF-03. Si es false, la venta es "Para Llevar" y la ubicación queda nula.</summary>
         public bool EsConsumoLocal
         {
             get => _esConsumoLocal;
@@ -301,7 +264,6 @@ namespace SistemaGestionBar.ViewModels
 
                 if (!value)
                 {
-                    // Para llevar no ocupa ubicación (RF-03) ni necesita mesero.
                     UbicacionSeleccionada = null;
                     MeseroSeleccionado = null;
                 }
@@ -327,7 +289,6 @@ namespace SistemaGestionBar.ViewModels
 
                 OnPropertyChanged(nameof(RequiereMesero));
 
-                // En la barra atiende el barman: la venta no lleva mesero (RF-02).
                 if (!RequiereMesero)
                     MeseroSeleccionado = null;
                 else
@@ -335,10 +296,6 @@ namespace SistemaGestionBar.ViewModels
             }
         }
 
-        /// <summary>
-        /// Solo se pide mesero si la venta es en el local Y en una mesa.
-        /// Gobierna la visibilidad del combo en la vista y la validación del repositorio.
-        /// </summary>
         public bool RequiereMesero => EsConsumoLocal && (UbicacionSeleccionada?.RequiereMesero ?? false);
 
         private Usuario? _meseroSeleccionado;
@@ -362,18 +319,10 @@ namespace SistemaGestionBar.ViewModels
             set => SetProperty(ref _metodoPagoSeleccionado, value);
         }
 
-        // ---------------------------------------------------------------
-        // Alertas de inventario (RF-08)
-        // ---------------------------------------------------------------
         public ObservableCollection<AlertaStock> AlertasStock { get; }
 
-        /// <summary>RF-08: el panel de alertas es exclusivo del administrador.</summary>
         public bool PuedeVerAlertas => UsuarioActual.AccedeAlTablero;
 
-        /// <summary>
-        /// Solo el administrador tiene tablero al que volver: para el resto
-        /// el punto de venta es la única pantalla del sistema.
-        /// </summary>
         public bool PuedeVolverAlTablero => UsuarioActual.AccedeAlTablero;
 
         public bool HayAlertasStock => PuedeVerAlertas && AlertasStock.Count > 0;
@@ -382,40 +331,6 @@ namespace SistemaGestionBar.ViewModels
             ? "1 insumo bajo el mínimo"
             : $"{AlertasStock.Count} insumos bajo el mínimo";
 
-        // ---------------------------------------------------------------
-        // Mensajes de la barra inferior
-        // ---------------------------------------------------------------
-        private string _mensaje = string.Empty;
-        public string Mensaje
-        {
-            get => _mensaje;
-            private set
-            {
-                if (SetProperty(ref _mensaje, value))
-                    OnPropertyChanged(nameof(HayMensaje));
-            }
-        }
-
-        private bool _mensajeEsError;
-        public bool MensajeEsError
-        {
-            get => _mensajeEsError;
-            private set => SetProperty(ref _mensajeEsError, value);
-        }
-
-        public bool HayMensaje => !string.IsNullOrWhiteSpace(Mensaje);
-
-        private void MostrarMensaje(string texto, bool esError)
-        {
-            MensajeEsError = esError;
-            Mensaje = texto;
-        }
-
-        private void LimpiarMensaje() => Mensaje = string.Empty;
-
-        // ---------------------------------------------------------------
-        // Comandos
-        // ---------------------------------------------------------------
         public ICommand AgregarProductoCommand { get; }
         public ICommand QuitarUnidadCommand { get; }
         public ICommand EliminarLineaCommand { get; }
@@ -426,7 +341,8 @@ namespace SistemaGestionBar.ViewModels
         public ICommand CerrarSesionCommand { get; }
         public ICommand VolverAlTableroCommand { get; }
         public ICommand CrearBackupCommand { get; }
-        // Restaurar vive solo en Administración (con doble autorización); desde la caja solo se puede respaldar.
+
+        // // Restaurar vive solo en Administración (con doble autorización); desde la caja solo se puede respaldar.
         public bool PuedeCrearBackup => UsuarioActual.AccedeAlTablero;
 
         private void VerReceta(ProductoCatalogoViewModel producto)
@@ -437,10 +353,6 @@ namespace SistemaGestionBar.ViewModels
             _dialogo.MostrarReceta(new RecetaViewModel(producto.Producto));
         }
 
-        /// <summary>
-        /// RF-01 + RF-07: arma la Venta con su detalle y delega en el repositorio,
-        /// que valida y descuenta el stock. El ViewModel no toca el inventario.
-        /// </summary>
         private void ConfirmarVenta()
         {
             var venta = new Venta
@@ -465,26 +377,16 @@ namespace SistemaGestionBar.ViewModels
 
             if (!resultado.Exito)
             {
-                MostrarMensaje(resultado.Mensaje, esError: true);
+                Fallar(resultado.Mensaje);
                 return;
             }
 
             MostrarComprobante(venta.IdVenta);
             VaciarTicket();
             RefrescarIndicadores();
-            MostrarMensaje(resultado.Mensaje, esError: false);
+            Informar(resultado.Mensaje);
         }
 
-        /// <summary>
-        /// Al confirmar se abre el comprobante de la venta recién registrada, en lugar
-        /// del cartel de "Venta confirmada" que había antes: el vendedor necesita ver
-        /// qué se cobró (renglones, mesa, mesero, forma de pago) y poder imprimirlo, y
-        /// un MessageBox con una línea de texto no muestra nada de eso.
-        ///
-        /// Es la misma ventana que usa Ventas en el tablero, y el comprobante lo arma el
-        /// repositorio desde Venta/Venta_Detalle: no hay una segunda versión del
-        /// comprobante que se pueda desincronizar con aquella.
-        /// </summary>
         private void MostrarComprobante(int idVenta)
         {
             var factura = _repositorio.ObtenerFacturaDeVenta(idVenta);
@@ -494,7 +396,6 @@ namespace SistemaGestionBar.ViewModels
             _dialogo.MostrarFactura(new FacturaViewModel(factura));
         }
 
-        /// <summary>Recalcula disponibilidad, alertas y contador tras cada venta.</summary>
         private void RefrescarIndicadores()
         {
             foreach (var producto in Productos)
@@ -510,9 +411,6 @@ namespace SistemaGestionBar.ViewModels
             OnPropertyChanged(nameof(TextoAlertas));
         }
 
-        // ---------------------------------------------------------------
-        // Módulo de Backups (Orquestado por ServicioBackupSql)
-        // ---------------------------------------------------------------
         private async void EjecutarCrearBackup()
         {
             var confirmacion = new ConfirmarContrasenaViewModel(_repositorio,
@@ -535,5 +433,6 @@ namespace SistemaGestionBar.ViewModels
             else
                 _dialogo.Informar("Error", resultado.Mensaje);
         }
+
     }
 }

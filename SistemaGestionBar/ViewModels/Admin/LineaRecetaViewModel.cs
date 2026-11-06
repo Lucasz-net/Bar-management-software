@@ -2,7 +2,6 @@ using SistemaGestionBar.Models;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>Un renglón editable de la composición de la receta (Producto_Ingrediente).</summary>
     public class LineaRecetaViewModel : ViewModelBase
     {
         public LineaRecetaViewModel(Ingrediente ingrediente, decimal cantidad)

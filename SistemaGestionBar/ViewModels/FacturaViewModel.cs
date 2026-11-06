@@ -5,14 +5,6 @@ using SistemaGestionBar.Models;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// Estado de la ventana del comprobante. Expone la factura y los dos comandos
-    /// de la ventana, para que la vista no necesite manejadores en el code-behind.
-    ///
-    /// Imprimir es una operación de presentación pura —dibuja el visual de la
-    /// ventana— así que el ViewModel recibe qué imprimir y no sabe nada de WPF
-    /// más allá de eso.
-    /// </summary>
     public class FacturaViewModel : ViewModelBase
     {
         public FacturaViewModel(Factura factura)

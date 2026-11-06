@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -10,19 +10,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Sección de reportes del tablero. Disponible para administrador y gerente: es
-    /// información de gestión del negocio, que es justamente lo que el gerente sí ve.
-    ///
-    /// <b>No se guarda ningún reporte.</b> Se arman en el momento a partir de las tablas
-    /// que ya existen (Venta, Venta_Detalle, Producto, Ingrediente, Usuario) y el PDF va
-    /// al disco del usuario, no a la base. Guardarlos obligaría a rehacerlos cada vez que
-    /// cambia una venta; por eso la cátedra pidió eliminar la tabla Reporte y por eso
-    /// esta pantalla no la necesita.
-    ///
-    /// La vista previa y el PDF salen del mismo <see cref="ContenidoDeReporte"/>, así que
-    /// lo que se ve en pantalla es literalmente lo que se exporta.
-    /// </summary>
     public class AdminReportesViewModel : SeccionAdminViewModel
     {
         private readonly ArmadorDeReportes _armador;
@@ -45,6 +32,9 @@ namespace SistemaGestionBar.ViewModels.Admin
 
                 new(TipoDeReporte.Empleados, "Ventas por empleado", "AccountGroupOutline",
                     "Cuánto cobró cada cajero y qué mesas atendió cada mesero.", UsaPeriodo: true),
+
+                new(TipoDeReporte.VentasPorCategoria, "Ventas por categoría", "ChartPie",
+                    "Cuánto facturó cada categoría del menú en el período.", UsaPeriodo: true),
 
                 new(TipoDeReporte.Catalogo, "Catálogo de productos", "SilverwareForkKnife",
                     "Listado completo con precio, categoría y stock. No depende del período.", UsaPeriodo: false),
@@ -74,15 +64,12 @@ namespace SistemaGestionBar.ViewModels.Admin
                 OnPropertyChanged(nameof(HaySeleccion));
                 OnPropertyChanged(nameof(PeriodoEsAplicable));
 
-                // Elegir un reporte ya lo genera: obligar a apretar un botón más para ver
-                // lo que se acaba de pedir no aporta nada, y el costo es una consulta local.
                 Generar();
             }
         }
 
         public bool HaySeleccion => Seleccionado is not null;
 
-        /// <summary>El catálogo y el inventario son una foto de hoy: el período no los cambia.</summary>
         public bool PeriodoEsAplicable => Seleccionado?.UsaPeriodo == true;
 
         public IReadOnlyList<OpcionFiltro<PeriodoDeReporte>> OpcionesPeriodo { get; } = new[]
@@ -90,7 +77,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             new OpcionFiltro<PeriodoDeReporte>("Hoy", PeriodoDeReporte.Hoy),
             new OpcionFiltro<PeriodoDeReporte>("Última semana", PeriodoDeReporte.UltimaSemana),
             new OpcionFiltro<PeriodoDeReporte>("Último mes", PeriodoDeReporte.UltimoMes),
-            new OpcionFiltro<PeriodoDeReporte>("Todo el historial", PeriodoDeReporte.Todo)
+            new OpcionFiltro<PeriodoDeReporte>("Todo el historial", PeriodoDeReporte.Todo),
+            new OpcionFiltro<PeriodoDeReporte>("Elegir fecha", PeriodoDeReporte.Personalizado)
         };
 
         private OpcionFiltro<PeriodoDeReporte>? _periodo;
@@ -99,14 +87,47 @@ namespace SistemaGestionBar.ViewModels.Admin
             get => _periodo;
             set
             {
-                if (SetProperty(ref _periodo, value) && Seleccionado is not null)
-                    Generar();
+                if (value?.Valor == PeriodoDeReporte.Personalizado && !ElegirFechas())
+                {
+                    // Se canceló el calendario: la lista vuelve a mostrar la opción anterior.
+                    System.Windows.Application.Current.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(Periodo)));
+                    return;
+                }
+
+                if (SetProperty(ref _periodo, value))
+                {
+                    OnPropertyChanged(nameof(EsPersonalizado));
+                    if (Seleccionado is not null)
+                        Generar();
+                }
             }
         }
+        private DateTime? _desde;
+        private DateTime? _hasta;
 
-        // ---------------------------------------------------------------
-        // El reporte armado
-        // ---------------------------------------------------------------
+        public bool EsPersonalizado => Periodo?.Valor == PeriodoDeReporte.Personalizado;
+
+        public string RangoTexto => _desde is DateTime d && _hasta is DateTime h
+            ? (d == h ? $"{d:dd/MM/yyyy}" : $"{d:dd/MM/yyyy} - {h:dd/MM/yyyy}")
+            : string.Empty;
+
+        public ICommand CambiarFechasCommand => new RelayCommand(() =>
+        {
+            if (ElegirFechas())
+                Generar();
+        });
+
+        private bool ElegirFechas()
+        {
+            var rango = Dialogo.ElegirRangoDeFechas(_desde, _hasta);
+            if (rango is null)
+                return false;
+
+            (_desde, _hasta) = rango.Value;
+            OnPropertyChanged(nameof(RangoTexto));
+            return true;
+        }
+
         private ContenidoDeReporte? _contenido;
         public ContenidoDeReporte? Contenido
         {
@@ -131,7 +152,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             LimpiarMensaje();
 
             var periodo = Seleccionado.UsaPeriodo
-                ? Periodo?.Valor ?? PeriodoDeReporte.UltimaSemana
+                ? new PeriodoElegido(Periodo?.Valor ?? PeriodoDeReporte.UltimaSemana, _desde, _hasta)
                 : PeriodoDeReporte.Todo;
 
             try
@@ -160,9 +181,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
             catch (Exception ex)
             {
-                // El caso real: el archivo está abierto en el lector de PDF y Windows lo
-                // tiene bloqueado. Decirlo con estas palabras evita la captura de pantalla
-                // de un IOException que no le explica nada a nadie.
                 Fallar($"No se pudo guardar el PDF: {ex.Message} " +
                        "Si el archivo ya está abierto, cerralo y volvé a intentar.");
                 return;
@@ -184,17 +202,9 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
         }
 
-        /// <summary>
-        /// Al entrar a la sección se rearma el reporte que esté elegido: si alguien cargó
-        /// una venta o repuso stock desde otra pantalla, los números tienen que ser los de ahora.
-        /// </summary>
         public override void Recargar() => Generar();
     }
 
-    /// <summary>
-    /// Un reporte ofrecido en la lista. <paramref name="UsaPeriodo"/> es lo que apaga el
-    /// selector de fechas para los reportes que son una foto del estado actual.
-    /// </summary>
     public record OpcionDeReporte(
         TipoDeReporte Tipo,
         string Titulo,

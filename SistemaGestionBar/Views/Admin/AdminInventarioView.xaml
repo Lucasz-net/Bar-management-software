@@ -9,7 +9,8 @@
              xmlns:modelos="clr-namespace:SistemaGestionBar.Models"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminInventarioViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1180">
+             d:DesignHeight="700" d:DesignWidth="1180"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -25,9 +26,6 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- ==== ACCIONES Y BÚSQUEDA ====
-                 Acá quedó solo el alta: Editar y Eliminar viven al pie de la ficha del
-                 insumo, en el panel de la derecha. -->
             <Border Grid.Row="0" Style="{DynamicResource PanelAdmin}" Padding="14">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -57,7 +55,6 @@
                 </Grid>
             </Border>
 
-            <!-- ==== FILTROS ==== -->
             <Grid Grid.Row="1" Margin="0,14,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -91,7 +88,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- ==== GRILLA ==== -->
             <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="8,6,8,10" Margin="0,14,0,0">
                 <Grid Style="{DynamicResource ZonaBloqueable}">
                     <DataGrid Style="{DynamicResource GrillaAdmin}"
@@ -104,7 +100,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="6,0,0,0">
-                                            <Border Width="32" Height="32" CornerRadius="10" Background="#F1F4F9">
+                                            <Border Width="32" Height="32" CornerRadius="10" Background="#F2F2F7">
                                                 <materialDesign:PackIcon Kind="PackageVariantClosed" Width="16" Height="16"
                                                                          Foreground="{DynamicResource TintaSuave}"
                                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -120,8 +116,6 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- Stock con barra: el número solo no dice si alcanza; la barra
-                                 contra el mínimo se lee de un vistazo. -->
                             <DataGridTemplateColumn Header="STOCK" Width="248" MinWidth="248" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -139,9 +133,6 @@
                                                     <Run Text="{Binding StockMinimo, StringFormat={}{0:0.##}, Mode=OneWay}" />
                                                 </TextBlock>
                                             </Grid>
-                                            <!-- La barra se mide contra el mínimo: llena verde = hay de
-                                                 sobra, y se vacía en ámbar a medida que baja del punto
-                                                 de reposición. -->
                                             <ProgressBar Style="{DynamicResource BarraStock}"
                                                          Minimum="0" Maximum="{Binding StockMinimo}"
                                                          Value="{Binding Stock, Mode=OneWay}" />
@@ -169,7 +160,7 @@
                                                     <materialDesign:PackIcon.Style>
                                                         <Style TargetType="materialDesign:PackIcon">
                                                             <Setter Property="Kind" Value="CheckCircleOutline" />
-                                                            <Setter Property="Foreground" Value="#17703F" />
+                                                            <Setter Property="Foreground" Value="#248A3D" />
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding StockBajo}" Value="True">
                                                                     <Setter Property="Kind" Value="AlertOutline" />
@@ -183,7 +174,7 @@
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock" BasedOn="{StaticResource TextoChip}">
                                                             <Setter Property="Text" Value="EN NIVEL" />
-                                                            <Setter Property="Foreground" Value="#17703F" />
+                                                            <Setter Property="Foreground" Value="#248A3D" />
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding StockBajo}" Value="True">
                                                                     <Setter Property="Text" Value="REPONER" />
@@ -221,11 +212,6 @@
             </Border>
         </Grid>
 
-        <!-- ============================================================
-             PANEL DERECHO: FICHA O FORMULARIO
-             Misma mecánica que en Productos: la ficha del insumo elegido con Editar y
-             Eliminar al pie, o el formulario con Cancelar y Guardar.
-             ============================================================ -->
         <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -246,7 +232,6 @@
 
                 <Grid Grid.Row="1">
 
-                    <!-- ======== CARA 1: FICHA ======== -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0" VerticalAlignment="Top">
                         <ScrollViewer.Style>
                             <Style TargetType="ScrollViewer">
@@ -282,7 +267,7 @@
                                     <TextBlock.Style>
                                         <Style TargetType="TextBlock" BasedOn="{StaticResource TextoChip}">
                                             <Setter Property="Text" Value="STOCK EN NIVEL" />
-                                            <Setter Property="Foreground" Value="#17703F" />
+                                            <Setter Property="Foreground" Value="#248A3D" />
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding Seleccionado.StockBajo}" Value="True">
                                                     <Setter Property="Text" Value="HAY QUE REPONER" />
@@ -333,7 +318,6 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Sin nada elegido y sin formulario abierto -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
@@ -355,7 +339,6 @@
                                    Text="Elegí un insumo de la lista para ver su ficha, editarlo o eliminarlo." />
                     </StackPanel>
 
-                    <!-- ======== CARA 2: FORMULARIO ======== -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0" VerticalAlignment="Top"
                                   Visibility="{Binding EnEdicion, Converter={StaticResource BoolAVisibilidad}}">
                         <StackPanel>
@@ -401,7 +384,6 @@
                     </ScrollViewer>
                 </Grid>
 
-                <!-- ==== PIE DE ACCIONES ==== -->
                 <Grid Grid.Row="2">
 
                     <Grid Margin="0,16,0,0">
@@ -428,12 +410,9 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Ajustar stock va arriba y solo: es lo que más se hace con un
-                             insumo, y abre la ventanita que toca el stock y nada más.
-                             Editar, abajo, sigue siendo para el resto de la ficha. -->
                         <Button Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,8"
                                 Style="{DynamicResource BotonPanel}"
-                                BorderBrush="#D9CDF7" Foreground="{DynamicResource Acento}"
+                                BorderBrush="#E9D4F7" Foreground="{DynamicResource Acento}"
                                 Command="{Binding AjustarStockCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="PackageUp" Width="16" Height="16" VerticalAlignment="Center" />
@@ -461,7 +440,7 @@
                         <Border Style="{DynamicResource PanelValidacion}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16"
-                                                         Foreground="#A93226" VerticalAlignment="Top" Margin="0,1,9,0" />
+                                                         Foreground="#D70015" VerticalAlignment="Top" Margin="0,1,9,0" />
                                 <TextBlock Style="{DynamicResource AvisoValidacion}" Width="270"
                                            Text="{Binding ResumenDeErrores}" />
                             </StackPanel>

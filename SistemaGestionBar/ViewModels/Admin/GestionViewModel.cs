@@ -8,30 +8,8 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Cómo viene el bar. Es la pantalla de entrada del <b>gerente</b> y la diferencia de
-    /// fondo entre su tablero y el del administrador.
-    ///
-    /// <b>Por qué es otra sección y no el mismo Resumen.</b> El resumen del administrador
-    /// contesta "¿qué hay cargado en el sistema?": cuántos productos, cuántos insumos,
-    /// cuántas cuentas. Son números de configuración, y no cambian de un día para otro.
-    /// El gerente necesita la otra pregunta, la que cambia todos los días: cuánto se
-    /// facturó, si fue más o menos que ayer, qué se vendió, quién vendió y qué falta
-    /// reponer. Meter las dos en una pantalla daba una grilla de números sin un tema.
-    ///
-    /// El administrador tiene las dos secciones: no pierde nada y gana esta.
-    ///
-    /// <b>De dónde salen los números.</b> De <c>ObtenerVentas()</c>, que ya trae el método
-    /// de pago, el cajero y el producto de cada renglón. Se agrupa en memoria, igual que
-    /// hacen los reportes: sobre las ventas de un bar es intrascendente y evita cinco
-    /// consultas más.
-    /// </summary>
     public class GestionViewModel : SeccionAdminViewModel
     {
-        /// <summary>
-        /// Ventana de los rankings. El día suelto es muy poca muestra —un bar puede abrir
-        /// y vender tres cosas— así que "lo que más se vende" se mira sobre la semana.
-        /// </summary>
         private const int DiasDelRanking = 7;
 
         public GestionViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -52,9 +30,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             Recargar();
         }
 
-        // ---------------------------------------------------------------
-        // El día
-        // ---------------------------------------------------------------
         private int _ventasHoy;
         public int VentasHoy
         {
@@ -76,9 +51,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             private set => SetProperty(ref _ticketPromedio, value);
         }
 
-        // ---------------------------------------------------------------
-        // La comparación con ayer
-        // ---------------------------------------------------------------
         private decimal _facturadoAyer;
         public decimal FacturadoAyer
         {
@@ -88,10 +60,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private bool _huboVentasAyer;
 
-        /// <summary>
-        /// Sin ventas ayer no hay porcentaje que calcular: dividir por cero daría un
-        /// "+∞%" que no dice nada. La vista muestra el texto plano en ese caso.
-        /// </summary>
         public bool HayComparacion
         {
             get => _huboVentasAyer;
@@ -113,16 +81,12 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private string _textoComparacion = string.Empty;
 
-        /// <summary>"12% más que ayer", "8% menos que ayer" o por qué no se puede comparar.</summary>
         public string TextoComparacion
         {
             get => _textoComparacion;
             private set => SetProperty(ref _textoComparacion, value);
         }
 
-        // ---------------------------------------------------------------
-        // Los rankings de la semana
-        // ---------------------------------------------------------------
         public string TituloDelRanking => $"Últimos {DiasDelRanking} días";
 
         private string _productoMasVendido = SinDatos;
@@ -169,9 +133,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private const string SinDatos = "—";
 
-        // ---------------------------------------------------------------
-        // Reposición
-        // ---------------------------------------------------------------
         public ObservableCollection<AlertaStock> Alertas { get; }
 
         public bool HayAlertas => Alertas.Count > 0;
@@ -194,15 +155,8 @@ namespace SistemaGestionBar.ViewModels.Admin
         protected override void AlCambiarLosDestinos() =>
             OnPropertyChanged(nameof(PuedeVerEquipo));
 
-        /// <summary>
-        /// Igual que en el resumen del administrador: lleva a la sección del ítem, que le
-        /// abre la ventanita de ajuste de stock. El destino lo resuelve la clase base.
-        /// </summary>
         private void Reponer(AlertaStock alerta) => IrAReponer(alerta);
 
-        // ---------------------------------------------------------------
-        // Cálculo
-        // ---------------------------------------------------------------
         public sealed override void Recargar()
         {
             var confirmadas = Repositorio.ObtenerVentas()
@@ -234,9 +188,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void CalcularComparacion()
         {
-            // Sin ventas hoy el porcentaje daría "100% menos que ayer", que es cierto y no
-            // sirve para nada: a las once de la mañana un bar todavía no vendió y eso no es
-            // una caída del 100%. Se dice el hecho en vez del número.
             if (FacturadoHoy <= 0)
             {
                 HayComparacion = false;
@@ -265,14 +216,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             };
         }
 
-        /// <summary>
-        /// Qué se vendió, quién vendió y cómo se pagó, sobre la ventana del ranking.
-        ///
-        /// Los nombres se resuelven contra el padrón y el catálogo, no contra la
-        /// navegación de cada venta: las consultas usan AsNoTracking, así que cada venta
-        /// trae su propia copia del usuario y del producto, y el rol ni siquiera viene
-        /// incluido. Agrupar por id y buscar el nombre aparte es lo que hacen los reportes.
-        /// </summary>
         private void CalcularRankings(List<Venta> ventas)
         {
             if (ventas.Count == 0)

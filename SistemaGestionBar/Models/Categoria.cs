@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 namespace SistemaGestionBar.Models
 {
-    /// <summary>Tabla Categoria. Agrupa los productos del catálogo.</summary>
     public class Categoria : EntidadAuditable
     {
         public int IdCategoria { get; set; }

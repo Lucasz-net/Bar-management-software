@@ -2,10 +2,6 @@ using SistemaGestionBar.Models;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// Un renglón del ticket en pantalla. Al confirmar la venta se convierte
-    /// en una fila de Venta_Detalle (RF-01).
-    /// </summary>
     public class LineaTicketViewModel : ViewModelBase
     {
         public LineaTicketViewModel(ProductoCatalogoViewModel producto)
@@ -31,7 +27,6 @@ namespace SistemaGestionBar.ViewModels
             }
         }
 
-        /// <summary>Subtotal del renglón. La sumatoria de estos es el total de la venta.</summary>
         public decimal Subtotal => Cantidad * PrecioUnitario;
 
         public VentaDetalle ConvertirADetalle()

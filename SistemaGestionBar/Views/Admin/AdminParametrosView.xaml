@@ -8,25 +8,14 @@
              xmlns:modelos="clr-namespace:SistemaGestionBar.Models"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminParametrosViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1180">
+             d:DesignHeight="700" d:DesignWidth="1180"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <UserControl.Resources>
-        <!-- Encabezado repetido de cada tarjeta paramétrica: chip de color con el icono,
-             título y bajada. Definido una vez porque las tres tarjetas son iguales. -->
         <Style x:Key="TituloTarjeta" TargetType="TextBlock" BasedOn="{StaticResource TituloEnLinea}">
             <Setter Property="FontSize" Value="15" />
         </Style>
 
-        <!-- La casilla que aparece al editar el nombre en cualquiera de las tres grillas.
-             Estas tres tablas se editan acá adentro y no en un formulario, así que no hay
-             validación por campo que las cuide: el tope de largo tiene que estar en la
-             casilla misma. Sin él se escribe un nombre de 60 caracteres, entra en una
-             columna de 40 y MySQL lo rechaza con un error que cierra la aplicación.
-
-             Sin BasedOn a propósito: los dos setters de abajo son exactamente los que trae
-             el estilo de edición por defecto de DataGridTextColumn, que es sellado y no se
-             puede heredar desde XAML. Basarlo en un estilo Material metería un campo
-             outlined dentro de una celda de 50 px de alto. -->
         <Style x:Key="CeldaDeNombre" TargetType="TextBox">
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Padding" Value="0" />
@@ -54,7 +43,6 @@
                 <ColumnDefinition Width="1.35*" />
             </Grid.ColumnDefinitions>
 
-            <!-- ============ CATEGORIAS ============ -->
             <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -64,8 +52,8 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
-                        <Border Style="{DynamicResource ChipIconoChico}" Background="#EDE7FA">
-                            <materialDesign:PackIcon Kind="ShapeOutline" Width="18" Height="18" Foreground="#5B3A9E"
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="#F5EAFB">
+                            <materialDesign:PackIcon Kind="ShapeOutline" Width="18" Height="18" Foreground="#AF52DE"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
@@ -113,7 +101,6 @@
                 </Grid>
             </Border>
 
-            <!-- ============ METODOS DE PAGO ============ -->
             <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" Margin="0,0,16,0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -124,7 +111,7 @@
 
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
                         <Border Style="{DynamicResource ChipIconoChico}" Background="{DynamicResource ExitoSuave}">
-                            <materialDesign:PackIcon Kind="CreditCardOutline" Width="18" Height="18" Foreground="#17703F"
+                            <materialDesign:PackIcon Kind="CreditCardOutline" Width="18" Height="18" Foreground="#248A3D"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
@@ -172,7 +159,6 @@
                 </Grid>
             </Border>
 
-            <!-- ============ UBICACIONES ============ -->
             <Border Grid.Column="2" Style="{DynamicResource PanelAdmin}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -200,8 +186,6 @@
                                                 Binding="{Binding NombreUbicacion, UpdateSourceTrigger=PropertyChanged}" />
                             <DataGridTextColumn Header="CAPACIDAD" Width="104" MinWidth="104"
                                                 Binding="{Binding Capacidad, UpdateSourceTrigger=PropertyChanged}" />
-                            <!-- Estatica a proposito: un DataGridComboBoxColumn no forma parte del
-                                 arbol visual, asi que no hereda el DataContext. -->
                             <DataGridComboBoxColumn Header="TIPO" Width="110" MinWidth="110"
                                                     SelectedItemBinding="{Binding Tipo, UpdateSourceTrigger=PropertyChanged}"
                                                     ItemsSource="{Binding Source={x:Static vm:AdminParametrosViewModel.TodosLosTipos}}" />

@@ -3,10 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// Base de todos los ViewModels. INotifyPropertyChanged es lo que hace que la UI
-    /// se redibuje sola: el equivalente WPF del setState/signal de un framework web.
-    /// </summary>
     public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;

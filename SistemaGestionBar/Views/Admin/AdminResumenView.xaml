@@ -7,23 +7,20 @@
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminResumenViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1180">
+             d:DesignHeight="700" d:DesignWidth="1180"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <UserControl.Resources>
-        <!-- Indicador: chip de icono arriba, numero grande, rotulo abajo. Los cinco son
-             iguales salvo el color y el texto, asi que la estructura va una sola vez. -->
         <Style x:Key="NumeroGrande" TargetType="TextBlock" BasedOn="{StaticResource ValorIndicador}">
             <Setter Property="FontSize" Value="27" />
             <Setter Property="Margin" Value="0,12,0,0" />
         </Style>
 
-        <!-- Barra de proporcion del catalogo. Template propio por lo mismo que BarraStock:
-             la clave de Material no existe en esta version del paquete. -->
         <Style x:Key="BarraProporcion" TargetType="ProgressBar">
             <Setter Property="Height" Value="9" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="#E2E7F0" />
-            <Setter Property="Foreground" Value="#7C5CC4" />
+            <Setter Property="Background" Value="#E5E5EA" />
+            <Setter Property="Foreground" Value="#AF52DE" />
             <Setter Property="Minimum" Value="0" />
             <Setter Property="Maximum" Value="1" />
             <Setter Property="Template">
@@ -43,7 +40,6 @@
             </Setter>
         </Style>
 
-        <!-- Punto de color que identifica cada mitad de la barra -->
         <Style x:Key="PuntoLeyenda" TargetType="Border">
             <Setter Property="Width" Value="9" />
             <Setter Property="Height" Value="9" />
@@ -59,11 +55,6 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- ==== INDICADORES DEL DÍA ====
-             Cada tarjeta entra a la sección que resume: el número es el resumen, la
-             sección es el detalle. Sin Columns explícito a propósito: si el rol no
-             tiene Personas, la quinta tarjeta no existe y las otras cuatro se reparten
-             el ancho en vez de dejar un hueco. -->
         <UniformGrid Grid.Row="0" Rows="1" Margin="-7,0">
 
             <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
@@ -83,12 +74,13 @@
             </Button>
 
             <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
-                    Command="{Binding IrAVentasCommand}" ToolTip="Ver el historial de ventas">
+                    Command="{Binding IrAVentasCommand}" ToolTip="Ver el historial de ventas"
+                    Tag="{DynamicResource Exito}">
                 <Grid>
                     <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
                     <StackPanel>
                         <Border Style="{DynamicResource ChipIcono}" Background="{DynamicResource ExitoSuave}" HorizontalAlignment="Left">
-                            <materialDesign:PackIcon Kind="CashMultiple" Width="20" Height="20" Foreground="#17703F"
+                            <materialDesign:PackIcon Kind="CashMultiple" Width="20" Height="20" Foreground="#248A3D"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="{DynamicResource Exito}"
@@ -100,14 +92,17 @@
 
             <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
                     Command="{Binding IrAProductosCommand}" ToolTip="Ver el catálogo de productos">
+                <Button.Tag>
+                    <SolidColorBrush Color="#AF52DE" />
+                </Button.Tag>
                 <Grid>
                     <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
                     <StackPanel>
-                        <Border Style="{DynamicResource ChipIcono}" Background="#EDE7FA" HorizontalAlignment="Left">
-                            <materialDesign:PackIcon Kind="GlassCocktail" Width="20" Height="20" Foreground="#5B3A9E"
+                        <Border Style="{DynamicResource ChipIcono}" Background="#F5EAFB" HorizontalAlignment="Left">
+                            <materialDesign:PackIcon Kind="GlassCocktail" Width="20" Height="20" Foreground="#AF52DE"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
-                        <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="#5B3A9E"
+                        <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="#AF52DE"
                                    Text="{Binding CantidadProductos}" />
                         <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Productos en catálogo" />
                     </StackPanel>
@@ -115,7 +110,8 @@
             </Button>
 
             <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
-                    Command="{Binding IrAInventarioCommand}" ToolTip="Ver el inventario de insumos">
+                    Command="{Binding IrAInventarioCommand}" ToolTip="Ver el inventario de insumos"
+                    Tag="{DynamicResource Aviso}">
                 <Grid>
                     <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
                     <StackPanel>
@@ -134,15 +130,18 @@
             <Button Style="{DynamicResource TarjetaAccion}" Margin="7,0"
                     Command="{Binding IrAEmpleadosCommand}" ToolTip="Ver el padrón de personas"
                     Visibility="{Binding PuedeVerEmpleados, Converter={StaticResource BoolAVisibilidad}}">
+                <Button.Tag>
+                    <SolidColorBrush Color="#515154" />
+                </Button.Tag>
                 <Grid>
                     <materialDesign:PackIcon Style="{DynamicResource FlechaTarjeta}" />
                     <StackPanel>
-                        <Border Style="{DynamicResource ChipIcono}" Background="#F1F4F9" HorizontalAlignment="Left">
+                        <Border Style="{DynamicResource ChipIcono}" Background="#F2F2F7" HorizontalAlignment="Left">
                             <materialDesign:PackIcon Kind="AccountGroupOutline" Width="20" Height="20"
-                                                     Foreground="#5A6577"
+                                                     Foreground="#515154"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
-                        <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="#5A6577"
+                        <TextBlock Style="{DynamicResource NumeroGrande}" Foreground="#515154"
                                    Text="{Binding CantidadEmpleados}" />
                         <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Empleados" />
                     </StackPanel>
@@ -156,7 +155,6 @@
                 <ColumnDefinition Width="358" />
             </Grid.ColumnDefinitions>
 
-            <!-- ==== ALERTAS DE INVENTARIO ==== -->
             <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,18,0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -177,9 +175,6 @@
                     </StackPanel>
 
                     <Grid Grid.Row="1">
-                        <!-- Cada alerta como una fila con barra: el numero solo no dice
-                             cuanto falta para quedarse sin insumo. El boton Reponer lleva
-                             al editor de ese item, con el formulario ya abierto. -->
                         <ItemsControl ItemsSource="{Binding Alertas}">
                             <ItemsControl.Template>
                                 <ControlTemplate TargetType="ItemsControl">
@@ -207,7 +202,7 @@
                                             <StackPanel Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
                                                 <TextBlock Text="{Binding Nombre}" FontSize="14" FontWeight="SemiBold"
                                                            Foreground="{DynamicResource TintaFuerte}" />
-                                                <TextBlock FontSize="12" Foreground="#96560A" Margin="0,2,0,0">
+                                                <TextBlock FontSize="12" Foreground="#B25000" Margin="0,2,0,0">
                                                     <Run Text="quedan" />
                                                     <Run Text="{Binding Stock, StringFormat={}{0:0.##}, Mode=OneWay}" FontWeight="SemiBold" />
                                                     <Run Text="{Binding UnidadMedida, Mode=OneWay}" />
@@ -240,7 +235,6 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <!-- Sin alertas es una buena noticia: se dice así, no con una tabla vacía. -->
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                             <StackPanel.Style>
                                 <Style TargetType="StackPanel">
@@ -255,7 +249,7 @@
                             <Border Width="56" Height="56" CornerRadius="28" Background="{DynamicResource ExitoSuave}"
                                     HorizontalAlignment="Center">
                                 <materialDesign:PackIcon Kind="CheckCircleOutline" Width="28" Height="28"
-                                                         Foreground="#17703F"
+                                                         Foreground="#248A3D"
                                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <TextBlock Text="Todo el inventario está en nivel" Margin="0,14,0,0"
@@ -268,14 +262,11 @@
                 </Grid>
             </Border>
 
-            <!-- ==== COMPOSICIÓN DEL CATÁLOGO ====
-                 Una sola pregunta: cuánto del catálogo se prepara y cuánto se vende
-                 cerrado. La barra lo contesta antes que los números. -->
             <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}" VerticalAlignment="Top">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                        <Border Style="{DynamicResource ChipIconoChico}" Background="#EDE7FA">
-                            <materialDesign:PackIcon Kind="ChartDonut" Width="18" Height="18" Foreground="#5B3A9E"
+                        <Border Style="{DynamicResource ChipIconoChico}" Background="#F5EAFB">
+                            <materialDesign:PackIcon Kind="ChartDonut" Width="18" Height="18" Foreground="#AF52DE"
                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
@@ -291,9 +282,6 @@
                     <ProgressBar Style="{DynamicResource BarraProporcion}"
                                  Value="{Binding ProporcionConReceta, Mode=OneWay}" />
 
-                    <!-- Leyenda de la barra: cada bloque es una de las dos mitades.
-                         La bajada va en su propia fila y no al lado del número: al lado
-                         se le quedaba sin ancho y terminaba pisando el porcentaje. -->
                     <Grid Margin="0,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -306,14 +294,14 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0" Grid.Column="0" Style="{DynamicResource PuntoLeyenda}"
-                                Background="#7C5CC4" VerticalAlignment="Center" />
+                                Background="#AF52DE" VerticalAlignment="Center" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Con receta" FontSize="14"
                                    FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}"
                                    VerticalAlignment="Center" />
                         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
                                     VerticalAlignment="Center" Margin="10,0,0,0">
                             <TextBlock Text="{Binding ProductosConReceta}" FontSize="22" FontWeight="Bold"
-                                       Foreground="#5B3A9E" VerticalAlignment="Center" />
+                                       Foreground="#AF52DE" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding PorcentajeConReceta}" FontSize="12"
                                        Foreground="{DynamicResource TintaSuave}"
                                        VerticalAlignment="Center" Margin="7,2,0,0" />
@@ -337,14 +325,14 @@
                         </Grid.RowDefinitions>
 
                         <Border Grid.Row="0" Grid.Column="0" Style="{DynamicResource PuntoLeyenda}"
-                                Background="#B9C2D2" VerticalAlignment="Center" />
+                                Background="#C7C7CC" VerticalAlignment="Center" />
                         <TextBlock Grid.Row="0" Grid.Column="1" Text="Venta directa" FontSize="14"
                                    FontWeight="SemiBold" Foreground="{DynamicResource TintaFuerte}"
                                    VerticalAlignment="Center" />
                         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
                                     VerticalAlignment="Center" Margin="10,0,0,0">
                             <TextBlock Text="{Binding ProductosDeVentaDirecta}" FontSize="22" FontWeight="Bold"
-                                       Foreground="#5A6577" VerticalAlignment="Center" />
+                                       Foreground="#515154" VerticalAlignment="Center" />
                             <TextBlock Text="{Binding PorcentajeVentaDirecta}" FontSize="12"
                                        Foreground="{DynamicResource TintaSuave}"
                                        VerticalAlignment="Center" Margin="7,2,0,0" />

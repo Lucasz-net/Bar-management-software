@@ -8,15 +8,14 @@
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:EquipoViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1180">
+             d:DesignHeight="700" d:DesignWidth="1180"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <UserControl.Resources>
-        <!-- Barra de participacion de cada fila. Template propio por lo mismo que la de
-             stock: la clave de Material no existe en esta version del paquete. -->
         <Style x:Key="BarraParticipacion" TargetType="ProgressBar">
             <Setter Property="Height" Value="7" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Background" Value="#E2E7F0" />
+            <Setter Property="Background" Value="#E5E5EA" />
             <Setter Property="Foreground" Value="{DynamicResource Acento}" />
             <Setter Property="Minimum" Value="0" />
             <Setter Property="Maximum" Value="1" />
@@ -50,11 +49,6 @@
             <ColumnDefinition Width="360" />
         </Grid.ColumnDefinitions>
 
-        <!-- ============================================================
-             LISTA
-             Sin boton de alta: esta pantalla no crea nada. Las cuentas se
-             dan de alta en Usuarios y los datos personales en Personas.
-             ============================================================ -->
         <Grid Grid.Column="0" Margin="0,0,18,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -78,8 +72,6 @@
                 </Grid>
             </Border>
 
-            <!-- ==== FILTROS ====
-                 El periodo no esconde filas: cambia el numero de cada una. -->
             <Grid Grid.Row="1" Margin="0,14,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -88,9 +80,16 @@
 
                 <WrapPanel Grid.Column="0" Orientation="Horizontal">
                     <ListBox Style="{DynamicResource GrupoChips}"
-                             DisplayMemberPath="Texto"
-                             ItemsSource="{Binding OpcionesPeriodo}"
+                             ItemsSource="{Binding OpcionesPeriodo}" ItemTemplate="{StaticResource ChipPeriodo}"
                              SelectedItem="{Binding Periodo}" />
+                    <Button Style="{DynamicResource BotonRangoFechas}" Margin="8,0,0,0"
+                            Command="{Binding CambiarFechasCommand}" ToolTip="Cambiar las fechas"
+                            Visibility="{Binding EsPersonalizado, Converter={StaticResource BoolAVisibilidad}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CalendarRange" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding RangoTexto}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
                     <CheckBox VerticalAlignment="Center" Margin="14,0,0,0" FontSize="13"
                               Foreground="{DynamicResource TintaSuave}"
@@ -123,7 +122,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- ==== GRILLA ==== -->
             <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="8,6,8,10" Margin="0,14,0,0">
                 <Grid>
                     <DataGrid Style="{DynamicResource GrillaAdmin}"
@@ -151,9 +149,6 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- El importe y el porcentaje van en el MISMO renglon, con la
-                                 barra debajo. En tres renglones la celda no entra en el
-                                 alto de fila de la grilla y "de lo facturado" salia cortado. -->
                             <DataGridTemplateColumn Header="COBRADO" Width="*" MinWidth="165" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -188,8 +183,6 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <!-- En la barra y para llevar no hay mesero (RF-02), asi que un
-                                 barman puede tener mucho cobrado y ninguna mesa. -->
                             <DataGridTemplateColumn Header="MESAS" Width="108" MinWidth="108" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -248,10 +241,6 @@
             </Border>
         </Grid>
 
-        <!-- ============================================================
-             PANEL DERECHO: FICHA
-             Sin Editar ni Eliminar: esta pantalla no escribe nada.
-             ============================================================ -->
         <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -334,7 +323,6 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Los datos se corrigen en otra pantalla: esta solo mide. -->
                         <Button Style="{DynamicResource BotonPanel}" HorizontalAlignment="Stretch" Margin="0,16,0,0"
                                 Command="{Binding IrAPersonasCommand}">
                             <StackPanel Orientation="Horizontal">

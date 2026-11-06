@@ -9,7 +9,8 @@
              xmlns:modelos="clr-namespace:SistemaGestionBar.Models"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminUsuariosViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1180">
+             d:DesignHeight="700" d:DesignWidth="1180"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -17,9 +18,6 @@
             <ColumnDefinition Width="390" />
         </Grid.ColumnDefinitions>
 
-        <!-- ============================================================
-             LISTA
-             ============================================================ -->
         <Grid Grid.Column="0" Margin="0,0,18,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -28,7 +26,6 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- ==== BARRA DE ACCIONES Y BÚSQUEDA ==== -->
             <Border Grid.Row="0" Style="{DynamicResource PanelAdmin}" Padding="14">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -58,7 +55,6 @@
                 </Grid>
             </Border>
 
-            <!-- ==== FILTROS ==== -->
             <Grid Grid.Row="1" Margin="0,14,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -100,7 +96,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- ==== GRILLA ==== -->
             <Border Grid.Row="3" Style="{DynamicResource PanelAdmin}" Padding="8,6,8,10" Margin="0,14,0,0">
                 <Grid Style="{DynamicResource ZonaBloqueable}">
                     <DataGrid Style="{DynamicResource GrillaAdmin}"
@@ -109,8 +104,6 @@
                               b:SelectorAssist.DesplazarASeleccion="True"
                               b:SelectorAssist.SeleccionBloqueada="{Binding EnEdicion}">
                         <DataGrid.Columns>
-                            <!-- La cuenta se lee por su credencial: el correo arriba, y
-                                 debajo de quién es, que es el dato que la vuelve humana. -->
                             <DataGridTemplateColumn Header="CUENTA" Width="*" MinWidth="260" IsReadOnly="True">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -175,9 +168,6 @@
             </Border>
         </Grid>
 
-        <!-- ============================================================
-             PANEL DERECHO: FICHA O FORMULARIO
-             ============================================================ -->
         <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -198,7 +188,6 @@
 
                 <Grid Grid.Row="1">
 
-                    <!-- ======== CARA 1: FICHA ======== -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0" VerticalAlignment="Top">
                         <ScrollViewer.Style>
                             <Style TargetType="ScrollViewer">
@@ -253,8 +242,6 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Datos personales de solo lectura: acá se consultan, se
-                                 corrigen en Personas. -->
                             <TextBlock Text="DATOS PERSONALES" Style="{DynamicResource TituloBloque}" Margin="0,18,0,10" />
                             <Border Style="{DynamicResource SubPanel}">
                                 <StackPanel>
@@ -282,7 +269,6 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <!-- Sin nada elegido y sin formulario abierto -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20">
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
@@ -304,21 +290,13 @@
                                    Text="Elegí una cuenta de la lista para ver su ficha, editarla o eliminarla." />
                     </StackPanel>
 
-                    <!-- ======== CARA 2: FORMULARIO ======== -->
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0"
                                   Visibility="{Binding EnEdicion, Converter={StaticResource BoolAVisibilidad}}">
                         <StackPanel>
 
-                            <!-- ==== TITULAR ====
-                                 Primero quién, después la credencial: sin persona no hay
-                                 cuenta que crear. El DNI la trae del padrón. -->
                             <TextBlock Text="TITULAR DE LA CUENTA" Style="{DynamicResource TituloBloque}" />
 
                             <TextBlock Text="DNI" Style="{DynamicResource EtiquetaAdmin}" />
-                            <!-- Se teclea sin puntos, igual que en Personas: el behavior no
-                                 los deja escribir y al pegar los saca solo. El contador de
-                                 Material queda apagado: el campo ya no admite más que los
-                                 8 números, así que "8 / 8" no informa nada. -->
                             <TextBox Style="{DynamicResource CampoAdmin}" MaxLength="{x:Static modelos:Documento.Digitos}"
                                      IsEnabled="{Binding EsAlta}"
                                      b:CampoNumerico.SoloDigitos="True"
@@ -326,17 +304,12 @@
                                      materialDesign:HintAssist.Hint="Ej: 40123456"
                                      Text="{Binding Dni, UpdateSourceTrigger=PropertyChanged, Delay=350}" />
 
-                            <!-- Editando no se cambia de titular: eso sería dar de baja una
-                                 cuenta y de alta otra, y las ventas ya apuntan a esta.
-                                 El margen deja lugar al mensaje de error, que Material
-                                 dibuja encima sin ocupar espacio propio. -->
                             <TextBlock Style="{DynamicResource TextoAyuda}" Margin="0,7,0,0"
                                        Visibility="{Binding EsAlta, Converter={StaticResource BoolAVisibilidad}}">
                                 <materialDesign:PackIcon Kind="MagnifyScan" Width="12" Height="12" VerticalAlignment="Center" />
                                 <Run Text="8 números, sin puntos. La persona tiene que estar cargada en el padrón." />
                             </TextBlock>
 
-                            <!-- Persona encontrada: se muestra, no se edita. -->
                             <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0"
                                     Visibility="{Binding HayPersona, Converter={StaticResource BoolAVisibilidad}}">
                                 <StackPanel Orientation="Horizontal">
@@ -354,8 +327,6 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- DNI completo que el padrón no tiene: no se inventa la
-                                 persona acá, se ofrece el salto a Personas. -->
                             <Border Style="{DynamicResource SubPanel}" Margin="0,10,0,0"
                                     Background="{DynamicResource AvisoSuave}"
                                     Visibility="{Binding DniSinResultado, Converter={StaticResource BoolAVisibilidad}}">
@@ -378,7 +349,6 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- ==== CREDENCIALES ==== -->
                             <TextBlock Text="ACCESO AL SISTEMA" Style="{DynamicResource TituloBloque}" Margin="0,18,0,0" />
 
                             <TextBlock Text="CORREO DE TRABAJO" Style="{DynamicResource EtiquetaAdmin}" />
@@ -407,7 +377,6 @@
                     </ScrollViewer>
                 </Grid>
 
-                <!-- ==== PIE DE ACCIONES ==== -->
                 <Grid Grid.Row="2">
 
                     <Grid Margin="0,16,0,0">
@@ -450,7 +419,7 @@
                         <Border Style="{DynamicResource PanelValidacion}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="AlertCircleOutline" Width="16" Height="16"
-                                                         Foreground="#A93226" VerticalAlignment="Top" Margin="0,1,9,0" />
+                                                         Foreground="#D70015" VerticalAlignment="Top" Margin="0,1,9,0" />
                                 <TextBlock Style="{DynamicResource AvisoValidacion}" Width="288"
                                            Text="{Binding ResumenDeErrores}" />
                             </StackPanel>

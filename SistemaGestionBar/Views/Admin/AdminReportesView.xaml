@@ -9,13 +9,11 @@
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminReportesViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1180">
+             d:DesignHeight="700" d:DesignWidth="1180"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <UserControl.Resources>
 
-        <!-- Tarjeta de la lista de reportes. Es propia de esta pantalla, asi que vive aca
-             y no en EstilosAdmin: alli van los estilos que comparten varias secciones.
-             Sigue la misma regla que las grillas: seleccionado = contorno, no relleno. -->
         <Style x:Key="TarjetaReporte" TargetType="ListBoxItem">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="Margin" Value="0,0,0,10" />
@@ -23,7 +21,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ListBoxItem">
                         <Border x:Name="tarjeta"
-                                Background="#FBFCFE"
+                                Background="#FAFAFC"
                                 BorderBrush="{DynamicResource Linea}"
                                 BorderThickness="1.5"
                                 CornerRadius="12"
@@ -54,10 +52,6 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- ==== PERIODO Y DESCARGA ====
-             El periodo se apaga (no se esconde) para el catalogo y el inventario: esos dos
-             son una foto de como esta el bar hoy, no de un rango de fechas. Apagarlo explica
-             por que no aplica; esconderlo dejaria al usuario buscando el selector. -->
         <Border Grid.Row="0" Style="{DynamicResource PanelAdmin}" Padding="14">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -69,13 +63,18 @@
                     <TextBlock Text="PERÍODO" Style="{DynamicResource EtiquetaAdmin}" Margin="2,0,0,7" />
 
                     <ListBox Style="{DynamicResource GrupoChips}"
-                             DisplayMemberPath="Texto"
-                             ItemsSource="{Binding OpcionesPeriodo}"
+                             ItemsSource="{Binding OpcionesPeriodo}" ItemTemplate="{StaticResource ChipPeriodo}"
                              SelectedItem="{Binding Periodo}"
                              IsEnabled="{Binding PeriodoEsAplicable}" />
+                    <Button HorizontalAlignment="Left" Style="{DynamicResource BotonRangoFechas}" Margin="0,8,0,0"
+                            Command="{Binding CambiarFechasCommand}" ToolTip="Cambiar las fechas"
+                            Visibility="{Binding EsPersonalizado, Converter={StaticResource BoolAVisibilidad}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="CalendarRange" Width="16" Height="16" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding RangoTexto}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
 
-                    <!-- BooleanToVisibilityConverter no acepta parametro, asi que la version
-                         invertida se hace con un DataTrigger sobre el contenedor. -->
                     <StackPanel>
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
@@ -118,7 +117,6 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- ==== QUE REPORTE ==== -->
             <Border Grid.Column="0" Style="{DynamicResource PanelAdmin}" Margin="0,0,18,0">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -175,16 +173,12 @@
                 </Grid>
             </Border>
 
-            <!-- ==== VISTA PREVIA ====
-                 Es el mismo ContenidoDeReporte que se imprime en el PDF, dibujado con los
-                 estilos del tablero: lo que se ve aca es exactamente lo que sale exportado. -->
             <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
                 <Grid>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                                   Visibility="{Binding HayVistaPrevia, Converter={StaticResource BoolAVisibilidad}}">
                         <StackPanel Margin="0,0,10,0">
 
-                            <!-- Encabezado del documento -->
                             <Grid Margin="0,0,0,6">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -210,8 +204,6 @@
 
                             <Border Height="2" Background="{DynamicResource Acento}" Margin="0,0,0,18" />
 
-                            <!-- Los bloques. Cada tipo trae su plantilla: WPF elige por DataType,
-                                 igual que el router elige la vista de cada ViewModel. -->
                             <ItemsControl ItemsSource="{Binding Contenido.Bloques}">
                                 <ItemsControl.Resources>
 
@@ -260,6 +252,14 @@
                                             <TextBlock Text="{Binding Titulo}" Style="{DynamicResource TituloBloque}" />
                                             <TextBlock Text="{Binding Texto}" Style="{DynamicResource TextoAyuda}"
                                                        Margin="0,6,0,0" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </DataTemplate>
+
+                                    <DataTemplate DataType="{x:Type rep:BloqueGrafico}">
+                                        <StackPanel Margin="0,0,0,22">
+                                            <TextBlock Text="{Binding Titulo}" Style="{DynamicResource TituloBloque}" />
+                                            <ContentControl b:GraficoDeReporteAssist.Bloque="{Binding}"
+                                                            Margin="0,10,0,0" />
                                         </StackPanel>
                                     </DataTemplate>
 

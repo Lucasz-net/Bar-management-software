@@ -2,10 +2,6 @@ using SistemaGestionBar.Models;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// Tarjeta de categoría del catálogo. La cantidad de productos se calcula
-    /// de los datos reales, ya no es un número escrito a mano en el XAML.
-    /// </summary>
     public class CategoriaFiltroViewModel : ViewModelBase
     {
         public CategoriaFiltroViewModel(Categoria? categoria, string nombre, int cantidadProductos)
@@ -15,7 +11,6 @@ namespace SistemaGestionBar.ViewModels
             CantidadProductos = cantidadProductos;
         }
 
-        /// <summary>null representa la pseudo-categoría "Todos".</summary>
         public Categoria? Categoria { get; }
 
         public int? IdCategoria => Categoria?.IdCategoria;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,21 +9,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Qué vendió cada uno. Es el "control de empleados" del gerente.
-    ///
-    /// <b>Solo lectura, y a propósito.</b> Acá no se crea, no se edita y no se borra
-    /// nada: esta pantalla contesta "cómo viene trabajando el equipo", no "quién entra al
-    /// sistema". Esa segunda pregunta es de <see cref="AdminUsuariosViewModel">Usuarios</see>,
-    /// que solo tiene el administrador, y ese es el límite que sostiene todo el esquema de
-    /// permisos: si el gerente pudiera asignar roles, se daría uno de administrador.
-    ///
-    /// Los datos personales se corrigen en Personas y la cuenta en Usuarios; desde la
-    /// ficha de la derecha se salta a las dos.
-    ///
-    /// <b>La cuenta es la misma que la del reporte "Ventas por empleado"</b>, con la misma
-    /// regla: solo ventas confirmadas, porque una anulada no factura.
-    /// </summary>
     public class EquipoViewModel : SeccionAdminViewModel
     {
         public EquipoViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -48,19 +33,13 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public ObservableCollection<DesempenoDeEmpleado> Filas { get; }
 
-        // ---------------------------------------------------------------
-        // Filtros
-        // ---------------------------------------------------------------
-        /// <summary>
-        /// Las mismas ventanas que los reportes y que el historial de ventas: si el gerente
-        /// mira "la última semana" en tres pantallas, tiene que significar lo mismo en las tres.
-        /// </summary>
         public IReadOnlyList<OpcionFiltro<PeriodoDeReporte>> OpcionesPeriodo { get; } = new[]
         {
             new OpcionFiltro<PeriodoDeReporte>("Hoy", PeriodoDeReporte.Hoy),
             new OpcionFiltro<PeriodoDeReporte>("Última semana", PeriodoDeReporte.UltimaSemana),
             new OpcionFiltro<PeriodoDeReporte>("Último mes", PeriodoDeReporte.UltimoMes),
-            new OpcionFiltro<PeriodoDeReporte>("Todo", PeriodoDeReporte.Todo)
+            new OpcionFiltro<PeriodoDeReporte>("Todo", PeriodoDeReporte.Todo),
+            new OpcionFiltro<PeriodoDeReporte>("Elegir fecha", PeriodoDeReporte.Personalizado)
         };
 
         private OpcionFiltro<PeriodoDeReporte>? _periodo;
@@ -69,19 +48,48 @@ namespace SistemaGestionBar.ViewModels.Admin
             get => _periodo;
             set
             {
-                // El período no filtra filas: cambia el número de cada fila, así que hay
-                // que rehacer la cuenta y no solo refrescar la vista.
+                if (value?.Valor == PeriodoDeReporte.Personalizado && !ElegirFechas())
+                {
+                    // Se canceló el calendario: la lista vuelve a mostrar la opción anterior.
+                    System.Windows.Application.Current.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(Periodo)));
+                    return;
+                }
+
                 if (SetProperty(ref _periodo, value))
+                {
+                    OnPropertyChanged(nameof(EsPersonalizado));
                     Recargar();
+                }
             }
+        }
+        private DateTime? _desde;
+        private DateTime? _hasta;
+
+        public bool EsPersonalizado => Periodo?.Valor == PeriodoDeReporte.Personalizado;
+
+        public string RangoTexto => _desde is DateTime d && _hasta is DateTime h
+            ? (d == h ? $"{d:dd/MM/yyyy}" : $"{d:dd/MM/yyyy} - {h:dd/MM/yyyy}")
+            : string.Empty;
+
+        public ICommand CambiarFechasCommand => new RelayCommand(() =>
+        {
+            if (ElegirFechas())
+                Recargar();
+        });
+
+        private bool ElegirFechas()
+        {
+            var rango = Dialogo.ElegirRangoDeFechas(_desde, _hasta);
+            if (rango is null)
+                return false;
+
+            (_desde, _hasta) = rango.Value;
+            OnPropertyChanged(nameof(RangoTexto));
+            return true;
         }
 
         private bool _soloConVentas;
 
-        /// <summary>
-        /// Esconde a quien no vendió nada en el período. Sirve para leer el ranking; por
-        /// defecto está apagado, porque "no vendió nada" también es información.
-        /// </summary>
         public bool SoloConVentas
         {
             get => _soloConVentas;
@@ -117,12 +125,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             SoloConVentas = false;
         }
 
-        // ---------------------------------------------------------------
-        // Indicadores del encabezado
-        // ---------------------------------------------------------------
         private decimal _totalDelPeriodo;
 
-        /// <summary>Lo facturado en el período, que es el 100% contra el que se reparte todo.</summary>
         public decimal TotalDelPeriodo
         {
             get => _totalDelPeriodo;
@@ -134,9 +138,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         protected override void RefrescarIndicadores() =>
             OnPropertyChanged(nameof(CantidadQueVendio));
 
-        // ---------------------------------------------------------------
-        // Selección
-        // ---------------------------------------------------------------
         private DesempenoDeEmpleado? _seleccionado;
         public DesempenoDeEmpleado? Seleccionado
         {
@@ -154,31 +155,21 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand IrAUsuariosCommand { get; }
         public ICommand IrAReportesCommand { get; }
 
-        /// <summary>El gerente no tiene Usuarios: el atajo a la cuenta no se le ofrece.</summary>
         public bool PuedeVerCuentas => PuedeIrA(DestinoAdmin.Usuarios);
 
         protected override void AlCambiarLosDestinos() =>
             OnPropertyChanged(nameof(PuedeVerCuentas));
 
-        // ---------------------------------------------------------------
-        // Cálculo
-        // ---------------------------------------------------------------
         public sealed override void Recargar()
         {
             int? idPrevio = Seleccionado?.IdUsuario;
 
             _periodo ??= OpcionesPeriodo[1];
-            var desde = ArmadorDeReportes.FechaDesde(_periodo.Valor);
-
-            var ventas = Repositorio.ObtenerVentas()
-                                    .Where(v => v.EstadoVenta == EstadoVenta.Confirmada)
-                                    .Where(v => desde is null || v.FechaHora >= desde)
-                                    .ToList();
+            var ventas = ArmadorDeReportes.VentasConfirmadas(
+                Repositorio, new PeriodoElegido(_periodo.Valor, _desde, _hasta));
 
             TotalDelPeriodo = ventas.Sum(v => v.Total);
 
-            // Agrupado por id y no por la navegación de cada venta: con AsNoTracking cada
-            // venta trae su propia copia del usuario, y el rol no viene incluido.
             var cobros = ventas.GroupBy(v => v.IdCajero)
                                .ToDictionary(g => g.Key,
                                              g => (Cantidad: g.Count(), Importe: g.Sum(v => v.Total)));
@@ -204,7 +195,6 @@ namespace SistemaGestionBar.ViewModels.Admin
                     TotalDelPeriodo));
             }
 
-            // Ordenado por lo cobrado: la pantalla se lee como un ranking.
             var ordenadas = Filas.OrderByDescending(f => f.TotalCobrado)
                                  .ThenBy(f => f.Nombre)
                                  .ToList();
@@ -219,7 +209,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             Seleccionado = Filas.FirstOrDefault(f => f.IdUsuario == idPrevio) ?? Filas.FirstOrDefault();
         }
 
-        /// <summary>Llega acá el salto desde otra sección señalando a una persona.</summary>
         public override void Enfocar(object? foco)
         {
             int? idPersona = foco switch
@@ -238,14 +227,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         }
     }
 
-    /// <summary>
-    /// Una fila de la pantalla: lo que hizo una cuenta en el período elegido.
-    ///
-    /// Separa las dos formas de participar en una venta, porque son dos trabajos
-    /// distintos: el <b>cajero</b> es quien cobró y el <b>mesero</b> quien tomó el pedido.
-    /// En la barra y en las ventas para llevar no hay mesero (RF-02), así que un barman
-    /// puede tener mucho cobrado y ninguna mesa.
-    /// </summary>
     public class DesempenoDeEmpleado
     {
         public DesempenoDeEmpleado(
@@ -273,12 +254,10 @@ namespace SistemaGestionBar.ViewModels.Admin
         public string Rol => Usuario.NombreRol;
         public string Correo => Usuario.Email;
 
-        /// <summary>Ventas que esta cuenta cobró.</summary>
         public int VentasCobradas { get; }
 
         public decimal TotalCobrado { get; }
 
-        /// <summary>Ventas en las que figura como quien tomó el pedido.</summary>
         public int MesasAtendidas { get; }
 
         public decimal ImporteAtendido { get; }
@@ -287,7 +266,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public decimal TicketPromedio => VentasCobradas == 0 ? 0 : TotalCobrado / VentasCobradas;
 
-        /// <summary>Qué porción de lo facturado pasó por esta cuenta. Alimenta la barra.</summary>
         public double Participacion =>
             TotalDelPeriodo <= 0 ? 0 : (double)(TotalCobrado / TotalDelPeriodo);
 
@@ -295,10 +273,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public bool Vendio => VentasCobradas > 0;
 
-        /// <summary>
-        /// Las iniciales del avatar. Se arman acá y no en la vista para que la grilla no
-        /// tenga que partir un nombre con un converter.
-        /// </summary>
         public string Iniciales =>
             string.Concat(Nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                                 .Take(2)

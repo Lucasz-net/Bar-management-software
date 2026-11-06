@@ -8,11 +8,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// ABM de las tablas paramétricas que pide RF-12: categorías, métodos de pago
-    /// y ubicaciones. Son listas cortas y de estructura simple, así que van juntas
-    /// en una sola pantalla en vez de tres secciones casi vacías.
-    /// </summary>
     public class AdminParametrosViewModel : SeccionAdminViewModel
     {
         public AdminParametrosViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -41,11 +36,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ObservableCollection<Categoria> Categorias { get; }
         public ObservableCollection<MetodoPago> MetodosPago { get; }
         public ObservableCollection<Ubicacion> Ubicaciones { get; }
-        /// <summary>
-        /// Estáticas a propósito: un DataGridComboBoxColumn no forma parte del árbol
-        /// visual, así que no hereda el DataContext y no puede bindear a una propiedad
-        /// de instancia. La fuente estática es la forma estándar de alimentarlo.
-        /// </summary>
         public static IReadOnlyList<TipoUbicacion> TodosLosTipos { get; } = Enum.GetValues<TipoUbicacion>();
 
         public ICommand AgregarCategoriaCommand { get; }
@@ -71,12 +61,10 @@ namespace SistemaGestionBar.ViewModels.Admin
                 MetodosPago.Add(m);
 
             Ubicaciones.Clear();
-            foreach (var u in Repositorio.ObtenerTodasLasUbicaciones())
+            foreach (var u in Repositorio.ObtenerUbicaciones())
                 Ubicaciones.Add(u);
         }
 
-        // Las altas se agregan a la lista en memoria con Id 0; el repositorio
-        // les asigna número recién cuando se guardan.
         private void AgregarCategoria()
         {
             LimpiarMensaje();

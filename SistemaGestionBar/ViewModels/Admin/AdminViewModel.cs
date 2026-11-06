@@ -8,13 +8,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Tablero del administrador. Es un segundo Shell, con la misma idea que MainWindow:
-    /// un menú lateral elige la sección y un ContentControl la dibuja.
-    ///
-    /// Analogía web: MainViewModel es el router raíz (login / POS / admin) y este es un
-    /// router anidado con sus propias rutas hijas.
-    /// </summary>
     public class AdminViewModel : ViewModelBase
     {
         public AdminViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo, SesionActual sesion)
@@ -46,7 +39,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             Secciones.Add(new AdminReportesViewModel(repositorio, dialogo, UsuarioActual));
             Secciones.Add(new AdminParametrosViewModel(repositorio, dialogo));
 
-            // Nueva sección de copias de seguridad. Accesible para los dos roles supervisores.
             if (esAdministrador || esGerente)
                 Secciones.Add(new AdminBackupsViewModel(repositorio, dialogo, UsuarioActual));
 
@@ -60,6 +52,7 @@ namespace SistemaGestionBar.ViewModels.Admin
             SeleccionarSeccionCommand = new RelayCommand<SeccionAdminViewModel>(SeleccionarSeccion);
             CerrarSesionCommand = new RelayCommand(() => CierreSesionSolicitado?.Invoke(this, EventArgs.Empty));
             IrAlPuntoDeVentaCommand = new RelayCommand(() => PuntoDeVentaSolicitado?.Invoke(this, EventArgs.Empty));
+            AlternarMenuCommand = new RelayCommand(() => MenuExpandido = !MenuExpandido);
 
             SeleccionarSeccion(Secciones[0]);
         }
@@ -100,6 +93,15 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand SeleccionarSeccionCommand { get; }
         public ICommand CerrarSesionCommand { get; }
         public ICommand IrAlPuntoDeVentaCommand { get; }
+        public ICommand AlternarMenuCommand { get; }
+
+        private bool _menuExpandido = true;
+
+        public bool MenuExpandido
+        {
+            get => _menuExpandido;
+            set => SetProperty(ref _menuExpandido, value);
+        }
 
         private void SeleccionarSeccion(SeccionAdminViewModel seccion)
         {
@@ -120,4 +122,4 @@ namespace SistemaGestionBar.ViewModels.Admin
             destino.Enfocar(pedido.Foco);
         }
     }
-}
+}

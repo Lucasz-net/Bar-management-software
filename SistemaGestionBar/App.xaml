@@ -13,26 +13,28 @@
                 <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="Cyan" SecondaryColor="Blue" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/Generic.xaml" />
 
-                <!-- Generic.xaml NO incluye los estilos de ComboBox, PasswordBox ni RadioButton.
-                     Sin estos diccionarios, claves como MaterialDesignOutlinedComboBox no existen
-                     y DynamicResource las ignora en silencio: el control se dibuja con el look
-                     por defecto de WPF y uno no se entera. Por eso se agregan explicitamente. -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ComboBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.PasswordBox.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.RadioButton.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DataGrid.xaml" />
 
-                <!-- Estilos compartidos por las pantallas del tablero de administracion -->
                 <ResourceDictionary Source="Views/Admin/EstilosAdmin.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- ============================================================
-                 ROUTER DE LA APLICACION
-                 Estos DataTemplates son el mapa "ruta -> componente": cuando
-                 MainViewModel.VistaActual apunta a un ViewModel, WPF busca aca
-                 que UserControl lo dibuja. Por eso navegamos entre ViewModels
-                 y nunca instanciamos Views a mano.
-                 ============================================================ -->
+            <!-- Azul del sistema (estilo Apple) en lugar del cian de Material. -->
+            <Color x:Key="MaterialDesign.Color.Primary">#0071E3</Color>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Primary" Color="#0071E3" />
+            <SolidColorBrush x:Key="PrimaryHueMidBrush" Color="#0071E3" />
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Secondary" Color="#0071E3" />
+            <SolidColorBrush x:Key="SecondaryHueMidBrush" Color="#0071E3" />
+
+            <FontFamily x:Key="MaterialDesignFont">/SistemaGestionBar;component/Assets/Fonts/#Inter</FontFamily>
+
+            <Style TargetType="Window">
+                <Setter Property="FontFamily" Value="/SistemaGestionBar;component/Assets/Fonts/#Inter" />
+                <Setter Property="UseLayoutRounding" Value="True" />
+            </Style>
+
             <DataTemplate DataType="{x:Type vm:LoginViewModel}">
                 <views:LoginView />
             </DataTemplate>
@@ -45,7 +47,6 @@
                 <viewsAdmin:AdminView />
             </DataTemplate>
 
-            <!-- Rutas hijas del tablero de administracion -->
             <DataTemplate DataType="{x:Type vmAdmin:AdminResumenViewModel}">
                 <viewsAdmin:AdminResumenView />
             </DataTemplate>
@@ -76,10 +77,9 @@
             <DataTemplate DataType="{x:Type vmAdmin:AdminParametrosViewModel}">
                 <viewsAdmin:AdminParametrosView />
             </DataTemplate>
-            <!-- NAVEGACIÓN AL TABLERO DE BACKUPS -->
             <DataTemplate DataType="{x:Type vmAdmin:AdminBackupsViewModel}">
                 <viewsAdmin:AdminBackupsView />
             </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
-</Application>
+</Application>

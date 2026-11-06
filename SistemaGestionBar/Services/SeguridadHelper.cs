@@ -3,10 +3,6 @@ using System.Security.Cryptography;
 
 namespace SistemaGestionBar.Services
 {
-    /// <summary>
-    /// Hasheo de contraseñas con PBKDF2 (RF-09). Nunca se guarda la clave en texto plano.
-    /// Formato almacenado: {saltBase64}.{hashBase64}
-    /// </summary>
     public static class SeguridadHelper
     {
         private const int Iteraciones = 100_000;
@@ -36,7 +32,6 @@ namespace SistemaGestionBar.Services
                 byte[] calculado = Rfc2898DeriveBytes.Pbkdf2(
                     claveIngresada, salt, Iteraciones, HashAlgorithmName.SHA256, esperado.Length);
 
-                // Comparación en tiempo fijo: evita filtrar información por el tiempo de respuesta.
                 return CryptographicOperations.FixedTimeEquals(calculado, esperado);
             }
             catch (FormatException)

@@ -7,15 +7,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Pantalla de entrada del administrador: el estado del negocio de un vistazo,
-    /// más el detalle de las alertas de inventario que exige RF-08.
-    ///
-    /// Todo lo que se muestra acá es un resumen de otra pantalla, así que todo lleva a
-    /// esa pantalla: las tarjetas de arriba entran a la sección que resumen y cada alerta
-    /// abre directamente el editor del insumo que hay que reponer. Un número que no se
-    /// puede seguir obliga a buscar a mano en el menú lo que uno ya tenía delante.
-    /// </summary>
     public class AdminResumenViewModel : SeccionAdminViewModel
     {
         public AdminResumenViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -27,9 +18,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             IrAVentasCommand = new RelayCommand(() => IrA(DestinoAdmin.Ventas));
             IrAProductosCommand = new RelayCommand(() => IrA(DestinoAdmin.Productos));
             IrAInventarioCommand = new RelayCommand(() => IrA(DestinoAdmin.Inventario));
-            // Empleado = persona con cuenta, así que la tarjeta lleva a Usuarios, que es
-            // donde ahora viven las cuentas. Personas es el padrón completo, y ahí los
-            // empleados son apenas una parte.
             IrAEmpleadosCommand = new RelayCommand(() => IrA(DestinoAdmin.Usuarios),
                                                    () => PuedeIrA(DestinoAdmin.Usuarios));
             ReponerCommand = new RelayCommand<AlertaStock>(Reponer);
@@ -39,9 +27,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public ObservableCollection<AlertaStock> Alertas { get; }
 
-        // ---------------------------------------------------------------
-        // Indicadores
-        // ---------------------------------------------------------------
         private int _ventasDelDia;
         public int VentasDelDia
         {
@@ -70,11 +55,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             private set => SetProperty(ref _cantidadInsumos, value);
         }
 
-        /// <summary>
-        /// Empleados = personas con cuenta de acceso. Es el mismo número que antes se
-        /// rotulaba "cuentas de acceso", pero el rótulo nombraba el mecanismo en vez de
-        /// la gente: en la sección Personas ese mismo grupo ya se llama "empleados".
-        /// </summary>
         private int _cantidadEmpleados;
         public int CantidadEmpleados
         {
@@ -82,9 +62,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             private set => SetProperty(ref _cantidadEmpleados, value);
         }
 
-        // ---------------------------------------------------------------
-        // Composición del catálogo
-        // ---------------------------------------------------------------
         private int _productosConReceta;
         public int ProductosConReceta
         {
@@ -96,10 +73,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
         }
 
-        /// <summary>Los que no llevan receta: botellas y latas, que descuentan su propio stock.</summary>
         public int ProductosDeVentaDirecta => Math.Max(0, CantidadProductos - ProductosConReceta);
 
-        /// <summary>Qué porción del catálogo se prepara. Alimenta la barra de proporción.</summary>
         public double ProporcionConReceta =>
             CantidadProductos == 0 ? 0 : (double)ProductosConReceta / CantidadProductos;
 
@@ -114,9 +89,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(PorcentajeVentaDirecta));
         }
 
-        // ---------------------------------------------------------------
-        // Alertas
-        // ---------------------------------------------------------------
         public bool HayAlertas => Alertas.Count > 0;
 
         public string TextoAlertas => Alertas.Count == 0
@@ -125,26 +97,17 @@ namespace SistemaGestionBar.ViewModels.Admin
                 ? "1 ítem llegó al stock mínimo"
                 : $"{Alertas.Count} ítems llegaron al stock mínimo";
 
-        // ---------------------------------------------------------------
-        // Atajos
-        // ---------------------------------------------------------------
         public ICommand IrAVentasCommand { get; }
         public ICommand IrAProductosCommand { get; }
         public ICommand IrAInventarioCommand { get; }
         public ICommand IrAEmpleadosCommand { get; }
         public ICommand ReponerCommand { get; }
 
-        /// <summary>Un gerente no tiene la sección Usuarios: la tarjeta no se muestra (RF-09).</summary>
         public bool PuedeVerEmpleados => PuedeIrA(DestinoAdmin.Usuarios);
 
         protected override void AlCambiarLosDestinos() =>
             OnPropertyChanged(nameof(PuedeVerEmpleados));
 
-        /// <summary>
-        /// Reponer no cambia el stock acá: lleva a la sección donde vive el ítem, que al
-        /// recibirlo le abre la ventanita de ajuste de stock. El destino lo resuelve la clase
-        /// base, que es la misma para Gestión.
-        /// </summary>
         private void Reponer(AlertaStock alerta) => IrAReponer(alerta);
 
         public sealed override void Recargar()

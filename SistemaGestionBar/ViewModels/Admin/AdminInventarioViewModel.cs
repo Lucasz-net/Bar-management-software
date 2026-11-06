@@ -8,10 +8,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// ABM de insumos y control de stock (RF-12 y RF-08).
-    /// Es la contracara del descuento automático del punto de venta: acá se repone.
-    /// </summary>
     public class AdminInventarioViewModel : SeccionAdminViewModel
     {
         public AdminInventarioViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -32,9 +28,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public ObservableCollection<Ingrediente> Ingredientes { get; }
 
-        // ---------------------------------------------------------------
-        // Filtros
-        // ---------------------------------------------------------------
         public IReadOnlyList<OpcionFiltro<EstadoStock>> OpcionesStock { get; } = new[]
         {
             new OpcionFiltro<EstadoStock>("Todo el inventario", EstadoStock.Todos),
@@ -85,15 +78,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             EstadoStockFiltro = OpcionesStock[0];
         }
 
-        // ---------------------------------------------------------------
-        // Selección y editor
-        // ---------------------------------------------------------------
         private Ingrediente? _seleccionado;
 
-        /// <summary>
-        /// Con el formulario abierto la selección queda congelada: si se pudiera mover,
-        /// quedaría remarcada una fila que no es la que está mostrando el editor.
-        /// </summary>
         public Ingrediente? Seleccionado
         {
             get => _seleccionado;
@@ -107,8 +93,6 @@ namespace SistemaGestionBar.ViewModels.Admin
                     if (value is not null)
                         Fallar("Terminá la edición —guardá o cancelá— antes de elegir otro insumo.");
 
-                    // Vuelve a avisar la propiedad para que la grilla devuelva la
-                    // selección a donde estaba.
                     OnPropertyChanged(nameof(Seleccionado));
                     return;
                 }
@@ -117,7 +101,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
         }
 
-        /// <summary>Cambia la selección sin pasar por el candado: lo usan Recargar y Enfocar.</summary>
         private void EstablecerSeleccion(Ingrediente? ingrediente)
         {
             if (!SetProperty(ref _seleccionado, ingrediente, nameof(Seleccionado)))
@@ -131,7 +114,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public bool HaySeleccion => Seleccionado is not null;
 
-        /// <summary>Cuánto le falta para llegar al mínimo, para la ficha de solo lectura.</summary>
         public decimal FaltanteParaElMinimo =>
             Seleccionado is null ? 0 : Math.Max(0, Seleccionado.StockMinimo - Seleccionado.Stock);
 
@@ -150,7 +132,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
         }
 
-        /// <summary>La ficha de solo lectura y el formulario son excluyentes.</summary>
         public bool NoEnEdicion => !EnEdicion;
 
         protected override bool ValidacionActiva => EnEdicion;
@@ -179,9 +160,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand EliminarCommand { get; }
         public ICommand AjustarStockCommand { get; }
 
-        // ---------------------------------------------------------------
-        // Validación
-        // ---------------------------------------------------------------
         protected override void DeclararReglas()
         {
             Requerido(Nombre, nameof(Nombre), "El nombre del insumo");
@@ -200,9 +178,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             NoSupera(StockMinimo, nameof(StockMinimo), "El stock mínimo", Limites.Cantidad, "N3");
         }
 
-        // ---------------------------------------------------------------
-        // Ciclo de vida
-        // ---------------------------------------------------------------
         public sealed override void Recargar()
         {
             int? idPrevio = Seleccionado?.IdIngrediente;
@@ -219,14 +194,6 @@ namespace SistemaGestionBar.ViewModels.Admin
                                 ?? Ingredientes.FirstOrDefault());
         }
 
-        /// <summary>
-        /// Llega acá cuando una alerta manda a reponer un insumo: se lo selecciona y se abre
-        /// la ventanita de ajuste de stock.
-        ///
-        /// Hasta el 2026-09-21 abría el formulario completo del ABM, con nombre y unidad de
-        /// medida al lado, y pedía el TOTAL nuevo: había que calcular de cabeza cuánto quedaba
-        /// después de la entrega. Ahora solo se carga lo que entró.
-        /// </summary>
         public override void Enfocar(object? foco)
         {
             if (foco is not AlertaStock alerta || !alerta.EsInsumo)
@@ -240,7 +207,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             AjustarStock();
         }
 
-        /// <summary>Abre la ventanita de ajuste de stock del insumo elegido (RF-08).</summary>
         private void AjustarStock()
         {
             if (Seleccionado is null)
@@ -253,8 +219,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (!Dialogo.AjustarStock(ajuste))
                 return;
 
-            // Recargar vuelve a leer de la base y conserva la selección por id: lo que queda
-            // en pantalla es lo que se guardó, no lo que calculó la ventana.
             Recargar();
             Informar(ajuste.MensajeDelGuardado);
         }
@@ -273,8 +237,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(TituloEditor));
             OnPropertyChanged(nameof(FaltanteParaElMinimo));
 
-            // Formulario recién cargado: las reglas se calculan, pero nada se pinta de
-            // rojo hasta que el usuario toque un campo o apriete Guardar.
             ReiniciarValidacion();
         }
 
@@ -310,8 +272,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void Guardar()
         {
-            // El botón está habilitado aunque falten datos: deshabilitado no explica QUÉ
-            // falta. Se aprieta, se marcan los campos y se dice cuántos hay que corregir.
             if (!IntentarConfirmar())
             {
                 Fallar(MensajeDeFormularioInvalido);

@@ -9,53 +9,29 @@ using System.Windows.Input;
 
 namespace SistemaGestionBar.ViewModels
 {
-    /// <summary>
-    /// Base de los ViewModels que tienen formulario. Implementa INotifyDataErrorInfo,
-    /// que es la forma en que WPF pregunta "¿este campo está mal?" sin que la vista
-    /// necesite una sola línea de code-behind: el binding lee los errores de acá y el
-    /// estilo de Material Design pinta el borde rojo y el texto debajo del campo.
-    ///
-    /// La regla de negocio sigue viviendo en el repositorio, que es quien la hace cumplir
-    /// venga de donde venga el dato. Esto es la otra mitad: avisar en pantalla, mientras
-    /// se escribe, antes de que el usuario apriete Guardar.
-    ///
-    /// <b>Errores calculados vs. errores mostrados.</b> Un formulario recién abierto está
-    /// vacío y por lo tanto es inválido, pero pintarlo entero de rojo antes de que el
-    /// usuario escriba una letra no ayuda: parece que hizo algo mal cuando todavía no
-    /// hizo nada. Por eso las reglas se calculan siempre —el botón Guardar necesita saber
-    /// si el formulario es válido— pero <see cref="GetErrors"/> solo devuelve el error de
-    /// un campo cuando ese campo ya fue tocado, o cuando el usuario apretó Guardar y hay
-    /// que mostrarle de una vez todo lo que falta.
-    /// </summary>
-    public abstract class ViewModelValidable : ViewModelBase, INotifyDataErrorInfo
+    /// <summary>Validación de formularios. Un error solo se muestra una vez que el campo fue tocado o se intentó confirmar, para no marcar en rojo un formulario recién abierto.</summary>
+    public abstract class ViewModelValidable : ViewModelConMensaje, INotifyDataErrorInfo
     {
         private static readonly Regex ExpresionCorreo =
             new(@"^[^@\s]+@[^@\s.]+(\.[^@\s.]+)+$", RegexOptions.Compiled);
 
         private readonly Dictionary<string, List<string>> _errores = new();
 
-        /// <summary>Campos que el usuario ya editó: los únicos que pueden pintarse de rojo.</summary>
         private readonly HashSet<string> _tocados = new();
 
-        /// <summary>Se enciende al apretar Guardar: de ahí en más se muestran todos los errores.</summary>
         private bool _mostrarTodos;
 
         public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
-        /// <summary>
-        /// Es true si hay CUALQUIER error, se esté mostrando o no. Lo mira el botón Guardar.
-        /// </summary>
         public bool HasErrors => _errores.Count > 0;
 
         public bool FormularioValido => !HasErrors;
 
-        /// <summary>Errores que en este momento se le están mostrando al usuario.</summary>
         private IEnumerable<string> ErroresVisibles =>
             _errores.Where(par => EsVisible(par.Key)).SelectMany(par => par.Value);
 
         public bool HayErroresVisibles => ErroresVisibles.Any();
 
-        /// <summary>Los errores a la vista, juntos, para el resumen arriba de los botones.</summary>
         public string ResumenDeErrores => string.Join("  ·  ", ErroresVisibles);
 
         public int CantidadErrores => _errores.Values.Sum(lista => lista.Count);
@@ -68,20 +44,12 @@ namespace SistemaGestionBar.ViewModels
                 ? lista
                 : Array.Empty<string>();
 
-        /// <summary>
-        /// Mientras esto sea false no se valida nada: un formulario cerrado no tiene
-        /// por qué mostrar los campos vacíos en rojo.
-        /// </summary>
+        // // Permite apagar la validación mientras el formulario está cerrado.
         protected virtual bool ValidacionActiva => true;
 
-        /// <summary>
-        /// Cada formulario declara acá sus reglas, llamando a los ayudantes de abajo.
-        /// Se ejecuta entera cada vez que cambia un campo: son cuatro o cinco
-        /// comparaciones, y así nunca queda un error viejo colgado.
-        /// </summary>
+        // // Las subclases declaran acá sus reglas llamando a Requerido, LargoMaximo, etc.
         protected virtual void DeclararReglas() { }
 
-        /// <summary>Vuelve a correr todas las reglas y avisa a la vista qué cambió.</summary>
         protected void Revalidar()
         {
             var propiedadesPrevias = _errores.Keys.ToList();
@@ -104,16 +72,9 @@ namespace SistemaGestionBar.ViewModels
             OnPropertyChanged(nameof(ResumenDeErrores));
             OnPropertyChanged(nameof(CantidadErrores));
 
-            // Sin esto el botón Guardar no se entera de que ya puede habilitarse:
-            // RelayCommand se apoya en CommandManager para reevaluar CanExecute.
             CommandManager.InvalidateRequerySuggested();
         }
 
-        /// <summary>
-        /// Deja el formulario "en limpio": las reglas se siguen calculando, pero ningún
-        /// campo se pinta de rojo hasta que el usuario lo toque. Se llama al abrir un alta,
-        /// al empezar a editar y al cancelar.
-        /// </summary>
         protected void ReiniciarValidacion()
         {
             _tocados.Clear();
@@ -121,30 +82,19 @@ namespace SistemaGestionBar.ViewModels
             Revalidar();
         }
 
-        /// <summary>
-        /// Lo llama Guardar antes de tocar el repositorio: muestra de una vez todo lo que
-        /// falta y devuelve si el formulario está en condiciones de confirmarse.
-        /// </summary>
+        // // Muestra todos los errores pendientes y dice si se puede guardar.
         protected bool IntentarConfirmar()
         {
-            // Se revalida, no se reusa el último cálculo: hay datos que cambian sin pasar
-            // por un SetCampo (las cantidades de la receta, por ejemplo) y el veredicto
-            // tiene que ser sobre lo que el formulario dice ahora.
             _mostrarTodos = true;
             Revalidar();
             return FormularioValido;
         }
 
-        /// <summary>Texto para la barra de mensajes cuando Guardar no puede seguir.</summary>
         protected string MensajeDeFormularioInvalido =>
             CantidadErrores == 1
                 ? "Falta corregir un dato: revisá el campo marcado en rojo."
                 : $"Faltan corregir {CantidadErrores} datos: revisá los campos marcados en rojo.";
 
-        /// <summary>
-        /// Setter de los campos del formulario: avisa el cambio, marca el campo como
-        /// tocado y revalida. Los campos que no son del formulario siguen usando SetProperty.
-        /// </summary>
         protected bool SetCampo<T>(ref T campo, T valor, [CallerMemberName] string? nombrePropiedad = null)
         {
             if (!SetProperty(ref campo, valor, nombrePropiedad))
@@ -157,10 +107,6 @@ namespace SistemaGestionBar.ViewModels
             return true;
         }
 
-        // ---------------------------------------------------------------
-        // Reglas reutilizables. Son las mismas que aplica el repositorio:
-        // acá se adelantan para que el usuario las vea mientras escribe.
-        // ---------------------------------------------------------------
         protected void Agregar(string propiedad, string mensaje)
         {
             if (!_errores.TryGetValue(propiedad, out var lista))
@@ -203,18 +149,8 @@ namespace SistemaGestionBar.ViewModels
                 Agregar(propiedad, "El correo no tiene un formato válido (nombre@dominio.com).");
         }
 
-        /// <summary>Largo del DNI. Lo usan la regla de abajo y el MaxLength de los campos.</summary>
         public const int DigitosDeDni = Models.Documento.Digitos;
 
-        /// <summary>
-        /// DNI argentino. El sistema identifica a las personas por DNI y nada más —no se
-        /// cargan CUIL ni CUIT—, así que el documento son siempre 8 números.
-        ///
-        /// <b>Se carga sin puntos.</b> Los puntos son cómo se lee un documento, no cómo se
-        /// guarda: si el campo los admitiera, la misma persona podría entrar dos veces
-        /// escrita de dos formas. Se muestran recién al mostrar el dato, y de eso se
-        /// encarga <see cref="Models.Documento.Formatear"/>.
-        /// </summary>
         protected void FormatoDni(string? valor, string propiedad)
         {
             if (string.IsNullOrWhiteSpace(valor))
@@ -253,23 +189,6 @@ namespace SistemaGestionBar.ViewModels
                 Agregar(propiedad, $"{etiqueta} no puede ser negativo.");
         }
 
-        /// <summary>
-        /// Techo de un número, que sale de lo que aguanta la columna
-        /// (ver <see cref="Models.Limites"/>).
-        ///
-        /// <b>No es una formalidad.</b> Un precio más grande que <c>decimal(12,2)</c> no se
-        /// guarda mal: MySQL lo rechaza con un "Out of range value for column 'precio'" que
-        /// nadie atrapa, y la aplicación se cierra. Avisarlo mientras se escribe es lo que
-        /// convierte ese cierre en un cartel rojo debajo del campo.
-        ///
-        /// <b>El mensaje es corto a propósito.</b> Estos techos se muestran en campos que van
-        /// en una fila de tres columnas (precio, stock, mínimo), donde el mensaje de error
-        /// tiene un tercio del ancho y el estilo <c>CampoAngosto</c> le reserva dos renglones.
-        /// "El precio no puede superar 9.999.999.999,99." se parte en tres y el tercero cae
-        /// encima de lo que sigue. "El precio: máximo 9.999.999.999,99." entra en dos.
-        /// </summary>
-        /// <param name="formato">"N2" para dinero, "N3" para cantidades: el máximo se
-        /// muestra con la misma cantidad de decimales que admite la columna.</param>
         protected void NoSupera(decimal valor, string propiedad, string etiqueta, decimal maximo,
                                 string formato = "N2")
         {
@@ -277,10 +196,6 @@ namespace SistemaGestionBar.ViewModels
                 Agregar(propiedad, $"{etiqueta}: máximo {maximo.ToString(formato)}.");
         }
 
-        /// <summary>
-        /// RF-13 adelantado a la pantalla: el duplicado lo rechaza igual el repositorio,
-        /// pero avisarlo mientras se escribe evita completar el formulario para nada.
-        /// </summary>
         protected void NoRepetido(string? valor, string propiedad, IEnumerable<string?> existentes, string mensaje)
         {
             if (string.IsNullOrWhiteSpace(valor))

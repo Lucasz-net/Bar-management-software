@@ -1,21 +1,14 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 
 namespace SistemaGestionBar.Reportes
 {
-    /// <summary>
-    /// Dibuja un <see cref="ContenidoDeReporte"/> como PDF.
-    ///
-    /// Esta clase no sabe nada del bar: no consulta la base ni decide qué mostrar, solo
-    /// pinta los bloques que le pasan. Por eso los cinco reportes comparten un mismo
-    /// encabezado, una misma tabla y un mismo pie sin repetir código, y agregar un sexto
-    /// reporte no toca este archivo.
-    ///
-    /// Se usa QuestPDF en su licencia Community (gratuita para este caso), que se declara
-    /// una sola vez al arrancar la app en App.xaml.cs.
-    /// </summary>
     public class DocumentoDeReporte : IDocument
     {
         private const string Acento = "#1565C0";
@@ -97,6 +90,10 @@ namespace SistemaGestionBar.Reportes
                             case BloqueTexto texto:
                                 caja.Item().Text(texto.Texto).FontSize(9).FontColor(Gris).Italic();
                                 break;
+
+                            case BloqueGrafico grafico:
+                                caja.Item().Element(c => Grafico(c, grafico));
+                                break;
                         }
                     });
                 }
@@ -152,8 +149,6 @@ namespace SistemaGestionBar.Reportes
 
                 foreach (var fila in bloque.Filas)
                 {
-                    // Rayado cebra: con tablas de treinta filas es lo que evita que el ojo
-                    // salte de renglón al leer un importe en la última columna.
                     string fondo = fila.EsTotal ? Fondo : numeroDeFila % 2 == 0 ? Colors.White : "#FAFAFA";
                     numeroDeFila++;
 
@@ -175,6 +170,124 @@ namespace SistemaGestionBar.Reportes
                     }
                 }
             });
+        }
+
+        private static void Grafico(IContainer contenedor, BloqueGrafico bloque)
+        {
+            if (bloque.Tipo == TipoDeGrafico.Circular)
+                Circular(contenedor, bloque);
+            else
+                Barras(contenedor, bloque);
+        }
+
+        private static void Barras(IContainer contenedor, BloqueGrafico bloque)
+        {
+            decimal maximo = bloque.Series.Count == 0 ? 0 : bloque.Series.Max(s => s.Valor);
+
+            contenedor.Column(columna =>
+            {
+                columna.Spacing(7);
+
+                for (int i = 0; i < bloque.Series.Count; i++)
+                {
+                    var serie = bloque.Series[i];
+                    float proporcion = maximo <= 0 ? 0f : (float)(serie.Valor / maximo);
+                    string color = PaletaDeGrafico.Color(i);
+
+                    columna.Item().Row(fila =>
+                    {
+                        fila.ConstantItem(120).AlignMiddle().Text(serie.Etiqueta).FontSize(8.5f).FontColor(Tinta);
+
+                        fila.RelativeItem().PaddingHorizontal(8).AlignMiddle().Row(pista =>
+                        {
+                            pista.RelativeItem(Math.Max(proporcion, 0.001f))
+                                 .Height(13).Background(color);
+
+                            pista.RelativeItem(Math.Max(1f - proporcion, 0.001f))
+                                 .Height(13).Background(Fondo);
+                        });
+
+                        fila.ConstantItem(75).AlignMiddle().AlignRight()
+                            .Text(serie.ValorTexto).FontSize(8.5f).Bold().FontColor(Acento);
+                    });
+                }
+            });
+        }
+
+        private static void Circular(IContainer contenedor, BloqueGrafico bloque)
+        {
+            decimal total = bloque.Series.Sum(s => s.Valor);
+
+            contenedor.Row(fila =>
+            {
+                fila.ConstantItem(110).Height(110).Svg(ArmarSvgDeTorta(bloque.Series, total));
+
+                fila.RelativeItem().PaddingLeft(16).Column(leyenda =>
+                {
+                    leyenda.Spacing(5);
+
+                    for (int i = 0; i < bloque.Series.Count; i++)
+                    {
+                        var serie = bloque.Series[i];
+                        string porcentaje = total <= 0 ? string.Empty : $" ({(double)(serie.Valor / total):P0})";
+
+                        leyenda.Item().Row(linea =>
+                        {
+                            linea.ConstantItem(9).Height(9).Background(PaletaDeGrafico.Color(i));
+                            linea.RelativeItem().PaddingLeft(6)
+                                 .Text($"{serie.Etiqueta}{porcentaje} · {serie.ValorTexto}").FontSize(8.5f).FontColor(Tinta);
+                        });
+                    }
+                });
+            });
+        }
+
+        private static string ArmarSvgDeTorta(IReadOnlyList<SerieDeGrafico> series, decimal total)
+        {
+            const double cx = 50, cy = 50, radio = 48;
+
+            var sb = new StringBuilder();
+            sb.Append("<svg viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\">");
+
+            if (total <= 0 || series.Count == 0)
+            {
+                sb.Append($"<circle cx=\"{cx}\" cy=\"{cy}\" r=\"{radio}\" fill=\"#E0E0E0\" />");
+            }
+            else
+            {
+                double angulo = -90;
+
+                for (int i = 0; i < series.Count; i++)
+                {
+                    double proporcion = (double)(series[i].Valor / total);
+
+                    if (series.Count == 1 || proporcion >= 0.9995)
+                    {
+                        sb.Append(CultureInfo.InvariantCulture,
+                            $"<circle cx=\"{cx}\" cy=\"{cy}\" r=\"{radio}\" fill=\"{PaletaDeGrafico.Color(i)}\" />");
+                        break;
+                    }
+
+                    double siguiente = angulo + proporcion * 360.0;
+                    var (x1, y1) = PuntoEnCirculo(cx, cy, radio, angulo);
+                    var (x2, y2) = PuntoEnCirculo(cx, cy, radio, siguiente);
+                    int arcoGrande = (siguiente - angulo) > 180 ? 1 : 0;
+
+                    sb.Append(CultureInfo.InvariantCulture,
+                        $"<path d=\"M{cx},{cy} L{x1:F2},{y1:F2} A{radio},{radio} 0 {arcoGrande} 1 {x2:F2},{y2:F2} Z\" fill=\"{PaletaDeGrafico.Color(i)}\" />");
+
+                    angulo = siguiente;
+                }
+            }
+
+            sb.Append("</svg>");
+            return sb.ToString();
+        }
+
+        private static (double X, double Y) PuntoEnCirculo(double cx, double cy, double radio, double grados)
+        {
+            double radianes = grados * Math.PI / 180.0;
+            return (cx + radio * Math.Cos(radianes), cy + radio * Math.Sin(radianes));
         }
 
         private void Pie(IContainer contenedor)

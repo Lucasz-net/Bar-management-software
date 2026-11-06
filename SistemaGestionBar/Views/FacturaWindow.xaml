@@ -10,7 +10,7 @@
         Title="{Binding Titulo}" Height="680" Width="830"
         MinHeight="560" MinWidth="700"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize"
-        Background="#EEF2F7">
+        Background="#EDEDF0">
 
     <Grid Margin="18">
         <Grid.RowDefinitions>
@@ -18,8 +18,6 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- x:Name porque es justo lo que se manda a la impresora: el comprobante,
-             sin los botones de la ventana. -->
         <Border x:Name="Comprobante" Grid.Row="0" Style="{DynamicResource PanelAdmin}">
             <Grid>
                 <Grid.RowDefinitions>
@@ -31,28 +29,26 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- Encabezado -->
                 <Grid Grid.Row="0">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="GlassCocktail" Width="26" Height="26"
-                                                 Foreground="#1565C0" VerticalAlignment="Center" />
+                                                 Foreground="#0071E3" VerticalAlignment="Center" />
                         <StackPanel Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="Sistema de Gestión de Bar" FontSize="16" FontWeight="Bold" Foreground="#2B3445" />
+                            <TextBlock Text="Sistema de Gestión de Bar" FontSize="16" FontWeight="Bold" Foreground="#1D1D1F" />
                             <TextBlock Text="Comprobante de venta" Style="{DynamicResource RotuloIndicador}" Margin="0" />
                         </StackPanel>
                     </StackPanel>
 
                     <StackPanel HorizontalAlignment="Right" VerticalAlignment="Center">
                         <TextBlock Text="{Binding Factura.Numero}" FontSize="22" FontWeight="Bold"
-                                   Foreground="#1565C0" HorizontalAlignment="Right" />
+                                   Foreground="#0071E3" HorizontalAlignment="Right" />
                         <TextBlock Style="{DynamicResource RotuloIndicador}" HorizontalAlignment="Right"
                                    Text="{Binding Factura.FechaEmision, StringFormat={}{0:dd/MM/yyyy HH:mm}}" />
                     </StackPanel>
                 </Grid>
 
-                <Border Grid.Row="1" Height="1" Background="#E4E8F0" Margin="0,16" />
+                <Border Grid.Row="1" Height="1" Background="#E5E5EA" Margin="0,16" />
 
-                <!-- Datos de la operación -->
                 <Grid Grid.Row="2" Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -63,28 +59,25 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="CLIENTE" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
                         <TextBlock Text="{Binding Factura.ClienteNombre, TargetNullValue='Consumidor Final'}"
-                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#1D1D1F" TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="ATENDIÓ" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
                         <TextBlock Text="{Binding Factura.CajeroNombre, TargetNullValue='—'}"
-                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#1D1D1F" TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="VENTA" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2"
                                    HorizontalAlignment="Right" />
-                        <TextBlock FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445"
+                        <TextBlock FontSize="14.5" FontWeight="SemiBold" Foreground="#1D1D1F"
                                    HorizontalAlignment="Right">
                             <Run Text="#" /><Run Text="{Binding Factura.IdVenta, Mode=OneWay}" />
                         </TextBlock>
                     </StackPanel>
                 </Grid>
 
-                <!-- Datos del pedido: cómo se pagó y a dónde fue. Van en su propia fila
-                     porque es lo que el vendedor mira al confirmar la venta, y en la fila
-                     de arriba (cliente / atendió / N°) no entraban sin apretujarse. -->
                 <Grid Grid.Row="3" Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -95,28 +88,25 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock Text="FORMA DE PAGO" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
                         <TextBlock Text="{Binding Factura.MetodoPagoNombre, TargetNullValue='—'}"
-                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#1D1D1F" TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
                         <TextBlock Text="CONSUMO" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2" />
                         <TextBlock Text="{Binding Factura.DestinoTexto}"
-                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445" TextWrapping="Wrap" />
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#1D1D1F" TextWrapping="Wrap" />
                     </StackPanel>
 
-                    <!-- La barra y el "para llevar" no llevan mesero: ahí el bloque no se
-                         muestra, en vez de mostrar un guión que no significa nada. -->
                     <StackPanel Grid.Column="2"
                                 Visibility="{Binding Factura.TieneMesero, Converter={StaticResource BoolAVisibilidad}}">
                         <TextBlock Text="MESERO" Style="{DynamicResource EtiquetaAdmin}" Margin="0,0,0,2"
                                    HorizontalAlignment="Right" />
                         <TextBlock Text="{Binding Factura.MeseroNombre}"
-                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#2B3445"
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#1D1D1F"
                                    HorizontalAlignment="Right" />
                     </StackPanel>
                 </Grid>
 
-                <!-- Renglones -->
                 <DataGrid Grid.Row="4" Style="{DynamicResource GrillaAdmin}"
                           ItemsSource="{Binding Factura.Lineas}" RowHeight="34">
                     <DataGrid.Columns>
@@ -127,18 +117,17 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <!-- Total -->
-                <Border Grid.Row="5" Background="#F7F9FC" CornerRadius="10" Padding="16,12" Margin="0,16,0,0">
+                <Border Grid.Row="5" Background="#F7F7F9" CornerRadius="10" Padding="16,12" Margin="0,16,0,0">
                     <Grid>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="14" Foreground="#2B3445" />
+                            <TextBlock Text="TOTAL" FontWeight="Bold" FontSize="14" Foreground="#1D1D1F" />
                             <TextBlock Style="{DynamicResource RotuloIndicador}" Margin="10,0,0,0">
                                 <Run Text="{Binding Factura.CantidadRenglones, Mode=OneWay}" />
                                 <Run Text="renglón(es)" />
                             </TextBlock>
                         </StackPanel>
                         <TextBlock Text="{Binding Factura.Importe, StringFormat={}{0:C0}}"
-                                   FontWeight="Bold" FontSize="24" Foreground="#1565C0"
+                                   FontWeight="Bold" FontSize="24" Foreground="#0071E3"
                                    HorizontalAlignment="Right" />
                     </Grid>
                 </Border>

@@ -17,17 +17,16 @@
 
     <Border Padding="28">
         <Border.Effect>
-            <DropShadowEffect Color="#7B5BD6" Opacity="0.12" BlurRadius="24" ShadowDepth="4" Direction="270" />
+            <DropShadowEffect Color="#000000" Opacity="0.07" BlurRadius="24" ShadowDepth="4" Direction="270" />
         </Border.Effect>
 
         <StackPanel>
 
-            <!-- Encabezado -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                <Border Background="#F1ECFD" CornerRadius="12" Width="44" Height="44">
+                <Border Background="#F5EAFB" CornerRadius="12" Width="44" Height="44">
                     <materialDesign:PackIcon Kind="BookOpenVariant"
                                              Width="22" Height="22"
-                                             Foreground="#7B5BD6"
+                                             Foreground="#AF52DE"
                                              HorizontalAlignment="Center"
                                              VerticalAlignment="Center" />
                 </Border>
@@ -35,35 +34,34 @@
                     <TextBlock Text="{Binding NombreProducto}"
                                FontSize="22"
                                FontWeight="Bold"
-                               Foreground="#2B3445" />
+                               Foreground="#1D1D1F" />
                     <TextBlock Text="{Binding Categoria}"
                                FontSize="13"
-                               Foreground="#8A93A5" />
+                               Foreground="#6E6E73" />
                 </StackPanel>
             </StackPanel>
 
             <TextBlock Text="{Binding Descripcion}"
                        FontSize="14"
-                       Foreground="#5A6577"
+                       Foreground="#515154"
                        TextWrapping="Wrap"
                        Margin="0,14,0,0" />
 
-            <!-- Ingredientes: vienen de Producto_Ingrediente -->
             <TextBlock Text="INGREDIENTES"
                        FontSize="12"
                        FontWeight="Bold"
-                       Foreground="#8A93A5"
+                       Foreground="#6E6E73"
                        Margin="0,22,0,8" />
 
-            <Border Background="#F7F9FC" CornerRadius="12" Padding="16,12">
+            <Border Background="#F7F7F9" CornerRadius="12" Padding="16,12">
                 <ItemsControl ItemsSource="{Binding Ingredientes}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Margin="0,3">
-                                <Ellipse Width="6" Height="6" Fill="#7B5BD6" VerticalAlignment="Center" />
+                                <Ellipse Width="6" Height="6" Fill="#AF52DE" VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding}"
                                            FontSize="14"
-                                           Foreground="#2B3445"
+                                           Foreground="#1D1D1F"
                                            TextWrapping="Wrap"
                                            Margin="10,0,0,0" />
                             </StackPanel>
@@ -72,17 +70,16 @@
                 </ItemsControl>
             </Border>
 
-            <!-- Preparacion paso a paso (RF-04) -->
             <TextBlock Text="PREPARACIÓN"
                        FontSize="12"
                        FontWeight="Bold"
-                       Foreground="#8A93A5"
+                       Foreground="#6E6E73"
                        Margin="0,20,0,8" />
 
             <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto">
                 <TextBlock Text="{Binding Instrucciones}"
                            FontSize="14"
-                           Foreground="#2B3445"
+                           Foreground="#1D1D1F"
                            LineHeight="22"
                            TextWrapping="Wrap" />
             </ScrollViewer>
@@ -93,8 +90,8 @@
                     Height="44"
                     FontSize="14"
                     FontWeight="Bold"
-                    Background="#7B5BD6"
-                    BorderBrush="#7B5BD6"
+                    Background="#AF52DE"
+                    BorderBrush="#AF52DE"
                     Foreground="White"
                     Cursor="Hand"
                     IsCancel="True"

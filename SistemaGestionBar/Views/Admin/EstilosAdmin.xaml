@@ -1,71 +1,67 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                    xmlns:beh="clr-namespace:SistemaGestionBar.Behaviors">
 
-    <!-- =================================================================
-         SISTEMA VISUAL DEL TABLERO
-         Mismo lenguaje que el punto de venta: fondo #F4F6FA, tarjetas
-         blancas de radio 16 con sombra azul suave, chips de icono, y una
-         tipografia de tres pesos. Vive en un diccionario aparte para que
-         las seis pantallas no repitan lo mismo.
-         ================================================================= -->
-
-    <!-- La propiedad Converter de un Binding no es una DependencyProperty, asi que
-         no admite DynamicResource: los converters son la unica excepcion a la regla
-         de usar siempre DynamicResource, y por eso se declaran aca una sola vez. -->
     <BooleanToVisibilityConverter x:Key="BoolAVisibilidad" />
 
-    <!-- ============ PALETA ============ -->
-    <SolidColorBrush x:Key="TintaFuerte" Color="#2B3445" />
-    <SolidColorBrush x:Key="TintaSuave"  Color="#8A93A5" />
-    <SolidColorBrush x:Key="TintaTenue"  Color="#9AA3B2" />
-    <SolidColorBrush x:Key="Acento"      Color="#1565C0" />
-    <SolidColorBrush x:Key="AcentoSuave" Color="#E3F0FE" />
-    <SolidColorBrush x:Key="Linea"       Color="#E4E8F0" />
-    <SolidColorBrush x:Key="Fondo"       Color="#F4F6FA" />
-    <SolidColorBrush x:Key="Exito"       Color="#2E7D32" />
-    <SolidColorBrush x:Key="ExitoSuave"  Color="#E4F3EA" />
-    <SolidColorBrush x:Key="Aviso"       Color="#E65100" />
-    <SolidColorBrush x:Key="AvisoSuave"  Color="#FFF3E0" />
-    <SolidColorBrush x:Key="Peligro"     Color="#C62828" />
-    <SolidColorBrush x:Key="PeligroSuave" Color="#FBE9E7" />
+    <SolidColorBrush x:Key="TintaFuerte" Color="#1D1D1F" />
+    <SolidColorBrush x:Key="TintaSuave"  Color="#6E6E73" />
+    <SolidColorBrush x:Key="TintaTenue"  Color="#86868B" />
+    <SolidColorBrush x:Key="Acento"      Color="#0071E3" />
+    <SolidColorBrush x:Key="AcentoSuave" Color="#E8F2FF" />
+    <SolidColorBrush x:Key="Linea"       Color="#E5E5EA" />
+    <SolidColorBrush x:Key="Fondo"       Color="#F5F5F7" />
+    <SolidColorBrush x:Key="Exito"       Color="#34C759" />
+    <SolidColorBrush x:Key="ExitoSuave"  Color="#E8F8EC" />
+    <SolidColorBrush x:Key="Aviso"       Color="#FF9500" />
+    <SolidColorBrush x:Key="AvisoSuave"  Color="#FFF4E0" />
+    <SolidColorBrush x:Key="Peligro"     Color="#FF3B30" />
+    <SolidColorBrush x:Key="PeligroSuave" Color="#FFEBEA" />
 
-    <!-- ============ SUPERFICIES ============ -->
-    <!-- La sombra tenida de azul es lo que da la sensacion de profundidad del POS.
-         Un gris neutro se ve sucio sobre el fondo frio. -->
-    <DropShadowEffect x:Key="SombraTarjeta" Color="#1565C0" Opacity="0.10"
-                      BlurRadius="22" ShadowDepth="4" Direction="270" />
+    <DropShadowEffect x:Key="SombraTarjeta" Color="#000000" Opacity="0.07"
+                      BlurRadius="26" ShadowDepth="5" Direction="270" />
 
     <Style x:Key="PanelAdmin" TargetType="Border">
         <Setter Property="Background" Value="White" />
-        <Setter Property="CornerRadius" Value="16" />
+        <Setter Property="CornerRadius" Value="22" />
         <Setter Property="BorderBrush" Value="{DynamicResource Linea}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding" Value="20" />
+        <Setter Property="Padding" Value="22" />
         <Setter Property="Effect" Value="{DynamicResource SombraTarjeta}" />
     </Style>
 
-    <!-- Tarjeta sin sombra, para bloques anidados adentro de un panel -->
     <Style x:Key="SubPanel" TargetType="Border">
-        <Setter Property="Background" Value="#FAFBFD" />
-        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Background" Value="#FAFAFC" />
+        <Setter Property="CornerRadius" Value="14" />
         <Setter Property="BorderBrush" Value="{DynamicResource Linea}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Padding" Value="14" />
     </Style>
 
     <Style x:Key="TarjetaIndicador" TargetType="Border" BasedOn="{StaticResource PanelAdmin}">
+        <Setter Property="Background" Value="{DynamicResource FondoTarjeta}" />
         <Setter Property="Padding" Value="18,16" />
         <Setter Property="MinWidth" Value="162" />
     </Style>
 
-    <!-- Misma tarjeta, pero que se puede apretar: un Button con la piel del indicador.
-         Es un Button de verdad y no un Border con un MouseDown para que la navegación
-         salga gratis con teclado y el cursor de mano venga solo. La flecha del borde
-         superior derecho es lo que avisa que la tarjeta lleva a alguna parte. -->
+    <Style x:Key="FranjaIndicador" TargetType="Border">
+        <Setter Property="Visibility" Value="Collapsed" />
+    </Style>
+
+    <LinearGradientBrush x:Key="FondoTarjeta" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FFFFFF" Offset="0" />
+        <GradientStop Color="#F3F8FF" Offset="1" />
+    </LinearGradientBrush>
+
+    <Style x:Key="ContenidoIndicador" TargetType="StackPanel">
+        <Setter Property="Margin" Value="18,16,18,16" />
+    </Style>
+
     <Style x:Key="TarjetaAccion" TargetType="Button">
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Background" Value="White" />
+        <Setter Property="Tag" Value="{DynamicResource Acento}" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="MinWidth" Value="162" />
@@ -73,21 +69,27 @@
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Border x:Name="tarjeta"
-                            Background="{TemplateBinding Background}"
+                            Background="{DynamicResource FondoTarjeta}"
                             CornerRadius="16"
                             BorderBrush="{DynamicResource Linea}"
                             BorderThickness="1.5"
-                            Padding="18,16"
                             Effect="{DynamicResource SombraTarjeta}"
                             SnapsToDevicePixels="True">
-                        <ContentPresenter />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="0" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Visibility="Collapsed" />
+                            <ContentPresenter Grid.Column="1" Margin="17,16,18,16" />
+                        </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="tarjeta" Property="BorderBrush" Value="{DynamicResource Acento}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="tarjeta" Property="Background" Value="#F7FAFE" />
+                            <Setter TargetName="tarjeta" Property="Background" Value="#F5F9FF" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -95,8 +97,6 @@
         </Setter>
     </Style>
 
-    <!-- Flecha chiquita en la esquina de las tarjetas que navegan. Aparece al pasar
-         el mouse: si estuviera siempre visible compite con el número, que es el dato. -->
     <Style x:Key="FlechaTarjeta" TargetType="materialDesign:PackIcon">
         <Setter Property="Kind" Value="ArrowRight" />
         <Setter Property="Width" Value="17" />
@@ -113,38 +113,32 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Cuadrado de color con el icono adentro: el acento visual del POS -->
     <Style x:Key="ChipIcono" TargetType="Border">
         <Setter Property="Width" Value="42" />
         <Setter Property="Height" Value="42" />
-        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="CornerRadius" Value="21" />
         <Setter Property="Background" Value="{DynamicResource AcentoSuave}" />
     </Style>
 
     <Style x:Key="ChipIconoChico" TargetType="Border" BasedOn="{StaticResource ChipIcono}">
         <Setter Property="Width" Value="34" />
         <Setter Property="Height" Value="34" />
-        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="CornerRadius" Value="17" />
     </Style>
 
-    <!-- ============ TIPOGRAFIA ============ -->
     <Style x:Key="TituloPanel" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="/SistemaGestionBar;component/Assets/Fonts/#Inter" />
         <Setter Property="FontSize" Value="16" />
-        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
         <Setter Property="Margin" Value="0,0,0,12" />
     </Style>
 
-    <!-- Titulo de tarjeta sin margen inferior, para encabezados en linea -->
     <Style x:Key="TituloEnLinea" TargetType="TextBlock" BasedOn="{StaticResource TituloPanel}">
         <Setter Property="Margin" Value="0" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
-    <!-- El aire entre un campo y la etiqueta del siguiente lo pone el campo (margen
-         inferior), no la etiqueta. Es lo que deja libre la franja donde Material dibuja
-         el mensaje de error: ese mensaje va en la capa de adornos, que NO ocupa lugar en
-         el layout, así que si el próximo control arranca pegado el error le queda encima. -->
     <Style x:Key="EtiquetaAdmin" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11.5" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -152,13 +146,11 @@
         <Setter Property="Margin" Value="0,0,0,5" />
     </Style>
 
-    <!-- Encabezado de bloque dentro de un formulario largo ("DATOS PERSONALES"). -->
     <Style x:Key="TituloBloque" TargetType="TextBlock" BasedOn="{StaticResource EtiquetaAdmin}">
         <Setter Property="Foreground" Value="{DynamicResource Acento}" />
         <Setter Property="Margin" Value="0,0,0,10" />
     </Style>
 
-    <!-- Par rótulo/valor de los paneles de detalle de solo lectura. -->
     <Style x:Key="RotuloDato" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{DynamicResource TintaSuave}" />
@@ -177,8 +169,9 @@
     </Style>
 
     <Style x:Key="ValorIndicador" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="/SistemaGestionBar;component/Assets/Fonts/#Inter" />
         <Setter Property="FontSize" Value="27" />
-        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{DynamicResource Acento}" />
     </Style>
 
@@ -195,7 +188,6 @@
         <Setter Property="Margin" Value="0,5,0,0" />
     </Style>
 
-    <!-- Estado vacio: lo que se ve cuando un filtro no deja nada -->
     <Style x:Key="TextoVacio" TargetType="TextBlock">
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Foreground" Value="{DynamicResource TintaTenue}" />
@@ -203,56 +195,28 @@
         <Setter Property="TextAlignment" Value="Center" />
     </Style>
 
-    <!-- ============ CAMPOS ============ -->
-    <!-- IMPORTANTE: nada de Height fijo en los campos Material. El estilo Outlined mide
-         su propio alto para ubicar el hint flotante, y forzarle una altura chica recorta
-         el texto a la mitad. El tamano se controla con Padding y FontSize. -->
-    <!-- El margen inferior de 20 NO es aire decorativo: es la franja donde Material
-         dibuja el mensaje de error. Ese mensaje va en la capa de adornos (AdornerLayer),
-         que se pinta por encima del resto y no ocupa lugar en el layout, así que sin esta
-         reserva "El nombre del producto es obligatorio" cae encima de la etiqueta y del
-         campo siguientes. Reservarlo siempre cuesta unos pocos píxeles; calcularlo solo
-         cuando hay error haría saltar el formulario entero cada vez que se tipea. -->
     <Style x:Key="CampoAdmin" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
         <Setter Property="FontSize" Value="14" />
         <Setter Property="Padding" Value="12,10" />
         <Setter Property="Margin" Value="0,0,0,22" />
         <Setter Property="VerticalAlignment" Value="Top" />
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
-        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="10" />
+        <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="12" />
         <Setter Property="materialDesign:ValidationAssist.UsePopup" Value="False" />
         <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11.5" />
-        <!-- Los campos ahora llevan MaxLength —el largo que aguanta su columna— y Material
-             responde a eso dibujando un contador "45 / 200" debajo del campo. Queda apagado
-             a proposito: ese contador aparece en la MISMA franja que el mensaje de error, la
-             de los 22 px reservados arriba, y los dos juntos no entran. El largo ya lo cuida
-             el propio campo, que no deja escribir de mas. -->
         <Setter Property="materialDesign:TextFieldAssist.CharacterCounterVisibility" Value="Collapsed" />
     </Style>
 
-    <!-- Campo dentro de una fila de la receta: ahí no hay lugar para el mensaje y la
-         validación la hace el formulario, no la celda. -->
     <Style x:Key="CampoEnLinea" TargetType="TextBox" BasedOn="{StaticResource CampoAdmin}">
         <Setter Property="Margin" Value="0" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="Padding" Value="7,5" />
     </Style>
 
-    <!-- Campo angosto de una fila de dos o tres columnas (precio, stock, mínimo). El
-         mensaje de error tiene ahí un tercio del ancho, así que se parte en dos renglones
-         y necesita el doble de franja reservada. -->
     <Style x:Key="CampoAngosto" TargetType="TextBox" BasedOn="{StaticResource CampoAdmin}">
         <Setter Property="Margin" Value="0,0,0,40" />
     </Style>
 
-    <Style x:Key="ComboAdmin" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="Padding" Value="12,10" />
-        <Setter Property="Margin" Value="0,0,0,22" />
-        <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
-        <Setter Property="materialDesign:ValidationAssist.UsePopup" Value="False" />
-        <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11.5" />
-    </Style>
 
     <Style x:Key="ClaveAdmin" TargetType="PasswordBox" BasedOn="{StaticResource MaterialDesignOutlinedPasswordBox}">
         <Setter Property="FontSize" Value="14" />
@@ -263,8 +227,6 @@
         <Setter Property="materialDesign:ValidationAssist.FontSize" Value="11.5" />
     </Style>
 
-    <!-- Buscador sin marco: va adentro de una tarjeta que ya hace de marco,
-         igual que el buscador del punto de venta. -->
     <Style x:Key="BuscadorPlano" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
         <Setter Property="FontSize" Value="14.5" />
         <Setter Property="BorderThickness" Value="0" />
@@ -274,10 +236,6 @@
         <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
     </Style>
 
-    <!-- ============ CHIPS DE FILTRO ============ -->
-    <!-- Para conjuntos chicos de opciones un grupo de chips se lee de un vistazo y no
-         esconde las alternativas detras de un desplegable. Es un ListBox de verdad,
-         asi que sigue andando con teclado. -->
     <Style x:Key="ChipFiltro" TargetType="ListBoxItem">
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Margin" Value="0,0,8,0" />
@@ -287,17 +245,17 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ListBoxItem">
                     <Border x:Name="fondo"
-                            CornerRadius="14"
-                            Padding="15,8"
-                            Background="#F1F4F9"
-                            BorderBrush="#E4E8F0"
+                            CornerRadius="17"
+                            Padding="16,8"
+                            Background="#F2F2F7"
+                            BorderBrush="#E5E5EA"
                             BorderThickness="1"
                             SnapsToDevicePixels="True">
                         <ContentPresenter VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="fondo" Property="BorderBrush" Value="#BBD5F2" />
+                            <Setter TargetName="fondo" Property="BorderBrush" Value="#B8D8FA" />
                         </Trigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="fondo" Property="Background" Value="{DynamicResource Acento}" />
@@ -327,15 +285,6 @@
         </Setter>
     </Style>
 
-    <!-- Combo compacto para las listas largas (categorias, roles), donde los chips
-         no entran. Sin Height fijo, por lo mismo que los campos. -->
-    <Style x:Key="FiltroCombo" TargetType="ComboBox" BasedOn="{StaticResource MaterialDesignOutlinedComboBox}">
-        <Setter Property="FontSize" Value="13.5" />
-        <Setter Property="Padding" Value="12,9" />
-        <Setter Property="MinWidth" Value="184" />
-        <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="materialDesign:HintAssist.IsFloating" Value="False" />
-    </Style>
 
     <Style x:Key="ContadorFiltro" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12.5" />
@@ -343,9 +292,8 @@
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
 
-    <!-- ============ BOTONES ============ -->
     <Style x:Key="BotonPrimario" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedButton}">
-        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="21" />
         <Setter Property="Height" Value="42" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -362,18 +310,18 @@
     </Style>
 
     <Style x:Key="BotonSecundario" TargetType="Button" BasedOn="{StaticResource MaterialDesignOutlinedButton}">
-        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="18" />
+        <Setter Property="materialDesign:ButtonAssist.CornerRadius" Value="21" />
         <Setter Property="Height" Value="42" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="Foreground" Value="#5A6577" />
-        <Setter Property="BorderBrush" Value="#CFD7E3" />
+        <Setter Property="Foreground" Value="#515154" />
+        <Setter Property="BorderBrush" Value="#D2D2D7" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Padding" Value="16,0" />
     </Style>
 
     <Style x:Key="BotonPeligro" TargetType="Button" BasedOn="{StaticResource BotonSecundario}">
         <Setter Property="Foreground" Value="{DynamicResource Peligro}" />
-        <Setter Property="BorderBrush" Value="#F2C7C7" />
+        <Setter Property="BorderBrush" Value="#FFD1CE" />
     </Style>
 
     <Style x:Key="BotonIconoFila" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
@@ -382,9 +330,6 @@
         <Setter Property="Cursor" Value="Hand" />
     </Style>
 
-    <!-- Editar / Eliminar viven al pie del panel de detalle, debajo de los datos del ítem
-         que están afectando. Cuando estaban arriba de la lista había que acordarse de qué
-         fila estaba seleccionada para saber sobre qué iban a actuar. -->
     <Style x:Key="BotonPanel" TargetType="Button" BasedOn="{StaticResource BotonSecundario}">
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -395,9 +340,6 @@
         <Setter Property="HorizontalContentAlignment" Value="Center" />
     </Style>
 
-    <!-- Zona de lista que se atenúa mientras hay un formulario abierto. El bloqueo real
-         lo hace SelectorAssist.SeleccionBloqueada; esto es el aviso visual de que ahí no
-         se puede elegir nada, para que el usuario no insista con el clic. -->
     <Style x:Key="ZonaBloqueable" TargetType="Grid">
         <Style.Triggers>
             <DataTrigger Binding="{Binding EnEdicion}" Value="True">
@@ -406,16 +348,12 @@
         </Style.Triggers>
     </Style>
 
-    <!-- Línea divisoria dentro de un editor largo -->
     <Style x:Key="SeparadorEditor" TargetType="Border">
         <Setter Property="Height" Value="1" />
-        <Setter Property="Background" Value="#EDF1F6" />
+        <Setter Property="Background" Value="#EDEDF0" />
         <Setter Property="Margin" Value="0,4,0,16" />
     </Style>
 
-    <!-- ============ GRILLAS ============ -->
-    <!-- Filas mas altas, sin lineas verticales y con el encabezado en mayusculas chicas:
-         la tabla deja de parecer una planilla y pasa a leerse como una lista. -->
     <Style x:Key="EncabezadoGrilla" TargetType="DataGridColumnHeader"
            BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
         <Setter Property="FontSize" Value="11.5" />
@@ -427,32 +365,12 @@
         <Setter Property="SeparatorVisibility" Value="Collapsed" />
     </Style>
 
-    <!-- SELECCION POR CONTORNO, NO POR RELLENO.
-         Pintar la fila entera de azul obliga a leer texto oscuro sobre un fondo de color:
-         la fila seleccionada termina siendo la MAS dificil de leer de la grilla, que es
-         justo al reves de lo que uno quiere. Acá la selección se marca con un contorno de
-         acento y las esquinas redondeadas, y el fondo queda blanco.
-
-         Hace falta un ControlTemplate propio porque el borde de DataGridRow no se puede
-         redondear con setters: CornerRadius no es una propiedad de la fila sino del Border
-         que vive adentro de su plantilla. Se omite el DataGridRowHeader a propósito:
-         GrillaAdmin usa HeadersVisibility="Column", así que nunca se dibuja. -->
     <Style x:Key="FilaGrilla" TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
-        <!-- El grosor es el mismo esté o no seleccionada (transparente cuando no lo
-             está): si apareciera recién al seleccionar, la fila se movería un píxel
-             al hacerle clic. RowHeight lo compensa. -->
         <Setter Property="BorderThickness" Value="1.5" />
         <Setter Property="Template">
             <Setter.Value>
-                <!-- El fondo y el contorno son dos capas SUPERPUESTAS a las celdas, no un
-                     Border que las contenga. Si el contorno envolviera las celdas se
-                     comería 3 px de ancho, y como el DataGrid calcula las columnas
-                     estrella contra el ancho del viewport (no contra el de la fila),
-                     el contenido mide 3 px más que el viewport: aparece una barra
-                     horizontal de la nada y, con el scroll deshabilitado, se recortan
-                     las últimas columnas. Superpuesto no ocupa lugar. -->
                 <ControlTemplate TargetType="DataGridRow">
                     <Grid>
                         <Border x:Name="fondo"
@@ -480,10 +398,8 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="fondo" Property="Background" Value="#F7F9FC" />
+                            <Setter TargetName="fondo" Property="Background" Value="#F7F7F9" />
                         </Trigger>
-                        <!-- Después del de mouse: una fila seleccionada sobre la que se
-                             pasa el mouse tiene que seguir viéndose seleccionada. -->
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="contorno" Property="BorderBrush" Value="{DynamicResource Acento}" />
                             <Setter TargetName="fondo" Property="Background" Value="Transparent" />
@@ -494,10 +410,6 @@
         </Setter>
     </Style>
 
-    <!-- La otra mitad del problema: Material pinta la CELDA seleccionada con el color
-         primario y le cambia el texto. Se neutraliza acá, para que el único indicio de
-         selección sea el contorno de la fila. Los triggers del estilo derivado se evalúan
-         después que los del base, así que estos ganan. -->
     <Style x:Key="CeldaGrilla" TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
@@ -520,18 +432,11 @@
         <Setter Property="IsReadOnly" Value="True" />
         <Setter Property="SelectionMode" Value="Single" />
         <Setter Property="HeadersVisibility" Value="Column" />
-        <!-- Sin líneas de grilla: las dibuja el borde de cada celda, y ese borde es el
-             mismo que necesitamos libre para que la selección se vea como un contorno. -->
         <Setter Property="GridLinesVisibility" Value="None" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="RowBackground" Value="Transparent" />
-        <!-- Auto y no Disabled: el contorno de la fila ya no ocupa ancho (va superpuesto),
-             así que no aparece la barra fantasma de 3 px, y si la ventana se achica de
-             verdad las columnas se pueden scrollear en vez de quedar recortadas. -->
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
-        <!-- 50 y no 46: el contorno de la fila se come 3 px de alto y la celda de
-             "acceso al sistema" tiene tres renglones que quedaban cortados. -->
         <Setter Property="RowHeight" Value="56" />
         <Setter Property="FontSize" Value="14" />
         <Setter Property="ColumnHeaderStyle" Value="{StaticResource EncabezadoGrilla}" />
@@ -544,15 +449,10 @@
         <Setter Property="RowHeight" Value="50" />
     </Style>
 
-    <!-- ============ BARRA DE STOCK ============ -->
-    <!-- Template propio y no BasedOn de Material: la clave MaterialDesignLinearProgressBar
-         no existe en esta version del paquete, y un StaticResource inexistente revienta
-         al renderizar la fila, no al compilar. Este template minimo necesita los dos
-         PART_ que pide ProgressBar. -->
     <Style x:Key="BarraStock" TargetType="ProgressBar">
         <Setter Property="Height" Value="5" />
         <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Background" Value="#EDF1F6" />
+        <Setter Property="Background" Value="#EDEDF0" />
         <Setter Property="Foreground" Value="{DynamicResource Exito}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -576,7 +476,6 @@
         </Style.Triggers>
     </Style>
 
-    <!-- ============ CHIPS DE ESTADO EN GRILLA ============ -->
     <Style x:Key="ChipGrilla" TargetType="Border">
         <Setter Property="CornerRadius" Value="8" />
         <Setter Property="Padding" Value="10,5" />
@@ -590,7 +489,6 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
-    <!-- ============ BARRA DE MENSAJES ============ -->
     <Style x:Key="BarraMensaje" TargetType="Border">
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="Padding" Value="14,10" />
@@ -612,10 +510,10 @@
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="VerticalAlignment" Value="Center" />
-        <Setter Property="Foreground" Value="#17703F" />
+        <Setter Property="Foreground" Value="#248A3D" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
-                <Setter Property="Foreground" Value="#A93226" />
+                <Setter Property="Foreground" Value="#D70015" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -626,23 +524,18 @@
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Margin" Value="0,0,10,0" />
         <Setter Property="Kind" Value="CheckCircleOutline" />
-        <Setter Property="Foreground" Value="#17703F" />
+        <Setter Property="Foreground" Value="#248A3D" />
         <Style.Triggers>
             <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
                 <Setter Property="Kind" Value="AlertCircleOutline" />
-                <Setter Property="Foreground" Value="#A93226" />
+                <Setter Property="Foreground" Value="#D70015" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
 
-    <!-- ============ RESUMEN DE VALIDACION ============ -->
-    <!-- Va arriba de Guardar/Cancelar y junta lo que falta. Se muestra recién cuando hay
-         errores VISIBLES, es decir campos que el usuario ya tocó o el intento de guardar:
-         un formulario recién abierto está vacío y por lo tanto es inválido, pero avisarlo
-         antes de que escriba una letra es ruido, no ayuda. -->
     <Style x:Key="PanelValidacion" TargetType="Border">
         <Setter Property="Background" Value="{DynamicResource PeligroSuave}" />
-        <Setter Property="BorderBrush" Value="#F2C7C7" />
+        <Setter Property="BorderBrush" Value="#FFD1CE" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="10" />
         <Setter Property="Padding" Value="12,9" />
@@ -659,9 +552,194 @@
         </Style.Triggers>
     </Style>
 
+    <DataTemplate x:Key="ChipPeriodo">
+        <StackPanel Orientation="Horizontal">
+            <materialDesign:PackIcon Kind="CalendarMonthOutline" Width="16" Height="16" Margin="0,0,7,0"
+                                     VerticalAlignment="Center">
+                <materialDesign:PackIcon.Style>
+                    <Style TargetType="materialDesign:PackIcon">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Texto}" Value="Elegir fecha">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </materialDesign:PackIcon.Style>
+            </materialDesign:PackIcon>
+            <TextBlock Text="{Binding Texto}" VerticalAlignment="Center" />
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- Menús desplegables: caja redondeada y lista flotante con esquinas amplias. -->
+    <Style x:Key="ItemComboApple" TargetType="ComboBoxItem">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="fondo" CornerRadius="10" Padding="12,9" Margin="0,1" Background="Transparent">
+                        <ContentPresenter VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="fondo" Property="Background" Value="{DynamicResource Fondo}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="fondo" Property="Background" Value="{DynamicResource AcentoSuave}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Acento}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ComboApple" TargetType="ComboBox">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderBrush" Value="#D2D2D7" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Padding" Value="14,0,10,0" />
+        <Setter Property="MinHeight" Value="42" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource ItemComboApple}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <Border x:Name="caja" CornerRadius="12"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" />
+
+                        <Grid Margin="{TemplateBinding Padding}" IsHitTestVisible="False">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <materialDesign:PackIcon x:Name="iconoCombo" Grid.Column="0" Width="18" Height="18"
+                                                     Margin="0,0,10,0" VerticalAlignment="Center"
+                                                     Kind="{Binding Path=(beh:ComboAssist.Icono), RelativeSource={RelativeSource TemplatedParent}, TargetNullValue=Circle}"
+                                                     Foreground="{DynamicResource Acento}" />
+                            <ContentPresenter Grid.Column="1" VerticalAlignment="Center"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                            <TextBlock x:Name="sugerencia" Grid.Column="1" VerticalAlignment="Center"
+                                       Text="{Binding Path=(materialDesign:HintAssist.Hint), RelativeSource={RelativeSource TemplatedParent}}"
+                                       Foreground="{DynamicResource TintaTenue}" Visibility="Collapsed" />
+                            <materialDesign:PackIcon Grid.Column="2" Kind="ChevronDown" Width="18" Height="18"
+                                                     Margin="8,0,0,0" VerticalAlignment="Center"
+                                                     Foreground="{DynamicResource TintaSuave}" />
+                        </Grid>
+
+                        <ToggleButton ClickMode="Press" Focusable="False"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent" />
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+
+                        <Popup x:Name="PART_Popup" Placement="Bottom" AllowsTransparency="True" Focusable="False"
+                               IsOpen="{TemplateBinding IsDropDownOpen}" PopupAnimation="Fade">
+                            <Grid MinWidth="{Binding ActualWidth, ElementName=caja}"
+                                  MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                <Border Margin="0,6,0,16" Background="White" CornerRadius="14"
+                                        BorderBrush="{DynamicResource Linea}" BorderThickness="1" Padding="5">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="#000000" Opacity="0.16" BlurRadius="24" ShadowDepth="6" Direction="270" />
+                                    </Border.Effect>
+                                    <ScrollViewer SnapsToDevicePixels="True" VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Grid>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="beh:ComboAssist.Icono" Value="{x:Null}">
+                            <Setter TargetName="iconoCombo" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="SelectedIndex" Value="-1">
+                            <Setter TargetName="sugerencia" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="caja" Property="BorderBrush" Value="{DynamicResource Acento}" />
+                        </Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="caja" Property="BorderBrush" Value="{DynamicResource Acento}" />
+                        </Trigger>
+                        <Trigger Property="Validation.HasError" Value="True">
+                            <Setter TargetName="caja" Property="BorderBrush" Value="{DynamicResource Peligro}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.55" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ComboAdmin" TargetType="ComboBox" BasedOn="{StaticResource ComboApple}">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Margin" Value="0,0,0,22" />
+    </Style>
+
+    <Style x:Key="FiltroCombo" TargetType="ComboBox" BasedOn="{StaticResource ComboApple}">
+        <Setter Property="MinWidth" Value="184" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Hoja modal estilo Apple: esquinas amplias, borde de un píxel y sombra difusa. -->
+    <Style x:Key="HojaModal" TargetType="Border">
+        <Setter Property="Background" Value="White" />
+        <Setter Property="CornerRadius" Value="22" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Linea}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Margin" Value="20" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="#000000" Opacity="0.18" BlurRadius="40" ShadowDepth="10" Direction="270" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="TituloModal" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="/SistemaGestionBar;component/Assets/Fonts/#Inter" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TintaFuerte}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="BotonRangoFechas" TargetType="Button" BasedOn="{StaticResource BotonSecundario}">
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource Acento}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Acento}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
     <Style x:Key="AvisoValidacion" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12.5" />
-        <Setter Property="Foreground" Value="#A93226" />
+        <Setter Property="Foreground" Value="#D70015" />
         <Setter Property="TextWrapping" Value="Wrap" />
         <Setter Property="VerticalAlignment" Value="Center" />
     </Style>

@@ -6,33 +6,11 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.Data
 {
-    /// <summary>
-    /// El mapa entre las clases de <c>Models/</c> y las tablas de MySQL.
-    ///
-    /// <b>Qué hace este archivo y qué no.</b> Las clases POCO dicen qué datos hay; acá se
-    /// dice cómo se guardan: nombres de tabla y columna, claves, índices únicos, tipos
-    /// exactos de los decimales y qué pasa al borrar. Nada de lógica de negocio: eso vive
-    /// en el repositorio, que es quien la hace cumplir venga el dato de donde venga.
-    ///
-    /// <b>Convención de nombres.</b> Tablas y columnas en minúscula con guión bajo
-    /// (<c>venta_detalle</c>, <c>id_producto</c>), como en el DER. En minúscula a
-    /// propósito: MySQL sobre Windows guarda los nombres en minúscula igual
-    /// (<c>lower_case_table_names</c>), así que escribirlos con mayúsculas solo lograría
-    /// que el código diga una cosa y DBeaver muestre otra. Y si algún día alguien abre el
-    /// proyecto en Linux, donde los nombres SÍ distinguen mayúsculas, no se rompe nada.
-    ///
-    /// <b>Los enums se guardan como texto.</b> Cuesta unos bytes más que un entero, pero
-    /// en DBeaver se lee <c>ParaLlevar</c> en vez de <c>1</c>, y una consulta escrita a
-    /// mano no necesita ir al código a ver qué número era cada cosa.
-    /// </summary>
+    /// <summary>Mapa entre las clases de Models y las tablas de MySQL. Tablas y columnas en minúscula con guión bajo; los enums se guardan como texto.</summary>
     public class BarDbContext : DbContext
     {
         private readonly SesionActual? _sesion;
 
-        /// <param name="sesion">
-        /// Quién está usando el sistema, para estampar la auditoría de RF-11. Va nulo en
-        /// los comandos de migración, que no tienen usuario logueado.
-        /// </param>
         public BarDbContext(DbContextOptions<BarDbContext> opciones, SesionActual? sesion = null)
             : base(opciones)
         {
@@ -53,33 +31,20 @@ namespace SistemaGestionBar.Data
         public DbSet<Venta> Ventas => Set<Venta>();
         public DbSet<VentaDetalle> VentaDetalles => Set<VentaDetalle>();
 
-        // Factura y FacturaLinea NO son entidades de EF Core: no tienen tabla propia.
-        // El comprobante se arma en memoria a partir de Venta/VentaDetalle, ver
-        // RepositorioSql.ConstruirFactura().
-
-        // Tipos de columna, en un solo lugar para no repetirlos quince veces.
         private const string Dinero = "decimal(12,2)";
         private const string Cantidad = "decimal(12,3)";
         private const string Fecha = "datetime(6)";
 
-        /// <summary>
-        /// La siembra inicial trae sus propias fechas —las ventas de la última semana
-        /// pasaron cuando dicen que pasaron— así que ahí la auditoría no se estampa.
-        /// En todo el resto de la vida de la aplicación queda encendida.
-        /// </summary>
+        /// <summary>Se apaga solo en la siembra inicial, que trae sus propias fechas.</summary>
         public bool AuditarCambios { get; set; } = true;
 
-        /// <summary>
-        /// RF-11 automático: en vez de que cada método del repositorio se acuerde de
-        /// estampar quién y cuándo, se hace acá, en el único lugar por el que pasan
-        /// todos los cambios. Un método nuevo que olvide auditar deja de ser posible.
-        /// </summary>
         public override int SaveChanges()
         {
             EstamparAuditoria();
             return base.SaveChanges();
         }
 
+        // // Un único punto por el que pasan todos los cambios: ningún método del repositorio puede olvidar auditar.
         private void EstamparAuditoria()
         {
             if (!AuditarCambios)
@@ -101,7 +66,6 @@ namespace SistemaGestionBar.Data
                         entrada.Entity.FechaModificacion = ahora;
                         entrada.Entity.UsuarioModificacion = usuario;
 
-                        // La fecha de alta no se toca nunca más: es cuándo nació la fila.
                         entrada.Property(nameof(EntidadAuditable.FechaCreacion)).IsModified = false;
                         break;
                 }
@@ -118,9 +82,6 @@ namespace SistemaGestionBar.Data
             ConfigurarAuditoria(modelo);
         }
 
-        // ---------------------------------------------------------------
-        // Padrón, cuentas y clientes
-        // ---------------------------------------------------------------
         private static void ConfigurarPersonas(ModelBuilder modelo)
         {
             modelo.Entity<Persona>(persona =>
@@ -133,13 +94,10 @@ namespace SistemaGestionBar.Data
                 persona.Property(p => p.Telefono).HasColumnName("telefono").HasMaxLength(Limites.Telefono);
                 persona.Property(p => p.Email).HasColumnName("email").HasMaxLength(Limites.Email);
 
-                // El DNI es la clave de negocio de la persona: obligatorio y único. Es lo
-                // que impide que el mismo cliente entre dos veces al padrón cuando además
-                // lo dan de alta como empleado.
                 persona.Property(p => p.DniCuit).HasColumnName("dni_cuit").HasMaxLength(20).IsRequired();
+                // // El DNI es la clave de negocio: evita cargar dos veces a la misma persona.
                 persona.HasIndex(p => p.DniCuit).IsUnique();
 
-                // Calculadas: se arman al leer, no son columnas.
                 persona.Ignore(p => p.NombreCompleto);
                 persona.Ignore(p => p.NombreParaListado);
                 persona.Ignore(p => p.EsEmpleado);
@@ -163,15 +121,11 @@ namespace SistemaGestionBar.Data
                 usuario.Property(u => u.IdPersona).HasColumnName("id_persona");
                 usuario.Property(u => u.IdRol).HasColumnName("id_rol");
 
-                // El correo de trabajo es la credencial de login (RF-09): único, o la
-                // autenticación quedaría ambigua.
                 usuario.Property(u => u.Email).HasColumnName("email").HasMaxLength(Limites.Email).IsRequired();
                 usuario.HasIndex(u => u.Email).IsUnique();
 
-                // Hash PBKDF2 + salt en base64, nunca la clave en claro.
                 usuario.Property(u => u.Clave).HasColumnName("clave").HasMaxLength(Limites.ClaveHasheada).IsRequired();
 
-                // Una persona tiene a lo sumo UNA cuenta.
                 usuario.HasOne(u => u.Persona)
                        .WithOne(p => p.Usuario)
                        .HasForeignKey<Usuario>(u => u.IdPersona)
@@ -198,8 +152,7 @@ namespace SistemaGestionBar.Data
                 cliente.Property(c => c.IdPersona).HasColumnName("id_persona");
                 cliente.Property(c => c.FechaRegistro).HasColumnName("fecha_registro").HasColumnType(Fecha);
 
-                // Ser cliente es un casillero de la ficha de la persona: si se borra la
-                // persona, esa fila se va con ella.
+                // // Ser cliente depende de la persona: si se borra, esta fila se va con ella.
                 cliente.HasOne(c => c.Persona)
                        .WithOne(p => p.Cliente)
                        .HasForeignKey<Cliente>(c => c.IdPersona)
@@ -209,9 +162,6 @@ namespace SistemaGestionBar.Data
             });
         }
 
-        // ---------------------------------------------------------------
-        // Catálogo, insumos y recetas
-        // ---------------------------------------------------------------
         private static void ConfigurarCatalogo(ModelBuilder modelo)
         {
             modelo.Entity<Categoria>(categoria =>
@@ -234,11 +184,8 @@ namespace SistemaGestionBar.Data
                 producto.Property(p => p.Precio).HasColumnName("precio").HasColumnType(Dinero);
                 producto.Property(p => p.Stock).HasColumnName("stock");
 
-                // EXTENSIÓN AL DER: umbral de reposición para la venta directa (RF-08).
                 producto.Property(p => p.StockMinimo).HasColumnName("stock_minimo");
 
-                // EXTENSIÓN AL DER: se guarda la RUTA de la foto, no el binario. Meter
-                // imágenes como VARBINARY infla la base y hace lento cada SELECT.
                 producto.Property(p => p.RutaImagen).HasColumnName("ruta_imagen").HasMaxLength(Limites.RutaImagen);
 
                 producto.HasIndex(p => p.Nombre).IsUnique();
@@ -270,20 +217,19 @@ namespace SistemaGestionBar.Data
             {
                 composicion.ToTable("producto_ingrediente");
 
-                // Clave compuesta: un insumo aparece una sola vez por producto.
+                // // Un insumo aparece una sola vez por producto.
                 composicion.HasKey(pi => new { pi.IdProducto, pi.IdIngrediente });
 
                 composicion.Property(pi => pi.IdProducto).HasColumnName("id_producto");
                 composicion.Property(pi => pi.IdIngrediente).HasColumnName("id_ingrediente");
                 composicion.Property(pi => pi.CantidadNecesaria).HasColumnName("cantidad_necesaria").HasColumnType(Cantidad);
 
-                // Borrar el producto se lleva su receta; borrar un insumo que está en uso
-                // se bloquea, que es la regla de integridad de RF-13.
                 composicion.HasOne(pi => pi.Producto)
                            .WithMany(p => p.Ingredientes)
                            .HasForeignKey(pi => pi.IdProducto)
                            .OnDelete(DeleteBehavior.Cascade);
 
+                // // Un insumo en uso no se puede borrar.
                 composicion.HasOne(pi => pi.Ingrediente)
                            .WithMany()
                            .HasForeignKey(pi => pi.IdIngrediente)
@@ -296,10 +242,7 @@ namespace SistemaGestionBar.Data
             {
                 receta.ToTable("receta");
 
-                // EXTENSIÓN AL DER. Relación 1-1 opcional con Producto: la clave primaria
-                // es además la foránea. Va en tabla aparte y no como columna de Producto
-                // porque una botella no se prepara, y la columna quedaría en NULL para
-                // más de la mitad del catálogo.
+                // // Clave primaria y foránea a la vez (1 a 1 con Producto).
                 receta.HasKey(r => r.IdProducto);
                 receta.Property(r => r.IdProducto).HasColumnName("id_producto").ValueGeneratedNever();
                 receta.Property(r => r.Instrucciones).HasColumnName("preparacion").IsRequired();
@@ -311,9 +254,6 @@ namespace SistemaGestionBar.Data
             });
         }
 
-        // ---------------------------------------------------------------
-        // Tablas paramétricas
-        // ---------------------------------------------------------------
         private static void ConfigurarParametricas(ModelBuilder modelo)
         {
             modelo.Entity<MetodoPago>(metodo =>
@@ -333,8 +273,6 @@ namespace SistemaGestionBar.Data
                 ubicacion.Property(u => u.NombreUbicacion).HasColumnName("nombre_ubicacion").HasMaxLength(Limites.NombreParametrico).IsRequired();
                 ubicacion.Property(u => u.Capacidad).HasColumnName("capacidad");
 
-                // EXTENSIÓN AL DER: Mesa o Barra. En la barra atiende el barman, así que
-                // la venta va sin mesero, y deducirlo del texto del nombre sería frágil.
                 ubicacion.Property(u => u.Tipo)
                          .HasColumnName("tipo_ubicacion")
                          .HasConversion<string>()
@@ -348,9 +286,6 @@ namespace SistemaGestionBar.Data
             });
         }
 
-        // ---------------------------------------------------------------
-        // Ventas
-        // ---------------------------------------------------------------
         private static void ConfigurarVentas(ModelBuilder modelo)
         {
             modelo.Entity<Venta>(venta =>
@@ -383,9 +318,7 @@ namespace SistemaGestionBar.Data
                 venta.HasOne(v => v.Cliente).WithMany()
                      .HasForeignKey(v => v.IdCliente).OnDelete(DeleteBehavior.Restrict);
 
-                // Dos caminos distintos a Usuario, y por eso hay que declararlos: el
-                // cajero que cobró y el mesero que atendió la mesa (RF-02). El mesero es
-                // opcional porque en la barra y en "para llevar" no hay.
+                // // El mesero es opcional: en barra y para llevar no hay.
                 venta.HasOne(v => v.Cajero).WithMany()
                      .HasForeignKey(v => v.IdCajero).OnDelete(DeleteBehavior.Restrict);
 
@@ -395,8 +328,7 @@ namespace SistemaGestionBar.Data
                 venta.HasOne(v => v.Ubicacion).WithMany()
                      .HasForeignKey(v => v.IdUbicacion).OnDelete(DeleteBehavior.Restrict);
 
-                // El total NO se persiste: se suma del detalle cada vez que se lee. Es la
-                // regla del enunciado, y evita que la cabecera y el detalle se contradigan.
+                // // El total se suma del detalle, no se persiste.
                 venta.Ignore(v => v.Total);
             });
 
@@ -409,9 +341,7 @@ namespace SistemaGestionBar.Data
                 detalle.Property(d => d.IdProducto).HasColumnName("id_producto");
                 detalle.Property(d => d.Cantidad).HasColumnName("cantidad");
 
-                // El precio unitario y el subtotal SÍ se guardan: son la foto del precio
-                // al momento de vender. Si mañana sube el Mojito, los tickets viejos no
-                // pueden cambiar.
+                // // Foto del precio al vender: los tickets viejos no cambian si sube el producto.
                 detalle.Property(d => d.PrecioUnitario).HasColumnName("precio_unitario").HasColumnType(Dinero);
                 detalle.Property(d => d.Subtotal).HasColumnName("subtotal").HasColumnType(Dinero);
 
@@ -423,15 +353,7 @@ namespace SistemaGestionBar.Data
             });
         }
 
-        // ---------------------------------------------------------------
-        // Auditoría (RF-11)
-        // ---------------------------------------------------------------
-        /// <summary>
-        /// Las tres columnas de auditoría son iguales en todas las entidades que heredan
-        /// de <see cref="EntidadAuditable"/>, así que se configuran de una sola pasada en
-        /// vez de repetirlas doce veces. Va al final, cuando el modelo ya tiene todas las
-        /// entidades registradas.
-        /// </summary>
+        // // Las tres columnas de auditoría son iguales en todas las entidades auditables.
         private static void ConfigurarAuditoria(ModelBuilder modelo)
         {
             var auditables = modelo.Model.GetEntityTypes()

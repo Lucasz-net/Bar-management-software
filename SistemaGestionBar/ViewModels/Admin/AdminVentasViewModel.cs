@@ -8,12 +8,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Historial de ventas con su detalle y su factura (RF-01).
-    ///
-    /// Es de solo lectura a propósito: una venta cobrada no se edita. Si estuvo mal,
-    /// se anula y se rehace; editarla dejaría el stock descontado sin correspondencia.
-    /// </summary>
     public class AdminVentasViewModel : SeccionAdminViewModel
     {
         public AdminVentasViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -31,15 +25,13 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ObservableCollection<Venta> Ventas { get; }
         public ObservableCollection<VentaDetalle> Detalle { get; }
 
-        // ---------------------------------------------------------------
-        // Filtros: texto, período y modalidad
-        // ---------------------------------------------------------------
         public IReadOnlyList<OpcionFiltro<PeriodoVenta>> OpcionesPeriodo { get; } = new[]
         {
             new OpcionFiltro<PeriodoVenta>("Todo el historial", PeriodoVenta.Todo),
             new OpcionFiltro<PeriodoVenta>("Hoy", PeriodoVenta.Hoy),
             new OpcionFiltro<PeriodoVenta>("Última semana", PeriodoVenta.UltimaSemana),
-            new OpcionFiltro<PeriodoVenta>("Último mes", PeriodoVenta.UltimoMes)
+            new OpcionFiltro<PeriodoVenta>("Último mes", PeriodoVenta.UltimoMes),
+            new OpcionFiltro<PeriodoVenta>("Elegir fecha", PeriodoVenta.Personalizado)
         };
 
         private OpcionFiltro<PeriodoVenta>? _periodo;
@@ -48,9 +40,45 @@ namespace SistemaGestionBar.ViewModels.Admin
             get => _periodo;
             set
             {
+                if (value?.Valor == PeriodoVenta.Personalizado && !ElegirFechas())
+                {
+                    // Se canceló el calendario: la lista vuelve a mostrar la opción anterior.
+                    System.Windows.Application.Current.Dispatcher.BeginInvoke(() => OnPropertyChanged(nameof(Periodo)));
+                    return;
+                }
+
                 if (SetProperty(ref _periodo, value))
+                {
+                    OnPropertyChanged(nameof(EsPersonalizado));
                     RefrescarVista();
+                }
             }
+        }
+
+        private DateTime? _desde;
+        private DateTime? _hasta;
+
+        public bool EsPersonalizado => Periodo?.Valor == PeriodoVenta.Personalizado;
+
+        public string RangoTexto => _desde is DateTime d && _hasta is DateTime h
+            ? (d == h ? $"{d:dd/MM/yyyy}" : $"{d:dd/MM/yyyy} – {h:dd/MM/yyyy}")
+            : string.Empty;
+
+        public ICommand CambiarFechasCommand => new RelayCommand(() =>
+        {
+            if (ElegirFechas())
+                RefrescarVista();
+        });
+
+        private bool ElegirFechas()
+        {
+            var rango = Dialogo.ElegirRangoDeFechas(_desde, _hasta);
+            if (rango is null)
+                return false;
+
+            (_desde, _hasta) = rango.Value;
+            OnPropertyChanged(nameof(RangoTexto));
+            return true;
         }
 
         public IReadOnlyList<OpcionFiltro<ModalidadConsumo?>> OpcionesModalidad { get; } = new[]
@@ -88,6 +116,10 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (desde is not null && venta.FechaHora < desde)
                 return false;
 
+            if (Periodo?.Valor == PeriodoVenta.Personalizado && _hasta is DateTime hasta &&
+                venta.FechaHora >= hasta.Date.AddDays(1))
+                return false;
+
             if (!HayBusqueda)
                 return true;
 
@@ -99,12 +131,12 @@ namespace SistemaGestionBar.ViewModels.Admin
                 || Contiene(venta.MetodoPago?.NombreMetodo, Termino);
         }
 
-        /// <summary>Fecha de corte del período elegido, o null si no hay corte.</summary>
         private DateTime? FechaDesde() => (Periodo?.Valor ?? PeriodoVenta.Todo) switch
         {
             PeriodoVenta.Hoy => DateTime.Today,
             PeriodoVenta.UltimaSemana => DateTime.Today.AddDays(-7),
             PeriodoVenta.UltimoMes => DateTime.Today.AddMonths(-1),
+            PeriodoVenta.Personalizado => _desde?.Date,
             _ => null
         };
 
@@ -115,9 +147,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             Modalidad = OpcionesModalidad[0];
         }
 
-        // ---------------------------------------------------------------
-        // Selección y detalle
-        // ---------------------------------------------------------------
         private Venta? _seleccionada;
         public Venta? Seleccionada
         {
@@ -147,16 +176,11 @@ namespace SistemaGestionBar.ViewModels.Admin
             ? "Detalle de la venta"
             : $"Venta #{Seleccionada.IdVenta}";
 
-        /// <summary>Comprobante de la venta seleccionada, para mostrar su número en el panel.</summary>
         public Factura? FacturaDeLaVenta =>
             Seleccionada is null ? null : Repositorio.ObtenerFacturaDeVenta(Seleccionada.IdVenta);
 
         public bool TieneFactura => FacturaDeLaVenta is not null;
 
-        // ---------------------------------------------------------------
-        // Indicadores. Se calculan sobre lo que se ve: si el usuario filtra
-        // "hoy", los números tienen que ser los de hoy y no los del historial.
-        // ---------------------------------------------------------------
         private int _cantidadVentas;
         public int CantidadVentas
         {
@@ -196,9 +220,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             Seleccionada = Ventas.FirstOrDefault(v => v.IdVenta == idPrevio) ?? Ventas.FirstOrDefault();
         }
 
-        /// <summary>
-        /// Los indicadores se recalculan cada vez que cambia el filtro, no solo al recargar.
-        /// </summary>
         private void RecalcularIndicadores()
         {
             var visibles = Ventas.Where(v => Coincide(v)).ToList();

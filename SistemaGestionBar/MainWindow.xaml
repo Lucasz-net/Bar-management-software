@@ -9,14 +9,12 @@
         MinWidth="1280"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
-        Background="#F4F6FA">
+        Background="#F5F5F7">
 
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
 
-    <!-- Cascaron (Shell). Este ContentControl es el unico "hueco" de la app:
-         MainViewModel decide que ViewModel poner y App.xaml resuelve su vista. -->
     <ContentControl Content="{Binding VistaActual}" />
 
 </Window>

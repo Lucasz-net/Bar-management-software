@@ -10,23 +10,22 @@
              d:DataContext="{d:DesignInstance Type=vm:AdminViewModel}"
              d:DesignHeight="820"
              d:DesignWidth="1360"
-             Background="#F4F6FA">
+             Background="#F5F5F7"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <UserControl.Resources>
-        <!-- Item del menu lateral. La barra vertical de la izquierda marca la seccion
-             activa: se ve incluso de reojo, que es como se lee un menu lateral. -->
         <Style x:Key="ItemMenu" TargetType="Border">
-            <Setter Property="CornerRadius" Value="11" />
+            <Setter Property="CornerRadius" Value="10" />
             <Setter Property="Padding" Value="13,11" />
             <Setter Property="Margin" Value="12,3" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="3,0,0,0" />
+            <Setter Property="BorderThickness" Value="0" />
             <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Cursor" Value="Hand" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
-                    <Setter Property="Background" Value="#1E4C86" />
-                    <Setter Property="BorderBrush" Value="#5FA8FF" />
+                    <Setter Property="Background" Value="White" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -35,10 +34,10 @@
             <Setter Property="FontSize" Value="14.5" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="12,0,0,0" />
-            <Setter Property="Foreground" Value="#A8C3E8" />
+            <Setter Property="Foreground" Value="#35506E" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
-                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Foreground" Value="#0071E3" />
                     <Setter Property="FontWeight" Value="SemiBold" />
                 </DataTrigger>
             </Style.Triggers>
@@ -48,10 +47,27 @@
             <Setter Property="Width" Value="19" />
             <Setter Property="Height" Value="19" />
             <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Foreground" Value="#A8C3E8" />
+            <Setter Property="Foreground" Value="#5B7C9F" />
             <Style.Triggers>
                 <DataTrigger Binding="{Binding EstaSeleccionada}" Value="True">
-                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Foreground" Value="#0071E3" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="FilaItemMenu" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Horizontal" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.MenuExpandido, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="False">
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TextoMenuColapsable" TargetType="TextBlock" BasedOn="{StaticResource TextoMenu}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding DataContext.MenuExpandido, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -59,38 +75,54 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="264" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- ============================================================
-             MENU LATERAL
-             ============================================================ -->
-        <Border Grid.Column="0" Background="#12305C">
-            <Grid>
+        <Grid Grid.Column="0">
+            <Border x:Name="panelMenu" Background="#DCEBFB" BorderBrush="#C5DDF5" BorderThickness="0,0,1,0" Width="264" HorizontalAlignment="Left">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding MenuExpandido}" Value="False">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="86" Duration="0:0:0.16" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="264" Duration="0:0:0.16" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <!-- Marca -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="22,26,22,22">
-                    <Border Background="#1E4C86" CornerRadius="11" Width="40" Height="40">
+                    <Border Background="#0071E3" CornerRadius="11" Width="40" Height="40">
                         <materialDesign:PackIcon Kind="GlassCocktail" Width="22" Height="22"
                                                  Foreground="White"
                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center" Margin="12,0,0,0">
-                        <TextBlock Text="{Binding TituloTablero}" FontSize="14" FontWeight="Bold" Foreground="White" />
-                        <TextBlock Text="Sistema de Gestión de Bar" FontSize="11.5" Foreground="#7FA6DA" />
+                    <StackPanel VerticalAlignment="Center" Margin="12,0,0,0"
+                                Visibility="{Binding MenuExpandido, Converter={StaticResource BoolAVisibilidad}}">
+                        <TextBlock Text="{Binding TituloTablero}" FontSize="14" FontWeight="Bold" Foreground="#1D1D1F" />
+                        <TextBlock Text="Sistema de Gestión de Bar" FontSize="11.5" Foreground="#5B7C9F" />
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Secciones.
-                     El ScrollViewer no es decorativo: el administrador tiene diez y en una
-                     ventana del alto minimo (740) no entran. Sin el, el ItemsControl se
-                     recorta en silencio y las ultimas secciones desaparecen del menu. -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
                               HorizontalScrollBarVisibility="Disabled">
                 <ItemsControl ItemsSource="{Binding Secciones}">
@@ -105,9 +137,9 @@
                                             CommandParameter="{Binding}" />
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Style="{DynamicResource FilaItemMenu}" ToolTip="{Binding Titulo}">
                                     <materialDesign:PackIcon Style="{DynamicResource IconoMenu}" Kind="{Binding Icono}" />
-                                    <TextBlock Style="{DynamicResource TextoMenu}" Text="{Binding Titulo}" />
+                                    <TextBlock Style="{DynamicResource TextoMenuColapsable}" Text="{Binding Titulo}" />
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
@@ -115,93 +147,143 @@
                 </ItemsControl>
                 </ScrollViewer>
 
-                <!-- Pie: usuario y salidas -->
                 <StackPanel Grid.Row="2" Margin="18,0,18,20">
-                    <Border Background="#1A3F72" CornerRadius="10" Padding="12,10" Margin="0,0,0,12">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Background="#2D89EF" CornerRadius="16" Width="32" Height="32">
+                    <Border Background="#EEF5FD" CornerRadius="14" Padding="12,10" Margin="0,0,0,12">
+                        <StackPanel Style="{DynamicResource FilaItemMenu}">
+                            <Border Background="#0071E3" CornerRadius="16" Width="32" Height="32"
+                                    ToolTip="{Binding NombreUsuario}">
                                 <TextBlock Text="{Binding InicialesUsuario}" Foreground="White"
                                            FontWeight="Bold" FontSize="13"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
-                            <StackPanel VerticalAlignment="Center" Margin="10,0,0,0">
-                                <TextBlock Text="{Binding NombreUsuario}" FontSize="13.5" FontWeight="SemiBold" Foreground="White" />
-                                <TextBlock Text="{Binding RolUsuario}" FontSize="11.5" Foreground="#7FA6DA" />
+                            <StackPanel VerticalAlignment="Center" Margin="10,0,0,0"
+                                        Visibility="{Binding MenuExpandido, Converter={StaticResource BoolAVisibilidad}}">
+                                <TextBlock Text="{Binding NombreUsuario}" FontSize="13.5" FontWeight="SemiBold" Foreground="#1D1D1F" />
+                                <TextBlock Text="{Binding RolUsuario}" FontSize="11.5" Foreground="#5B7C9F" />
                             </StackPanel>
                         </StackPanel>
                     </Border>
 
                     <Button Style="{DynamicResource MaterialDesignOutlinedButton}"
-                            materialDesign:ButtonAssist.CornerRadius="16"
+                            materialDesign:ButtonAssist.CornerRadius="18"
                             Height="36" FontSize="13"
-                            Foreground="#A8C3E8" BorderBrush="#2A5490"
+                            Foreground="#0071E3" BorderBrush="#9CC4F0"
                             Cursor="Hand"
                             Margin="0,0,0,8"
+                            ToolTip="Punto de venta"
                             Command="{Binding IrAlPuntoDeVentaCommand}">
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Style="{DynamicResource FilaItemMenu}">
                             <materialDesign:PackIcon Kind="CashRegister" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="Punto de venta" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Punto de venta" Margin="8,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding MenuExpandido, Converter={StaticResource BoolAVisibilidad}}" />
                         </StackPanel>
                     </Button>
 
                     <Button Style="{DynamicResource MaterialDesignOutlinedButton}"
-                            materialDesign:ButtonAssist.CornerRadius="16"
+                            materialDesign:ButtonAssist.CornerRadius="18"
                             Height="36" FontSize="13"
-                            Foreground="#F0A6A0" BorderBrush="#5C3540"
+                            Foreground="#FF3B30" BorderBrush="#F2B8B3"
                             Cursor="Hand"
+                            ToolTip="Cerrar sesión"
                             Command="{Binding CerrarSesionCommand}">
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel Style="{DynamicResource FilaItemMenu}">
                             <materialDesign:PackIcon Kind="LogoutVariant" Width="16" Height="16" VerticalAlignment="Center" />
-                            <TextBlock Text="Cerrar sesión" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Cerrar sesión" Margin="8,0,0,0" VerticalAlignment="Center"
+                                       Visibility="{Binding MenuExpandido, Converter={StaticResource BoolAVisibilidad}}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
-            </Grid>
-        </Border>
+                </Grid>
+            </Border>
 
-        <!-- ============================================================
-             CONTENIDO DE LA SECCION
-             ============================================================ -->
+            <Button HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Width="26" Height="26" Padding="0" Cursor="Hand"
+                    Command="{Binding AlternarMenuCommand}"
+                    ToolTip="Mostrar u ocultar el menú"
+                    Panel.ZIndex="5">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Margin" Value="251,30,0,0" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding MenuExpandido}" Value="False">
+                                <Setter Property="Margin" Value="73,30,0,0" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="White" CornerRadius="13" BorderBrush="#D2D2D7" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+                <Grid Width="13" Height="13">
+                    <materialDesign:PackIcon Kind="ChevronLeft" Width="13" Height="13" Foreground="#6E6E73">
+                        <materialDesign:PackIcon.Style>
+                            <Style TargetType="materialDesign:PackIcon">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding MenuExpandido}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </materialDesign:PackIcon.Style>
+                    </materialDesign:PackIcon>
+                    <materialDesign:PackIcon Kind="ChevronRight" Width="13" Height="13" Foreground="#6E6E73">
+                        <materialDesign:PackIcon.Style>
+                            <Style TargetType="materialDesign:PackIcon">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding MenuExpandido}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </materialDesign:PackIcon.Style>
+                    </materialDesign:PackIcon>
+                </Grid>
+            </Button>
+        </Grid>
+
         <Grid Grid.Column="1" Margin="26,24,26,24">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Encabezado de la seccion: chip de icono + titulo + bajada, con la misma
-                 estructura que el encabezado del punto de venta. -->
             <Grid Grid.Row="0" Margin="0,0,0,20">
                 <StackPanel Orientation="Horizontal">
                     <Border Width="46" Height="46" CornerRadius="13" Background="White"
-                            BorderBrush="#E4E8F0" BorderThickness="1">
+                            BorderBrush="#E5E5EA" BorderThickness="1">
                         <Border.Effect>
-                            <DropShadowEffect Color="#1565C0" Opacity="0.10" BlurRadius="18" ShadowDepth="3" Direction="270" />
+                            <DropShadowEffect Color="#000000" Opacity="0.07" BlurRadius="18" ShadowDepth="3" Direction="270" />
                         </Border.Effect>
                         <materialDesign:PackIcon Kind="{Binding SeccionActual.Icono}"
-                                                 Width="22" Height="22" Foreground="#1565C0"
+                                                 Width="22" Height="22" Foreground="#0071E3"
                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel VerticalAlignment="Center" Margin="14,0,0,0">
                         <TextBlock Text="{Binding SeccionActual.Titulo}"
-                                   FontSize="24" FontWeight="Bold" Foreground="#2B3445" />
+                                   FontSize="24" FontWeight="Bold" Foreground="#1D1D1F" />
                         <TextBlock Text="{Binding SeccionActual.Subtitulo}"
-                                   FontSize="13.5" Foreground="#8A93A5" Margin="0,2,0,0" />
+                                   FontSize="13.5" Foreground="#6E6E73" Margin="0,2,0,0" />
                     </StackPanel>
                 </StackPanel>
 
                 <Border Background="White" CornerRadius="12" Padding="14,8"
-                        BorderBrush="#E4E8F0" BorderThickness="1"
+                        BorderBrush="#E5E5EA" BorderThickness="1"
                         HorizontalAlignment="Right" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="CalendarBlankOutline" Width="15" Height="15"
-                                                 Foreground="#9AA3B2" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding FechaActual}" FontSize="13.5" Foreground="#5A6577"
+                                                 Foreground="#86868B" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding FechaActual}" FontSize="13.5" Foreground="#515154"
                                    Margin="8,0,0,0" VerticalAlignment="Center" />
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <!-- Router anidado: el DataTemplate de App.xaml resuelve cada seccion -->
             <ContentControl Grid.Row="1" Content="{Binding SeccionActual}" />
         </Grid>
     </Grid>

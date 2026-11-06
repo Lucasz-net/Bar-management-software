@@ -6,14 +6,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.Data
 {
-    /// <summary>
-    /// Semilla de datos de prueba, con la MISMA forma que tendrán las tablas del DER.
-    /// Cuando entre EF Core, este archivo se convierte casi textualmente en el
-    /// método OnModelCreating(...).HasData(...) o en un Seeder de migración.
-    ///
-    /// Es una única fuente de verdad: todo el sistema lee de acá y las relaciones
-    /// (navegación) quedan enlazadas al construirse, igual que haría el ORM.
-    /// </summary>
     public class DatosPrueba
     {
         public List<Rol> Roles { get; } = new();
@@ -29,18 +21,8 @@ namespace SistemaGestionBar.Data
         public List<Ubicacion> Ubicaciones { get; } = new();
         public List<Venta> Ventas { get; } = new();
 
-        /// <summary>Clave en texto plano de los cuatro usuarios de prueba.</summary>
         public const string ClaveDemo = "12345678";
 
-        /// <summary>
-        /// Ruta de la foto del producto. Los archivos viven en Assets/Productos/
-        /// con Build Action = Resource (ver el .csproj).
-        ///
-        /// Se usa la pack URI completa con el nombre del ensamblado y no la forma corta
-        /// "/Assets/...": la relativa se resuelve contra el ensamblado DE ENTRADA, asi que
-        /// deja de funcionar apenas otro proyecto (un tester, un host) arranca la aplicacion.
-        /// Cuando entre la base de datos, esta cadena es el valor de Producto.ruta_imagen.
-        /// </summary>
         private static string RutaFoto(string archivo) =>
             $"pack://application:,,,/SistemaGestionBar;component/Assets/Productos/{archivo}.png";
 
@@ -57,9 +39,6 @@ namespace SistemaGestionBar.Data
             return datos;
         }
 
-        // ---------------------------------------------------------------
-        // Rol / Persona / Usuario / Cliente
-        // ---------------------------------------------------------------
         private void CargarSeguridad()
         {
             Roles.AddRange(new[]
@@ -70,8 +49,6 @@ namespace SistemaGestionBar.Data
                 new Rol { IdRol = 4, NombreRol = RolesSistema.Gerente }
             });
 
-            // El Email de Persona es el CONTACTO PERSONAL. El correo con el que cada
-            // empleado inicia sesión va en Usuario, más abajo.
             Personas.AddRange(new[]
             {
                 new Persona { IdPersona = 1, Nombre = "Nazareno", Apellido = "Villalba",  DniCuit = "40123456",   Telefono = "351-5550101", Email = "nazareno.villalba@gmail.com" },
@@ -84,8 +61,6 @@ namespace SistemaGestionBar.Data
                 new Persona { IdPersona = 8, Nombre = "Valentina", Apellido = "Suárez",   DniCuit = "42888999",   Telefono = "351-5550107", Email = "valen.suarez@gmail.com" }
             });
 
-            // Las claves se hashean igual que lo hará el alta real de usuarios (RF-09).
-            // El correo de trabajo es el nombre de usuario con el que se entra al sistema.
             Usuarios.AddRange(new[]
             {
                 new Usuario { IdUsuario = 1, IdPersona = 1, IdRol = 1, Email = "admin@bar.com",    Clave = SeguridadHelper.GenerarHash(ClaveDemo) },
@@ -103,13 +78,8 @@ namespace SistemaGestionBar.Data
             });
         }
 
-        // ---------------------------------------------------------------
-        // Tablas paramétricas: Categoria / Metodo_Pago / Ubicacion
-        // ---------------------------------------------------------------
         private void CargarParametricas()
         {
-            // Tres categorías para el catálogo del vendedor. "Botellas" agrupa
-            // cervezas, vinos y destilados: todo lo que se vende cerrado, sin preparar.
             Categorias.AddRange(new[]
             {
                 new Categoria { IdCategoria = 1, NombreCategoria = "Cócteles" },
@@ -125,7 +95,6 @@ namespace SistemaGestionBar.Data
                 new MetodoPago { IdMetodoPago = 4, NombreMetodo = "Transferencia / QR" }
             });
 
-            // Una sola barra: la atiende el barman, por eso no lleva mesero (RF-02).
             Ubicaciones.AddRange(new[]
             {
                 new Ubicacion { IdUbicacion = 1, NombreUbicacion = "Mesa 1", Capacidad = 4, Tipo = TipoUbicacion.Mesa },
@@ -137,9 +106,6 @@ namespace SistemaGestionBar.Data
             });
         }
 
-        // ---------------------------------------------------------------
-        // Ingrediente
-        // ---------------------------------------------------------------
         private void CargarInventario()
         {
             Ingredientes.AddRange(new[]
@@ -163,41 +129,29 @@ namespace SistemaGestionBar.Data
             });
         }
 
-        // ---------------------------------------------------------------
-        // Producto
-        // ---------------------------------------------------------------
         private void CargarCatalogo()
         {
             Productos.AddRange(new[]
             {
-                // Botellas (IdCategoria 3): venta directa, descuentan de Producto.Stock
                 new Producto { IdProducto = 1, IdCategoria = 3, Nombre = "Corona Extra 710ml", Descripcion = "Cerveza lager mexicana, botella de 710 ml.", Precio = 3500, Stock = 48, StockMinimo = 12, RutaImagen = RutaFoto("corona-extra") },
                 new Producto { IdProducto = 2, IdCategoria = 3, Nombre = "Heineken 473ml",     Descripcion = "Lager holandesa en lata de 473 ml.",         Precio = 3200, Stock = 36, StockMinimo = 12, RutaImagen = RutaFoto("heineken") },
                 new Producto { IdProducto = 3, IdCategoria = 3, Nombre = "Patagonia Amber",    Descripcion = "Amber lager artesanal, botella de 730 ml.",  Precio = 4200, Stock = 6,  StockMinimo = 10, RutaImagen = RutaFoto("patagonia-amber") },
 
-                // Cócteles (IdCategoria 1): se preparan, descuentan de Ingrediente
                 new Producto { IdProducto = 4, IdCategoria = 1, Nombre = "Mojito", Descripcion = "Ron blanco, menta fresca, lima y soda.", Precio = 6500, RutaImagen = RutaFoto("mojito") },
                 new Producto { IdProducto = 5, IdCategoria = 1, Nombre = "Margarita", Descripcion = "Tequila, triple sec y jugo de limón.", Precio = 7000, RutaImagen = RutaFoto("margarita") },
                 new Producto { IdProducto = 6, IdCategoria = 1, Nombre = "Whisky Sour", Descripcion = "Whisky, limón y almíbar.", Precio = 8500, RutaImagen = RutaFoto("whisky-sour") },
                 new Producto { IdProducto = 7, IdCategoria = 1, Nombre = "Fernet con Coca", Descripcion = "El clásico: 30% fernet, 70% cola.", Precio = 5500, RutaImagen = RutaFoto("fernet-con-coca") },
                 new Producto { IdProducto = 8, IdCategoria = 1, Nombre = "Gin Tonic de Pepino", Descripcion = "Gin artesanal, tónica y pepino.", Precio = 7200, RutaImagen = RutaFoto("gin-tonic") },
 
-                // Sin Alcohol (IdCategoria 2)
                 new Producto { IdProducto = 9, IdCategoria = 2, Nombre = "Limonada de Menta", Descripcion = "Limón exprimido, menta y soda.", Precio = 3000, RutaImagen = RutaFoto("limonada") },
                 new Producto { IdProducto = 10, IdCategoria = 2, Nombre = "Agua Mineral 500ml", Descripcion = "Agua mineral sin gas.", Precio = 1800, Stock = 60, StockMinimo = 15, RutaImagen = RutaFoto("agua-mineral") },
                 new Producto { IdProducto = 11, IdCategoria = 2, Nombre = "Gaseosa Línea Cola", Descripcion = "Botella de 500 ml.", Precio = 2200, Stock = 72, StockMinimo = 20, RutaImagen = RutaFoto("gaseosa-cola") },
 
-                // Botellas (IdCategoria 3): destilados y vinos
                 new Producto { IdProducto = 12, IdCategoria = 3, Nombre = "Vodka Smirnoff 700ml", Descripcion = "Botella cerrada de 700 ml.", Precio = 12000, Stock = 12, StockMinimo = 4, RutaImagen = RutaFoto("vodka-smirnoff") },
                 new Producto { IdProducto = 13, IdCategoria = 3, Nombre = "Vino Malbec 750ml", Descripcion = "Malbec de Mendoza, cosecha 2023.", Precio = 9500, Stock = 18, StockMinimo = 5, RutaImagen = RutaFoto("vino-malbec") }
             });
         }
 
-        // ---------------------------------------------------------------
-        // Producto_Ingrediente (que lleva y cuanto) + Receta (como se prepara).
-        // Solo tienen filas los productos que se preparan: una botella de vino
-        // no aparece en ninguna de las dos tablas.
-        // ---------------------------------------------------------------
         private void CargarRecetas()
         {
             void Composicion(int idProducto, params (int IdIngrediente, decimal Cantidad)[] items)
@@ -220,7 +174,6 @@ namespace SistemaGestionBar.Data
             Composicion(8, (13, 60), (14, 200), (15, 3), (16, 6));                  // Gin Tonic de Pepino
             Composicion(9, (8, 60), (4, 15), (2, 6), (5, 200), (16, 6));            // Limonada de Menta
 
-            // Tabla Receta: solo el procedimiento. Los ingredientes ya quedaron arriba.
             Recetas.Add(new Receta { IdProducto = 4, Instrucciones =   // Mojito
                 "1. Colocar la menta con el azúcar y el jugo de lima en el vaso y macerar sin romper las hojas.\n2. Agregar el ron y llenar con hielo.\n3. Completar con soda y revolver de abajo hacia arriba.\n4. Decorar con un gajo de lima y un ramito de menta." });
             Recetas.Add(new Receta { IdProducto = 5, Instrucciones =   // Margarita
@@ -235,9 +188,6 @@ namespace SistemaGestionBar.Data
                 "1. Macerar la menta con el azúcar.\n2. Agregar el jugo de limón y mezclar hasta disolver.\n3. Llenar con hielo y completar con soda." });
         }
 
-        // ---------------------------------------------------------------
-        // Enlaza las propiedades de navegación, tal como haría el ORM al hacer Include().
-        // ---------------------------------------------------------------
         private void EnlazarNavegacion()
         {
             foreach (var usuario in Usuarios)
@@ -274,20 +224,6 @@ namespace SistemaGestionBar.Data
             }
         }
 
-        // ---------------------------------------------------------------
-        // Venta + Venta_Detalle: una semana de operación del bar.
-        //
-        // Sin esto, el historial de ventas y los indicadores del resumen arrancan
-        // vacíos y no hay forma de ver funcionar la sección Ventas ni las facturas
-        // (que ahora se arman al vuelo a partir de estas mismas ventas).
-        //
-        // Dos decisiones deliberadas:
-        //  - Las ventas se siembran COMO DATOS, no llamando a RegistrarVenta: son ventas
-        //    que ya ocurrieron, así que no vuelven a descontar stock. El stock cargado
-        //    arriba ya es el que quedó después de estas ventas.
-        //  - El precio del renglón sale del catálogo actual. En producción sería el precio
-        //    del día de la venta; en una semilla, mantener dos precios sería ruido.
-        // ---------------------------------------------------------------
         private void CargarHistorialDeVentas()
         {
             int idVenta = 1;
@@ -341,7 +277,6 @@ namespace SistemaGestionBar.Data
                 Ventas.Add(venta);
             }
 
-            //        días  hh  mm  cajero cliente pago  modalidad                  ubic  mesero  renglones
             Registrar(6, 21, 15, 2, 1, 1, ModalidadConsumo.Local, 1, 3, (4, 2), (1, 1));
             Registrar(6, 22, 40, 3, 2, 2, ModalidadConsumo.Local, 3, 3, (7, 3), (8, 1));
             Registrar(5, 20, 5, 2, 1, 4, ModalidadConsumo.ParaLlevar, null, null, (10, 2), (11, 1));

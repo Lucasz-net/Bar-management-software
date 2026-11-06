@@ -7,19 +7,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Cuentas de acceso al sistema (RF-09 y RF-12).
-    ///
-    /// Una cuenta no es una persona: es el permiso de una persona <b>que ya está en el
-    /// padrón</b> para entrar al sistema. Por eso acá no se escribe un solo dato personal.
-    /// Lo que se define es el correo de trabajo con el que inicia sesión, el rol que tiene
-    /// y su contraseña.
-    ///
-    /// <b>Cómo se elige a quién darle la cuenta.</b> Por DNI, igual que en Personas: se
-    /// teclea el documento y, si está en el padrón, aparecen sus datos. Si no está, no se
-    /// inventa una persona desde acá —eso sería volver a mezclar las dos pantallas—: se
-    /// avisa y se ofrece el salto a Personas para darla de alta.
-    /// </summary>
     public class AdminUsuariosViewModel : SeccionAdminViewModel
     {
         public AdminUsuariosViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -43,10 +30,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ObservableCollection<Usuario> Usuarios { get; }
         public ObservableCollection<Rol> Roles { get; }
 
-        // ---------------------------------------------------------------
-        // Filtros
-        // ---------------------------------------------------------------
-        /// <summary>Roles para el combo de filtro, con "Todos" adelante.</summary>
         public ObservableCollection<OpcionFiltro<Rol?>> OpcionesRol { get; }
 
         private OpcionFiltro<Rol?>? _rolFiltro;
@@ -87,9 +70,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             RolFiltro = OpcionesRol.FirstOrDefault();
         }
 
-        // ---------------------------------------------------------------
-        // Indicadores del encabezado
-        // ---------------------------------------------------------------
         public int CantidadAdministradores =>
             Usuarios.Count(u => u.NombreRol == RolesSistema.Administrador);
 
@@ -101,15 +81,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(CantidadEnSalon));
         }
 
-        // ---------------------------------------------------------------
-        // Selección
-        // ---------------------------------------------------------------
         private Usuario? _seleccionado;
 
-        /// <summary>
-        /// Con el formulario abierto la selección queda congelada, igual que en el resto
-        /// del tablero: moverla dejaría remarcada una fila que no es la que se está editando.
-        /// </summary>
         public Usuario? Seleccionado
         {
             get => _seleccionado;
@@ -165,27 +138,14 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private bool _esAlta;
 
-        /// <summary>
-        /// En un alta el DNI se teclea; editando, no: cambiar de titular no es editar una
-        /// cuenta, es darle de baja a uno y de alta a otro. Y las ventas ya registradas
-        /// apuntan a esta cuenta.
-        /// </summary>
         public bool EsAlta => _esAlta;
 
         public string TituloEditor => !EnEdicion
             ? "Ficha de la cuenta"
             : _esAlta ? "Nueva cuenta de acceso" : $"Editando la cuenta de {_nombrePersona}";
 
-        // ---------------------------------------------------------------
-        // La persona titular de la cuenta
-        // ---------------------------------------------------------------
         private string _dni = string.Empty;
 
-        /// <summary>
-        /// Documento del titular. Al escribirlo completo se busca en el padrón: si está,
-        /// se muestran sus datos y la cuenta queda enganchada a esa ficha; si no está,
-        /// se avisa y se ofrece darla de alta en Personas.
-        /// </summary>
         public string Dni
         {
             get => _dni;
@@ -196,12 +156,10 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
         }
 
-        /// <summary>La persona que el DNI encontró. Sin ella no hay cuenta que guardar.</summary>
         private Persona? _persona;
 
         private string _nombrePersona = string.Empty;
 
-        /// <summary>Nombre del titular, de solo lectura: se edita en Personas.</summary>
         public string NombrePersona
         {
             get => _nombrePersona;
@@ -219,19 +177,14 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private bool _dniSinResultado;
 
-        /// <summary>Se buscó un DNI completo y el padrón no lo tiene: hay que darla de alta.</summary>
         public bool DniSinResultado
         {
             get => _dniSinResultado;
             private set => SetProperty(ref _dniSinResultado, value);
         }
 
-        // ---------------------------------------------------------------
-        // Datos de la cuenta
-        // ---------------------------------------------------------------
         private string _emailTrabajo = string.Empty;
 
-        /// <summary>Correo del bar: es el nombre de usuario con el que se inicia sesión (RF-09).</summary>
         public string EmailTrabajo { get => _emailTrabajo; set => SetCampo(ref _emailTrabajo, value); }
 
         private Rol? _rolSeleccionado;
@@ -240,7 +193,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         private string _claveNueva = string.Empty;
         public string ClaveNueva { get => _claveNueva; set => SetCampo(ref _claveNueva, value); }
 
-        /// <summary>La cuenta que se está editando, o null si es un alta.</summary>
         private Usuario? CuentaActual => _esAlta ? null : Seleccionado;
 
         public string AyudaClave => CuentaActual is null
@@ -253,19 +205,13 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand CancelarCommand { get; }
         public ICommand EliminarCommand { get; }
 
-        /// <summary>Salto al padrón para dar de alta al titular que todavía no existe.</summary>
         public ICommand IrAPersonasCommand { get; }
 
-        // ---------------------------------------------------------------
-        // Validación
-        // ---------------------------------------------------------------
         protected override void DeclararReglas()
         {
             Requerido(Dni, nameof(Dni), "El DNI del titular");
             FormatoDni(Dni, nameof(Dni));
 
-            // Recién con el documento completo: a medio teclear, "no está en el padrón"
-            // es cierto y no aporta nada más que ruido rojo debajo del campo.
             if (!HayPersona && Dni.Count(char.IsDigit) >= DigitosDeDni)
                 Agregar(nameof(Dni), "Ese DNI no está en el padrón.");
 
@@ -286,14 +232,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         private IEnumerable<Usuario> OtrasCuentas() =>
             Usuarios.Where(u => u.IdUsuario != Seleccionado?.IdUsuario);
 
-        // ---------------------------------------------------------------
-        // Búsqueda del titular en el padrón
-        // ---------------------------------------------------------------
-        /// <summary>
-        /// Solo en un alta. Trae del padrón a la persona del DNI tecleado y, si ya tiene
-        /// cuenta, lo dice en vez de dejar que el usuario complete el formulario para que
-        /// el repositorio lo rechace al final.
-        /// </summary>
         private void BuscarEnElPadron()
         {
             if (!_esAlta || !EnEdicion)
@@ -305,16 +243,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             {
                 EstablecerPersona(null);
 
-                // Sin esto queda arriba el "fulano está en el padrón" del DNI anterior,
-                // en verde, contradiciendo al panel que dice que este no está.
                 LimpiarMensaje();
 
-                // El aviso recién tiene sentido con el documento completo: a medio
-                // teclear, "no existe" es cierto y no sirve para nada.
-                //
-                // No se toca la barra de mensajes: el panel que aparece debajo del campo
-                // ya lo dice y encima trae el botón para ir a cargarla. Decirlo también
-                // arriba era el mismo texto tres veces en la misma pantalla.
                 DniSinResultado = Dni.Count(char.IsDigit) >= DigitosDeDni;
                 return;
             }
@@ -324,8 +254,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             var yaConCuenta = Usuarios.FirstOrDefault(u => u.IdPersona == encontrada.IdPersona);
             if (yaConCuenta is not null)
             {
-                // No se abandona la edición: se corta el alta y se muestra la cuenta que
-                // ya existe, que es lo que el usuario venía a buscar sin saberlo.
                 Cancelar();
                 EstablecerSeleccion(Usuarios.FirstOrDefault(u => u.IdUsuario == yaConCuenta.IdUsuario));
                 Informar($"{encontrada.NombreCompleto} ya tiene cuenta ({yaConCuenta.Email}). " +
@@ -354,9 +282,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void IrAPersonas() => IrA(DestinoAdmin.Personas, _persona);
 
-        // ---------------------------------------------------------------
-        // Ciclo de vida
-        // ---------------------------------------------------------------
         public sealed override void Recargar()
         {
             int? idPrevio = Seleccionado?.IdUsuario;
@@ -384,11 +309,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             EstablecerSeleccion(Usuarios.FirstOrDefault(u => u.IdUsuario == idPrevio) ?? Usuarios.FirstOrDefault());
         }
 
-        /// <summary>
-        /// Llega acá el salto desde Personas. Si esa persona ya tiene cuenta se la
-        /// selecciona; si no, se abre el alta con su DNI puesto, que es lo que se quiere
-        /// hacer justo después de dar de alta a un empleado en el padrón.
-        /// </summary>
         public override void Enfocar(object? foco)
         {
             if (foco is not Persona persona)

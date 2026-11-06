@@ -17,19 +17,10 @@
 
     <UserControl.Resources>
 
-        <!-- ============================================================
-             El login usa el mismo lenguaje visual que el tablero y el punto
-             de venta: azul #12305C para la marca, acento #1565C0, fondo
-             #F4F6FA y tarjetas blancas con sombra tenida de azul. Antes era
-             una tarjeta gris suelta en el medio y parecia de otra aplicacion.
-             ============================================================ -->
+        <SolidColorBrush x:Key="TintaLogin" Color="#1D1D1F" />
+        <SolidColorBrush x:Key="TintaLoginSuave" Color="#6E6E73" />
+        <SolidColorBrush x:Key="AcentoLogin" Color="#0071E3" />
 
-        <SolidColorBrush x:Key="TintaLogin" Color="#2B3445" />
-        <SolidColorBrush x:Key="TintaLoginSuave" Color="#8A93A5" />
-        <SolidColorBrush x:Key="AcentoLogin" Color="#1565C0" />
-
-        <!-- Sin Height fijo: el estilo Outlined de Material mide su propio alto para
-             ubicar el hint, y forzarselo recorta el texto. Se agranda con Padding. -->
         <Style x:Key="CampoLogin" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
             <Setter Property="FontSize" Value="14.5" />
             <Setter Property="Padding" Value="14,12" />
@@ -64,7 +55,6 @@
             <Setter Property="Cursor" Value="Hand" />
         </Style>
 
-        <!-- Una fila de lo que el sistema hace, en el panel de marca. -->
         <Style x:Key="TextoCapacidad" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Foreground" Value="#C3D8F5" />
@@ -77,7 +67,7 @@
             <Setter Property="Width" Value="38" />
             <Setter Property="Height" Value="38" />
             <Setter Property="CornerRadius" Value="11" />
-            <Setter Property="Background" Value="#1E4C86" />
+            <Setter Property="Background" Value="#0A4FA8" />
         </Style>
 
     </UserControl.Resources>
@@ -88,24 +78,14 @@
             <ColumnDefinition Width="560" />
         </Grid.ColumnDefinitions>
 
-        <!-- ============================================================
-             PANEL DE MARCA
-             Ocupa la mitad izquierda para que la pantalla de entrada diga
-             de que sistema se trata, en vez de ser un cuadro de dos campos
-             flotando sobre un fondo gris.
-             ============================================================ -->
         <Grid Grid.Column="0" ClipToBounds="True">
             <Grid.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#0E2A52" Offset="0" />
-                    <GradientStop Color="#17427C" Offset="1" />
+                    <GradientStop Color="#0A0F1C" Offset="0" />
+                    <GradientStop Color="#12264A" Offset="1" />
                 </LinearGradientBrush>
             </Grid.Background>
 
-            <!-- Dos halos que le dan profundidad al plano sin competir con el texto.
-                 Van con degradado radial hasta transparente y no con un relleno liso:
-                 un circulo de color parejo, por poca opacidad que tenga, deja el borde
-                 marcado y se lee como una mancha, no como luz. -->
             <Ellipse Width="620" Height="620"
                      HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-230,-260,0,0">
                 <Ellipse.Fill>
@@ -129,9 +109,8 @@
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center"
                         MaxWidth="440" Margin="48,0">
 
-                <!-- Marca, igual que el encabezado del menu lateral del tablero -->
                 <StackPanel Orientation="Horizontal">
-                    <Border Background="#1E4C86" CornerRadius="13" Width="52" Height="52">
+                    <Border Background="#0A4FA8" CornerRadius="13" Width="52" Height="52">
                         <materialDesign:PackIcon Kind="GlassCocktail" Width="28" Height="28"
                                                  Foreground="White"
                                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -144,7 +123,7 @@
                     </StackPanel>
                 </StackPanel>
 
-                <Border Height="1" Background="#1E4C86" Margin="0,34,0,0" />
+                <Border Height="1" Background="#0A4FA8" Margin="0,34,0,0" />
 
                 <StackPanel Margin="0,34,0,0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,22">
@@ -177,14 +156,11 @@
             </StackPanel>
         </Grid>
 
-        <!-- ============================================================
-             FORMULARIO
-             ============================================================ -->
-        <Grid Grid.Column="1" Background="#F4F6FA">
+        <Grid Grid.Column="1" Background="#F5F5F7">
             <Border Width="400" VerticalAlignment="Center" HorizontalAlignment="Center"
                     Background="White" CornerRadius="16" Padding="34,32">
                 <Border.Effect>
-                    <DropShadowEffect Color="#1565C0" Opacity="0.13" BlurRadius="28"
+                    <DropShadowEffect Color="#000000" Opacity="0.07" BlurRadius="28"
                                       ShadowDepth="5" Direction="270" />
                 </Border.Effect>
 
@@ -192,19 +168,17 @@
                     <TextBlock Text="Iniciar sesión" FontSize="25" FontWeight="Bold"
                                Foreground="{StaticResource TintaLogin}" />
 
-                    <!-- Barra de estado: verde al entrar, roja si las credenciales no
-                         sirven. Como bloque y no como texto suelto, para que se vea. -->
                     <Border CornerRadius="10" Padding="13,11" Margin="0,20,0,0">
                         <Border.Style>
                             <Style TargetType="Border">
                                 <Setter Property="Visibility" Value="Collapsed" />
-                                <Setter Property="Background" Value="#E4F3EA" />
+                                <Setter Property="Background" Value="#E8F8EC" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding HayMensaje}" Value="True">
                                         <Setter Property="Visibility" Value="Visible" />
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
-                                        <Setter Property="Background" Value="#FBE9E7" />
+                                        <Setter Property="Background" Value="#FFEBEA" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -215,11 +189,11 @@
                                 <materialDesign:PackIcon.Style>
                                     <Style TargetType="materialDesign:PackIcon">
                                         <Setter Property="Kind" Value="CheckCircleOutline" />
-                                        <Setter Property="Foreground" Value="#2E7D32" />
+                                        <Setter Property="Foreground" Value="#34C759" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
                                                 <Setter Property="Kind" Value="AlertCircleOutline" />
-                                                <Setter Property="Foreground" Value="#C62828" />
+                                                <Setter Property="Foreground" Value="#FF3B30" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -230,10 +204,10 @@
                                        Width="278" Margin="10,0,0,0">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#17703F" />
+                                        <Setter Property="Foreground" Value="#248A3D" />
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding MensajeEsError}" Value="True">
-                                                <Setter Property="Foreground" Value="#A93226" />
+                                                <Setter Property="Foreground" Value="#D70015" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
@@ -265,10 +239,6 @@
                         </StackPanel>
                     </Button>
 
-                    <!-- Aca iba el enlace "Registrarse". No esta ni se reemplaza por un
-                         cartel que explique su ausencia: en este sistema nadie se da de
-                         alta solo, las cuentas las crea el administrador (RF-09), y una
-                         pantalla de ingreso no tiene por que contar eso. -->
                 </StackPanel>
             </Border>
         </Grid>

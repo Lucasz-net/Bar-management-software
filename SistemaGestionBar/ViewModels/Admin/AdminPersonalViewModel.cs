@@ -7,20 +7,6 @@ using SistemaGestionBar.Services;
 
 namespace SistemaGestionBar.ViewModels.Admin
 {
-    /// <summary>
-    /// Padrón de personas (RF-10 y RF-12). Acá se carga y se corrige <b>quién es</b>
-    /// alguien: DNI, nombre, apellido, teléfono y correo personal.
-    ///
-    /// <b>Qué NO se hace acá.</b> Nada de credenciales. El correo de trabajo, el rol y la
-    /// contraseña viven en la sección <see cref="AdminUsuariosViewModel">Usuarios</see>,
-    /// que arma la cuenta sobre una persona que este padrón ya tiene. Estaban juntos y el
-    /// formulario mentía: para dar de alta a un cliente había que pasar por delante de un
-    /// bloque de credenciales que no le correspondía.
-    ///
-    /// Lo único que sigue siendo de las dos pantallas es el <b>DNI</b>: es el dato
-    /// identificatorio, y al escribirlo en un alta trae a la persona que ya lo tenga en
-    /// vez de duplicarla.
-    /// </summary>
     public class AdminPersonalViewModel : SeccionAdminViewModel
     {
         public AdminPersonalViewModel(IRepositorioBar repositorio, IServicioDialogo dialogo)
@@ -42,9 +28,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         public ObservableCollection<Persona> Personas { get; }
 
-        // ---------------------------------------------------------------
-        // Filtros
-        // ---------------------------------------------------------------
         public IReadOnlyList<OpcionFiltro<VinculoPersona>> OpcionesVinculo { get; } = new[]
         {
             new OpcionFiltro<VinculoPersona>("Todas", VinculoPersona.Todas),
@@ -100,9 +83,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             Vinculo = OpcionesVinculo[0];
         }
 
-        // ---------------------------------------------------------------
-        // Indicadores del encabezado
-        // ---------------------------------------------------------------
         public int CantidadClientes => Personas.Count(p => p.EsCliente);
         public int CantidadEmpleados => Personas.Count(p => p.EsEmpleado);
 
@@ -112,15 +92,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             OnPropertyChanged(nameof(CantidadEmpleados));
         }
 
-        // ---------------------------------------------------------------
-        // Selección
-        // ---------------------------------------------------------------
         private Persona? _seleccionada;
 
-        /// <summary>
-        /// Con la ficha abierta para editar la selección queda congelada: si se pudiera
-        /// mover, quedaría remarcada una fila que no es la que muestra el formulario.
-        /// </summary>
         public Persona? Seleccionada
         {
             get => _seleccionada;
@@ -134,8 +107,6 @@ namespace SistemaGestionBar.ViewModels.Admin
                     if (value is not null)
                         Fallar("Terminá la edición —guardá o cancelá— antes de elegir otra persona.");
 
-                    // Vuelve a avisar la propiedad para que la grilla devuelva la
-                    // selección a donde estaba.
                     OnPropertyChanged(nameof(Seleccionada));
                     return;
                 }
@@ -144,7 +115,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             }
         }
 
-        /// <summary>Cambia la selección sin pasar por el candado: lo usa Recargar.</summary>
         private void EstablecerSeleccion(Persona? persona)
         {
             if (!SetProperty(ref _seleccionada, persona, nameof(Seleccionada)))
@@ -184,19 +154,8 @@ namespace SistemaGestionBar.ViewModels.Admin
             ? "Ficha de la persona"
             : _esAlta ? "Nueva persona" : $"Editando a {_nombre} {_apellido}".TrimEnd();
 
-        // ---------------------------------------------------------------
-        // Datos personales
-        // ---------------------------------------------------------------
         private string _dni = string.Empty;
 
-        /// <summary>
-        /// Dato identificatorio, con los 8 números pelados. En un alta, escribirlo completo
-        /// trae del padrón a la persona que ya lo tenga: es lo que evita cargar dos veces a
-        /// la misma persona.
-        ///
-        /// Para mostrarlo en la grilla o en la ficha va <see cref="Persona.DniFormateado"/>,
-        /// que es el que le pone los puntos.
-        /// </summary>
         public string Dni
         {
             get => _dni;
@@ -221,7 +180,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private bool _esCliente;
 
-        /// <summary>RF-05: tildarlo es lo que habilita a la persona en el punto de venta.</summary>
         public bool EsCliente { get => _esCliente; set => SetProperty(ref _esCliente, value); }
 
         public ICommand NuevoCommand { get; }
@@ -230,10 +188,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         public ICommand CancelarCommand { get; }
         public ICommand EliminarCommand { get; }
 
-        /// <summary>
-        /// Atajo a la otra mitad: desde la ficha se salta a Usuarios llevando la persona,
-        /// que es lo que se quiere hacer justo después de dar de alta a un empleado.
-        /// </summary>
         public ICommand IrAUsuariosCommand { get; }
 
         public bool PuedeGestionarCuentas => PuedeIrA(DestinoAdmin.Usuarios);
@@ -241,9 +195,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         protected override void AlCambiarLosDestinos() =>
             OnPropertyChanged(nameof(PuedeGestionarCuentas));
 
-        // ---------------------------------------------------------------
-        // Validación
-        // ---------------------------------------------------------------
         protected override void DeclararReglas()
         {
             Requerido(Dni, nameof(Dni), "El DNI");
@@ -267,14 +218,6 @@ namespace SistemaGestionBar.ViewModels.Admin
         private IEnumerable<Persona> OtrasPersonas() =>
             Personas.Where(p => p.IdPersona != Seleccionada?.IdPersona);
 
-        // ---------------------------------------------------------------
-        // Búsqueda en el padrón por documento
-        // ---------------------------------------------------------------
-        /// <summary>
-        /// Solo en un alta: si el DNI tecleado ya está en el padrón, se traen los datos de
-        /// esa persona y el alta se convierte en una edición. Así no quedan dos filas para
-        /// el mismo DNI cuando un cliente conocido entra a trabajar al bar.
-        /// </summary>
         private void BuscarEnElPadron()
         {
             if (!_esAlta || !EnEdicion)
@@ -296,9 +239,6 @@ namespace SistemaGestionBar.ViewModels.Admin
                      "Los cambios que hagas ahora actualizan su ficha.");
         }
 
-        // ---------------------------------------------------------------
-        // Ciclo de vida
-        // ---------------------------------------------------------------
         public sealed override void Recargar()
         {
             int? idPrevio = Seleccionada?.IdPersona;
@@ -314,7 +254,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             EstablecerSeleccion(Personas.FirstOrDefault(p => p.IdPersona == idPrevio) ?? Personas.FirstOrDefault());
         }
 
-        /// <summary>Llega acá el salto desde Usuarios: señala en el padrón a esa persona.</summary>
         public override void Enfocar(object? foco)
         {
             int? id = foco switch
@@ -335,8 +274,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void CargarEnEditor(Persona? persona)
         {
-            // Normalizado, no crudo: una ficha vieja guardada con puntos tiene que abrirse
-            // en el formulario como se carga hoy, con los números pelados.
             _dni = Documento.Normalizar(persona?.DniCuit);
             _nombre = persona?.Nombre ?? string.Empty;
             _apellido = persona?.Apellido ?? string.Empty;
@@ -353,8 +290,6 @@ namespace SistemaGestionBar.ViewModels.Admin
                 OnPropertyChanged(propiedad);
             }
 
-            // Ficha recién cargada: las reglas se calculan, pero nada se pinta de rojo
-            // hasta que el usuario toque un campo o apriete Guardar.
             ReiniciarValidacion();
         }
 
@@ -395,8 +330,6 @@ namespace SistemaGestionBar.ViewModels.Admin
 
         private void Guardar()
         {
-            // El botón está habilitado aunque falten datos: deshabilitado no explica QUÉ
-            // falta. Se aprieta, se marcan los campos y se dice cuántos hay que corregir.
             if (!IntentarConfirmar())
             {
                 Fallar(MensajeDeFormularioInvalido);
@@ -431,9 +364,6 @@ namespace SistemaGestionBar.ViewModels.Admin
             if (Seleccionada is null)
                 return;
 
-            // La cuenta NO se borra en cascada desde acá: dar de baja un acceso es una
-            // decisión de la sección Usuarios y se toma mirando esa pantalla. Si la
-            // persona tiene cuenta, el repositorio rechaza el borrado y lo dice.
             if (Seleccionada.EsEmpleado)
             {
                 Fallar($"{Seleccionada.NombreCompleto} tiene una cuenta de acceso. " +

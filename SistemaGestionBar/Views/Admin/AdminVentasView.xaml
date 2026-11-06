@@ -7,7 +7,8 @@
              xmlns:vm="clr-namespace:SistemaGestionBar.ViewModels.Admin"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:AdminVentasViewModel}"
-             d:DesignHeight="700" d:DesignWidth="1180">
+             d:DesignHeight="700" d:DesignWidth="1180"
+             FontFamily="/SistemaGestionBar;component/Assets/Fonts/#Inter">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -17,54 +18,76 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- ==== INDICADORES ==== -->
-        <!-- Se recalculan con el filtro: si el usuario mira "hoy", los numeros son de hoy. -->
         <UniformGrid Grid.Row="0" Rows="1" Columns="3">
-            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0">
-                <StackPanel Orientation="Horizontal">
-                    <Border Style="{DynamicResource ChipIcono}">
-                        <materialDesign:PackIcon Kind="ReceiptTextOutline" Width="20" Height="20"
-                                                 Foreground="{DynamicResource Acento}"
-                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadVentas}" />
-                        <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ventas en el período" />
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0" Padding="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{DynamicResource FranjaIndicador}" Background="{DynamicResource Acento}" />
+                    <StackPanel Grid.Column="1" Style="{DynamicResource ContenidoIndicador}" Orientation="Horizontal">
+                        <Border Style="{DynamicResource ChipIcono}">
+                            <materialDesign:PackIcon Kind="ReceiptTextOutline" Width="20" Height="20"
+                                                     Foreground="{DynamicResource Acento}"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource ValorIndicador}" Text="{Binding CantidadVentas}" />
+                            <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ventas en el período" />
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
-            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0">
-                <StackPanel Orientation="Horizontal">
-                    <Border Style="{DynamicResource ChipIcono}" Background="{DynamicResource ExitoSuave}">
-                        <materialDesign:PackIcon Kind="CashMultiple" Width="20" Height="20" Foreground="#17703F"
-                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Style="{DynamicResource ValorIndicador}" Foreground="{DynamicResource Exito}"
-                                   Text="{Binding TotalFacturado, StringFormat={}{0:C0}}" />
-                        <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Total facturado" />
+            <Border Style="{DynamicResource TarjetaIndicador}" Margin="0,0,14,0" Padding="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{DynamicResource FranjaIndicador}" Background="{DynamicResource Exito}" />
+                    <StackPanel Grid.Column="1" Style="{DynamicResource ContenidoIndicador}" Orientation="Horizontal">
+                        <Border Style="{DynamicResource ChipIcono}" Background="{DynamicResource ExitoSuave}">
+                            <materialDesign:PackIcon Kind="CashMultiple" Width="20" Height="20" Foreground="#248A3D"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource ValorIndicador}" Foreground="{DynamicResource Exito}"
+                                       Text="{Binding TotalFacturado, StringFormat={}{0:C0}}" />
+                            <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Total facturado" />
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
-            <Border Style="{DynamicResource TarjetaIndicador}">
-                <StackPanel Orientation="Horizontal">
-                    <Border Style="{DynamicResource ChipIcono}" Background="#F1F4F9">
-                        <materialDesign:PackIcon Kind="ChartLine" Width="20" Height="20"
-                                                 Foreground="#5A6577"
-                                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Border Style="{DynamicResource TarjetaIndicador}" Padding="0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Border Grid.Column="0" Style="{DynamicResource FranjaIndicador}">
+                        <Border.Background>
+                            <SolidColorBrush Color="#515154" />
+                        </Border.Background>
                     </Border>
-                    <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
-                        <TextBlock Style="{DynamicResource ValorIndicador}" Foreground="#5A6577"
-                                   Text="{Binding TicketPromedio, StringFormat={}{0:C0}}" />
-                        <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ticket promedio" />
+                    <StackPanel Grid.Column="1" Style="{DynamicResource ContenidoIndicador}" Orientation="Horizontal">
+                        <Border Style="{DynamicResource ChipIcono}" Background="#F2F2F7">
+                            <materialDesign:PackIcon Kind="ChartLine" Width="20" Height="20"
+                                                     Foreground="#515154"
+                                                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource ValorIndicador}" Foreground="#515154"
+                                       Text="{Binding TicketPromedio, StringFormat={}{0:C0}}" />
+                            <TextBlock Style="{DynamicResource RotuloIndicador}" Text="Ticket promedio" />
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
         </UniformGrid>
 
-        <!-- ==== BÚSQUEDA ==== -->
         <Border Grid.Row="1" Style="{DynamicResource PanelAdmin}" Padding="14" Margin="0,16,0,0">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -80,10 +103,6 @@
             </Grid>
         </Border>
 
-        <!-- ==== FILTROS ==== -->
-        <!-- Los filtros en un WrapPanel y el contador en su propia columna: apilados en
-             la misma celda, al angostar la ventana el contador se montaba encima del
-             último chip. -->
         <Grid Grid.Row="2" Margin="0,14,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -92,9 +111,16 @@
 
             <WrapPanel Grid.Column="0" Orientation="Horizontal">
                 <ListBox Style="{DynamicResource GrupoChips}"
-                         DisplayMemberPath="Texto"
-                         ItemsSource="{Binding OpcionesPeriodo}"
+                         ItemsSource="{Binding OpcionesPeriodo}" ItemTemplate="{StaticResource ChipPeriodo}"
                          SelectedItem="{Binding Periodo}" />
+                <Button Style="{DynamicResource BotonRangoFechas}" Margin="8,0,0,0"
+                        Command="{Binding CambiarFechasCommand}" ToolTip="Cambiar las fechas"
+                        Visibility="{Binding EsPersonalizado, Converter={StaticResource BoolAVisibilidad}}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="CalendarRange" Width="16" Height="16" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding RangoTexto}" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
 
                 <Border Width="1" Background="{DynamicResource Linea}" Margin="6,4,12,4" />
 
@@ -118,7 +144,6 @@
             </TextBlock>
         </Grid>
 
-        <!-- ==== HISTORIAL + DETALLE ==== -->
         <Grid Grid.Row="3" Margin="0,14,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -164,9 +189,6 @@
                                                 </materialDesign:PackIcon.Style>
                                             </materialDesign:PackIcon>
                                             <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                                <!-- FallbackValue ademas de TargetNullValue: cuando el nulo es un
-                                                     eslabon del camino (Ubicacion) y no el valor final, WPF usa el
-                                                     Fallback y el TargetNullValue nunca llega a aplicarse. -->
                                                 <TextBlock Text="{Binding Ubicacion.NombreUbicacion, TargetNullValue='Para llevar', FallbackValue='Para llevar'}"
                                                            FontSize="13.5" Foreground="{DynamicResource TintaFuerte}" />
                                                 <TextBlock Text="{Binding MetodoPago.NombreMetodo}" FontSize="12"
@@ -228,7 +250,6 @@
                 </Grid>
             </Border>
 
-            <!-- ==== DETALLE ==== -->
             <Border Grid.Column="1" Style="{DynamicResource PanelAdmin}">
                 <Grid>
                     <Grid.RowDefinitions>
